@@ -8,7 +8,7 @@ pub struct CPciDevice {
     pub device_id: u16,
     pub subsys_device_id: u16,
     pub subsys_vendor_id: u16,
-    pub device_class: u16,
+    pub device_class: u32,
     pub revision_id: u8,
 }
 

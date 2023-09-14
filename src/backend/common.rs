@@ -1,4 +1,33 @@
 use std::{num::ParseIntError, fs::{DirEntry, read_to_string}};
+use std::io::ErrorKind;
+
+#[derive(Debug)]
+pub enum PciEnumerationError {
+    OsError,
+    GenericIoError(std::io::Error),
+    ReadDirectory,
+    NotFound,
+    PermissionDenied,
+    ParseInt(ParseIntError),
+}
+
+// Convert IO errors to PCI enumeration errors.
+impl From<std::io::Error> for PciEnumerationError {
+    fn from(err: std::io::Error) -> Self {
+        match err.kind() {
+            ErrorKind::NotFound => PciEnumerationError::NotFound,
+            ErrorKind::PermissionDenied => PciEnumerationError::PermissionDenied,
+            _ => PciEnumerationError::GenericIoError(err),
+        }
+    }
+}
+
+// Convert integer parsing error into PCI enumeration error.
+impl From<ParseIntError> for PciEnumerationError {
+    fn from(err: ParseIntError) -> Self {
+        PciEnumerationError::ParseInt(err)
+    }
+}
 
 // Define a PCI device as its component fields
 #[derive(Debug)]
@@ -13,17 +42,16 @@ pub struct PciDevice {
     pub revision_id: u8,
 }
 
-// Two helper functions to convert hexadecimal IDs into numbers.
-// I predict these will be helpful for all platforms, not just Linux.
-pub fn ox_hex_string_to_u8(input_string: &str) -> Result<u8, ParseIntError> {
+pub(crate) fn ox_hex_string_to_u8(input_string: &str) -> Result<u8, ParseIntError> {
     let input_string = if input_string.starts_with("0x") {
         &input_string[2..]
     } else {
         input_string
     }.trim();
-    u8::from_str_radix(input_string, 8)
+    u8::from_str_radix(input_string, 16)
 }
-pub fn ox_hex_string_to_u16(input_string: &str) -> Result<u16, ParseIntError> {
+
+pub(crate) fn ox_hex_string_to_u16(input_string: &str) -> Result<u16, ParseIntError> {
     let input_string = if input_string.starts_with("0x") {
         &input_string[2..]
     } else {
@@ -32,66 +60,66 @@ pub fn ox_hex_string_to_u16(input_string: &str) -> Result<u16, ParseIntError> {
     u16::from_str_radix(input_string, 16)
 }
 
-pub fn ox_hex_string_to_u32(input_string: &str) -> Result<u32, ParseIntError> {
+pub(crate) fn ox_hex_string_to_u32(input_string: &str) -> Result<u32, ParseIntError> {
     let input_string = if input_string.starts_with("0x") {
         &input_string[2..]
     } else {
         input_string
     }.trim();
-    u32::from_str_radix(input_string, 32)
+    u32::from_str_radix(input_string, 16)
 }
 
-
-pub enum GetPciDevAttrErr {
-    ReadDirError,
-    ReadFileError,
-    ParseHexError,
-}
-
-pub fn get_pci_device_attribute_u8(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u8, GetPciDevAttrErr> {
-    if let Ok(dir_usable) = dir {
-        if let Ok(file_contents) = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute)) {
-            if let Ok(decoded_number) = ox_hex_string_to_u8(&file_contents) {
-                return Ok(decoded_number)
-            } else {
-                return Err(GetPciDevAttrErr::ParseHexError)
-            }
-        } else {
-            return Err(GetPciDevAttrErr::ReadFileError)
+pub(crate) fn get_pci_device_attribute_u8(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u8, PciEnumerationError> {
+    let dir_usable = match dir {
+        Ok(f) => f,
+        Err(_) => {
+            return Err(PciEnumerationError::ReadDirectory);
         }
-    } else {
-        return Err(GetPciDevAttrErr::ReadDirError)
-    }
+    };
+
+    let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute))?;
+    let decoded_number = ox_hex_string_to_u8(&file_contents)?;
+
+    Ok(decoded_number)
 }
 
-pub fn get_pci_device_attribute_u16(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u16, GetPciDevAttrErr> {
-    if let Ok(dir_usable) = dir {
-        if let Ok(file_contents) = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute)) {
-            if let Ok(decoded_number) = ox_hex_string_to_u16(&file_contents) {
-                return Ok(decoded_number)
-            } else {
-                return Err(GetPciDevAttrErr::ParseHexError)
-            }
-        } else {
-            return Err(GetPciDevAttrErr::ReadFileError)
+pub(crate) fn get_pci_device_attribute_u16(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u16, PciEnumerationError> {
+    let dir_usable = match dir {
+        Ok(f) => f,
+        Err(_) => {
+            return Err(PciEnumerationError::ReadDirectory);
         }
-    } else {
-        return Err(GetPciDevAttrErr::ReadDirError)
-    }
+    };
+
+    let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute))?;
+    let decoded_number = ox_hex_string_to_u16(&file_contents)?;
+
+    Ok(decoded_number)
 }
 
-pub fn get_pci_device_attribute_u32(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u32, GetPciDevAttrErr> {
-    if let Ok(dir_usable) = dir {
-        if let Ok(file_contents) = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute)) {
-            if let Ok(decoded_number) = ox_hex_string_to_u32(&file_contents) {
-                return Ok(decoded_number)
-            } else {
-                return Err(GetPciDevAttrErr::ParseHexError)
-            }
-        } else {
-            return Err(GetPciDevAttrErr::ReadFileError)
+pub(crate) fn get_pci_device_attribute_u32(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u32, PciEnumerationError> {
+    let dir_usable = match dir {
+        Ok(f) => f,
+        Err(_) => {
+            return Err(PciEnumerationError::ReadDirectory);
         }
-    } else {
-        return Err(GetPciDevAttrErr::ReadDirError)
+    };
+
+    let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute))?;
+    let decoded_number = ox_hex_string_to_u32(&file_contents)?;
+
+    Ok(decoded_number)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::backend::common::{ox_hex_string_to_u16, ox_hex_string_to_u32, ox_hex_string_to_u8};
+
+    #[test]
+    fn test_hex_decoding() {
+        // Test to make sure every bit is recognized using the highest possible integer!
+        assert_eq!(ox_hex_string_to_u8("0xFF"), Ok(255));
+        assert_eq!(ox_hex_string_to_u16("0xFFFF"), Ok(65535));
+        assert_eq!(ox_hex_string_to_u32("0xFFFFFFFF"), Ok(4294967295));
     }
 }

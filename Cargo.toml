@@ -1,10 +1,23 @@
 [package]
-name = "pci-info-rs"
+name = "libpci-rs"
+authors = ["NamedNeon"]
+license = "BSD-3"
 version = "0.2.0"
 edition = "2021"
+categories = ["Operating systems", "PCI", "Bindings"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 bindgen = "0.68.1"
 libc = "0.2.148"
+
+[dependencies.windows]
+version = "0.51.1"
+features = [
+    "Win32_Devices_DeviceAndDriverInstallation",
+    "Win32_Foundation"
+]
+
+[dev-dependencies]
+fastrand = "2.0.0"
