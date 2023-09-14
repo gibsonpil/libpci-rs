@@ -1,3 +1,5 @@
+use crate::backend::common::{PciDevice};
+
 #[repr(C)]
 pub struct CPciDevice {
     pub slot: *mut ::std::os::raw::c_char,
@@ -17,10 +19,19 @@ pub struct CPciDeviceList {
 }
 
 extern "C" {
-    pub fn get_pci_list() -> CPciDeviceList;
+    fn get_pci_list() -> CPciDeviceList;
 }
 
 extern "C" {
-    pub fn get_pci_by_id(vendor: u16, device: u16) -> CPciDevice;
+    fn get_pci_by_id(vendor: u16, device: u16) -> CPciDevice;
 }
 
+#[inline]
+pub fn _get_pci_list() -> Vec<PciDevice> {
+    todo!()
+}
+
+#[inline]
+pub fn _get_pci_by_id(vendor: u16, device: u16) -> PciDevice {
+    todo!()
+}
