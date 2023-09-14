@@ -7,8 +7,8 @@ typedef struct pci_device {
     char *slot;
     char *label;
     uint16_t vendor_id, device_id;
-    uint16_t sub_id, sub_vendor;
-    uint16_t device_class;
+    uint16_t subsys_device_id, subsys_vendor_id;
+    uint32_t device_class;
     uint8_t revision_id;
 } pci_device_t;
 

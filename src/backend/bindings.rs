@@ -1,4 +1,4 @@
-use crate::backend::common::{PciDevice};
+use crate::backend::common::PciDevice;
 
 #[repr(C)]
 pub struct CPciDevice {
@@ -6,8 +6,8 @@ pub struct CPciDevice {
     pub label: *mut ::std::os::raw::c_char,
     pub vendor_id: u16,
     pub device_id: u16,
-    pub sub_id: u16,
-    pub sub_vendor: u16,
+    pub subsys_device_id: u16,
+    pub subsys_vendor_id: u16,
     pub device_class: u16,
     pub revision_id: u8,
 }
