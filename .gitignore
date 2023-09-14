@@ -2,3 +2,4 @@
 /Cargo.lock
 /.idea
 /src/backend/c/cmake-build*
+/.vscode
