@@ -1,1 +1,3 @@
-fn main() {}
+fn main() {
+    // todo: setup binding compilation
+}
