@@ -2,7 +2,10 @@ use crate::backend::common::PciDevice;
 
 #[repr(C)]
 pub struct CPciDevice {
-    pub slot: *mut ::std::os::raw::c_char,
+    pub domain: u32,
+    pub bus: u8,
+    pub device: u8,
+    pub function: u8,
     pub label: *mut ::std::os::raw::c_char,
     pub vendor_id: u16,
     pub device_id: u16,
