@@ -30,9 +30,12 @@ impl From<ParseIntError> for PciEnumerationError {
 }
 
 // Define a PCI device as its component fields
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PciDevice {
-    pub slot: String,
+    pub domain: u32,
+    pub bus: u8,
+    pub device: u8,
+    pub function: u8,
     pub label: String,
     pub vendor_id: u16,
     pub device_id: u16,
