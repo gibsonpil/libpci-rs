@@ -1,20 +1,21 @@
 mod bindings;
 mod common;
+
 pub use common::PciDevice;
 
-// Get OS implementation.
-#[cfg(target_os = "linux")]
-mod linux;
-#[cfg(target_os = "linux")]
-use linux::{_get_pci_by_id, _get_pci_list};
+use cfg_if::cfg_if;
 
-#[cfg(target_os = "windows")]
-mod windows;
-#[cfg(target_os = "windows")]
-use self::windows::{_get_pci_by_id, _get_pci_list};
-
-#[cfg(target_os = "macos")]
-use bindings::{_get_pci_by_id, _get_pci_list};
+cfg_if! {
+    if #[cfg(target_os = "linux")] {
+        mod linux;
+        use linux::{_get_pci_by_id, _get_pci_list};
+    } else if #[cfg(target_os = "windows")] {
+        mod windows;
+        use self::windows::{_get_pci_by_id, _get_pci_list};
+    } else {
+        use bindings::{_get_pci_by_id, _get_pci_list};
+    }
+}
 
 use crate::backend::common::PciEnumerationError;
 
