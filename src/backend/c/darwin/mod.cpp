@@ -1,6 +1,8 @@
-#include "../api.h"
-
 #include <IOKit/IOKitLib.h>
+
+extern "C" {
+    #include "../api.h"
+}
 
 extern "C" pci_device_list_t get_pci_list(void) {
 

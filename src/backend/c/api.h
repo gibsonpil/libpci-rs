@@ -1,5 +1,5 @@
-#ifndef PCI_INFO_RS_API_H
-#define PCI_INFO_RS_API_H
+#ifndef LIBPCI_RS_API_H
+#define LIBPCI_RS_API_H
 
 #include <stdint.h>
 
@@ -21,4 +21,4 @@ pci_device_list_t get_pci_list(void);
 
 pci_device_t get_pci_by_id(uint16_t vendor, uint16_t device);
 
-#endif //PCI_INFO_RS_API_H
+#endif //LIBPCI_RS_API_H
