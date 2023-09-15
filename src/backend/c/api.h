@@ -8,8 +8,7 @@ typedef struct pci_device {
     uint8_t bus, device, function;
     uint16_t vendor_id, device_id;
     uint16_t subsys_device_id, subsys_vendor_id;
-    uint32_t device_class;
-    uint8_t revision_id;
+    uint8_t dev_class, subclass, programming_interface;
     char *label;
 } pci_device_t;
 

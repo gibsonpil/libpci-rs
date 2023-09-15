@@ -43,7 +43,9 @@ pub struct PciDevice {
     pub device_id: u16,
     pub subsys_device_id: u16,
     pub subsys_vendor_id: u16,
-    pub device_class: u32,
+    pub class: u8,
+    pub subclass: u8,
+    pub programming_interface: u8,
     pub revision_id: u8,
 }
 
@@ -128,7 +130,7 @@ pub(crate) fn get_pci_device_attribute_u32(dir: &Result<DirEntry, std::io::Error
 
 impl Display for PciDevice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:02x} Class={:x} Rev={:x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.device_class, self.revision_id)
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:02x} Class={:x} Subclass={:x} PIF={:x} Rev={:x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
     }
 }
 

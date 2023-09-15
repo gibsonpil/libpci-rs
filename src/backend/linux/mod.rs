@@ -48,7 +48,13 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
         let device_id = get_pci_device_attribute_u16(&directory, "device")?; // Device ID
         let subsys_device_id = get_pci_device_attribute_u16(&directory, "subsystem_device")?; // Subsystem Device ID
         let subsys_vendor_id = get_pci_device_attribute_u16(&directory, "subsystem_vendor")?; // Subsystem Vendor ID
-        let device_class = get_pci_device_attribute_u32(&directory, "class")?; // Device Class
+
+        let class_code = get_pci_device_attribute_u32(&directory, "class")?;
+
+        let class = (class_code >> 16) & 0xFF; // Device Class
+        let subclass = (class_code >> 8) & 0xFF;
+        let programming_interface = class_code & 0xFF;
+
         let revision_id = get_pci_device_attribute_u8(&directory, "revision")?; // Revision ID
         let components = comps_from_linux_pci_addr(&directory.unwrap().file_name().to_str().unwrap()).unwrap(); // TODO: handle in case of error as to not panic on unwrap.
         let (domain, bus, device, function) = components;
@@ -63,7 +69,9 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             device_id,
             subsys_device_id,
             subsys_vendor_id,
-            device_class,
+            class,
+            subclass,
+            programming_interface,
             revision_id,
         })
     }

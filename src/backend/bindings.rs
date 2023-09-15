@@ -11,7 +11,9 @@ pub struct CPciDevice {
     pub device_id: u16,
     pub subsys_device_id: u16,
     pub subsys_vendor_id: u16,
-    pub device_class: u32,
+    pub dev_class: u8,
+    pub subclass: u8,
+    pub programming_interface: u8,
     pub revision_id: u8,
     pub label: *mut ::std::os::raw::c_char,
 }

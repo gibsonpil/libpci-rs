@@ -74,7 +74,9 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                     device_id: 0,
                     subsys_device_id: 0,
                     subsys_vendor_id: 0,
-                    device_class: 0,
+                    class: 0,
+                    subclass: 0,
+                    programming_interface: 0,
                     revision_id: 0,
                 }
             );
