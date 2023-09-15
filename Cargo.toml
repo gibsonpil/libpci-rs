@@ -1,9 +1,13 @@
 [package]
 name = "libpci-rs"
+description = "A cross-platform library to detect and list PCI devices and their information."
 authors = [ "NamedNeon", "shibedrill" ]
-license = "BSD-3"
-version = "0.2.0"
+license = "BSD-3-Clause"
+version = "0.0.1"
 edition = "2021"
+homepage = "https://github.com/NamedNeon/libpci-rs"
+documentation = "https://docs.rs/libpci-rs"
+readme = "README.md"
 categories = ["Operating systems", "PCI", "Bindings"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

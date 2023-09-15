@@ -1,9 +1,7 @@
 pub mod backend;
 
-// todo: uncomment
 #[cfg(test)]
 mod tests {
-
     #[test]
     fn test_pci_listing() {
         println!("Begin test output: test_pci_listing");
