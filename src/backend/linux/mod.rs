@@ -5,21 +5,18 @@ use super::common::*;
 
 // ahaha this particular code is by Shibe Drill
 
+#[inline]
 fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), ()> {
     let comps_vec: Vec<&str> = address.split(|char| (char == ':') | (char == '.')).collect();
     if comps_vec.len() != 4 {
         return Err(());
-    } else {
-        return {
-            Ok((
-                u32::from_str_radix(comps_vec[0], 16).unwrap(), 
-                u8::from_str_radix(comps_vec[1], 16).unwrap(),
-                u8::from_str_radix(comps_vec[2], 16).unwrap(),
-                u8::from_str_radix(comps_vec[3], 16).unwrap(),
-            ))
-        }
     }
-
+    Ok((
+        u32::from_str_radix(comps_vec[0], 16).unwrap(),
+        u8::from_str_radix(comps_vec[1], 16).unwrap(),
+        u8::from_str_radix(comps_vec[2], 16).unwrap(),
+        u8::from_str_radix(comps_vec[3], 16).unwrap(),
+    ))
 }
 
 #[inline]
@@ -53,7 +50,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
         let subsys_vendor_id = get_pci_device_attribute_u16(&directory, "subsystem_vendor")?; // Subsystem Vendor ID
         let device_class = get_pci_device_attribute_u32(&directory, "class")?; // Device Class
         let revision_id = get_pci_device_attribute_u8(&directory, "revision")?; // Revision ID
-        let components = comps_from_linux_pci_addr(&directory.unwrap().file_name().to_str().unwrap()).unwrap();
+        let components = comps_from_linux_pci_addr(&directory.unwrap().file_name().to_str().unwrap()).unwrap(); // TODO: handle in case of error as to not panic on unwrap.
         let (domain, bus, device, function) = components;
 
         device_list.push(PciDevice {

@@ -1,3 +1,5 @@
+//! libpci-rs's backend module is the programmatic layer that handles making syscalls to the underlying operating system.
+
 mod bindings;
 mod common;
 
@@ -19,6 +21,7 @@ cfg_if! {
 
 use crate::backend::common::PciEnumerationError;
 
+// @return
 pub fn get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
     _get_pci_list()
 }
