@@ -51,9 +51,9 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 
         let class_code = get_pci_device_attribute_u32(&directory, "class")?;
 
-        let class = (class_code >> 16) & 0xFF; // Device Class
-        let subclass = (class_code >> 8) & 0xFF;
-        let programming_interface = class_code & 0xFF;
+        let class: u8 = ((class_code >> 16) & 0xFF) as u8; // Device Class
+        let subclass: u8 = ((class_code >> 8) & 0xFF) as u8; // Device Subclass
+        let programming_interface: u8 = (class_code & 0xFF) as u8; // Device Programming Interface
 
         let revision_id = get_pci_device_attribute_u8(&directory, "revision")?; // Revision ID
         let components = comps_from_linux_pci_addr(&directory.unwrap().file_name().to_str().unwrap()).unwrap(); // TODO: handle in case of error as to not panic on unwrap.
