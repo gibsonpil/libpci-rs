@@ -13,7 +13,7 @@ typedef struct pci_device {
 } pci_device_t;
 
 typedef struct pci_device_list {
-    size_t len;
+    uint32_t len;
     pci_device_t *buffer;
 } pci_device_list_t;
 
