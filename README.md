@@ -3,7 +3,7 @@
 
 ![Crates.io](https://img.shields.io/crates/v/libpci-rs)
 ![GitHub](https://img.shields.io/github/license/NamedNeon/libpci-rs)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/NamedNeon/libpci-rs/tests)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/NamedNeon/libpci-rs/tests.yml)
 
 Unstable work-in-progress cross-platform library to detect and list PCI devices and their information. 
 
