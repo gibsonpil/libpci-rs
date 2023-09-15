@@ -1,5 +1,7 @@
+use core::fmt;
 use std::{num::ParseIntError, fs::{DirEntry, read_to_string}};
 use std::io::ErrorKind;
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub enum PciEnumerationError {
@@ -45,6 +47,9 @@ pub struct PciDevice {
     pub revision_id: u8,
 }
 
+
+
+// ############################## Begin hex helper functions ##############################
 pub(crate) fn ox_hex_string_to_u8(input_string: &str) -> Result<u8, ParseIntError> {
     let input_string = if input_string.starts_with("0x") {
         &input_string[2..]
@@ -71,7 +76,11 @@ pub(crate) fn ox_hex_string_to_u32(input_string: &str) -> Result<u32, ParseIntEr
     }.trim();
     u32::from_str_radix(input_string, 16)
 }
+// ############################## End hex helper functions ##############################
 
+
+
+// ############################## Begin attribute hepler functions ##############################
 pub(crate) fn get_pci_device_attribute_u8(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u8, PciEnumerationError> {
     let dir_usable = match dir {
         Ok(f) => f,
@@ -112,6 +121,15 @@ pub(crate) fn get_pci_device_attribute_u32(dir: &Result<DirEntry, std::io::Error
     let decoded_number = ox_hex_string_to_u32(&file_contents)?;
 
     Ok(decoded_number)
+}
+// ############################## End attribute helper functions ##############################
+
+
+
+impl Display for PciDevice {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:02x} Class={:x} Rev={:x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.device_class, self.revision_id)
+    }
 }
 
 #[cfg(test)]
