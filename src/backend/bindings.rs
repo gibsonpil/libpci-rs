@@ -1,4 +1,4 @@
-use crate::backend::common::PciDevice;
+use crate::backend::common::{PciDevice, PciEnumerationError};
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -34,11 +34,11 @@ extern "C" {
 }
 
 #[inline]
-pub fn _get_pci_list() -> Vec<PciDevice> {
+pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
     todo!()
 }
 
 #[inline]
-pub fn _get_pci_by_id(vendor: u16, device: u16) -> PciDevice {
+pub fn _get_pci_by_id(vendor: u16, device: u16) -> Result<PciDevice, PciEnumerationError> {
     todo!()
 }
