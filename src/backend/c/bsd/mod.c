@@ -3,18 +3,20 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-#ifdef __OpenBSD__
-#include <errno.h>
-#elifdef __FreeBSD__
-#include <std/errno.h>
-#endif
-
 #include <unistd.h>
 #include <stdbool.h>
 
 #include <sys/types.h>
 #include <sys/pciio.h>
 #include <sys/ioctl.h>
+
+#ifdef __OpenBSD__
+#include <errno.h>
+#endif
+
+#ifdef __FreeBSD__
+#include <std/errno.h>
+#endif
 
 #include "../api.h"
 
