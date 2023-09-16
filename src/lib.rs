@@ -1,4 +1,6 @@
 pub mod backend;
+pub mod ids;
+pub mod pci;
 
 #[cfg(test)]
 mod tests {
