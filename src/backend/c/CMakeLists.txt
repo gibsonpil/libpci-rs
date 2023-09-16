@@ -11,3 +11,5 @@ else()
 endif()
 
 target_include_directories(libpci-rs-c-backend PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(TARGETS libpci-rs-c-backend DESTINATION .)
