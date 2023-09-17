@@ -21,7 +21,6 @@ cfg_if! {
 
 use crate::backend::common::PciEnumerationError;
 
-// @return
 pub fn get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
     _get_pci_list()
 }
