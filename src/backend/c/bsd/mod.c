@@ -45,8 +45,8 @@ bsd_pci_handle_t* get_pci_handle() {
 	return handle;
 }
 
-pci_device_list_t get_pci_list() {
-	pci_device_list_t result;
+pci_device_stack_t get_pci_stack() {
+	pci_device_stack_t result;
 	bsd_pci_handle_t *handle = get_pci_handle();
 	// TODO
 	free_pci_handle(handle);
@@ -58,5 +58,3 @@ pci_device_t get_pci_by_id(uint16_t vendor, uint16_t device) {
 	// TODO
 	return result;
 }
-
-
