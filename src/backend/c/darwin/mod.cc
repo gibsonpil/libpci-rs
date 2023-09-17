@@ -10,8 +10,8 @@ extern "C" {
 
 using namespace std;
 
-extern "C" pci_device_list_t get_pci_list(void) {
-    vector<pci_device_list_t> pci_device_vector;
+extern "C" pci_device_stack_t get_pci_list(void) {
+    vector<pci_device_stack_t> pci_device_vector;
 
     io_iterator_t iterator = IO_OBJECT_NULL;
 
@@ -24,7 +24,7 @@ extern "C" pci_device_list_t get_pci_list(void) {
             kIODeviceTreePlane, 0, &iterator);
 
     // Convert vector to conform to C api.
-    pci_device_list_t result;
+    pci_device_stack_t result;
     result.len = pci_device_vector.size();
     auto* buffer = (pci_device_t*) malloc(result.len);
     memcpy(buffer, pci_device_vector.data(), result.len);

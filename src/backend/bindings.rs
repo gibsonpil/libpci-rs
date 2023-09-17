@@ -1,4 +1,5 @@
 use crate::backend::common::{PciDevice, PciEnumerationError};
+use std::ffi::c_void;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -20,21 +21,28 @@ pub struct CPciDevice {
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct CPciDeviceList {
+pub struct CPciDeviceStack {
     pub len: usize,
     pub buffer: *mut CPciDevice,
 }
 
 extern "C" {
-    fn get_pci_list() -> CPciDeviceList;
-}
-
-extern "C" {
+    fn get_pci_list() -> CPciDeviceStack;
     fn get_pci_by_id(vendor: u16, device: u16) -> CPciDevice;
+    fn create_pci_device_stack() -> CPciDeviceStack;
+    fn free_pci_device_stack(stack: *mut CPciDeviceStack);
+    fn pci_device_stack_push(stack: *mut CPciDeviceStack, device: CPciDevice) -> u32;
+    fn pci_device_stack_pop(stack: *mut CPciDeviceStack) -> CPciDevice;
 }
 
 #[inline]
 pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
+    let mut c_pci_stack = unsafe { get_pci_list() };
+
+    unsafe {
+        free_pci_device_stack(&mut c_pci_stack);
+    }
+
     todo!()
 }
 
@@ -42,3 +50,9 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 pub fn _get_pci_by_id(vendor: u16, device: u16) -> Result<PciDevice, PciEnumerationError> {
     todo!()
 }
+
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//
+// }
