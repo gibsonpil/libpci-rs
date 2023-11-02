@@ -13,7 +13,7 @@ categories = ["Operating systems", "PCI", "Bindings"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bindgen = "0.68.1"
+bindgen = "0.69.0"
 cfg-if = "1.0.0"
 libc = "0.2.148"
 
