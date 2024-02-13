@@ -87,8 +87,8 @@ macro_rules! get_pci_device_attribute {
         };
     
         let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), $attribute))?;
-        let input_string = if file_contents.starts_with("0x") {
-            &file_contents[2..]
+        let input_string = if let Some(stripped) = file_contents.strip_prefix("0x") {
+            stripped
         } else {
             &file_contents
         }.trim();
