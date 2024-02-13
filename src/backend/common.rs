@@ -26,7 +26,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use core::fmt;
-use std::{num::ParseIntError, fs::{DirEntry, read_to_string}};
+use std::num::ParseIntError;
 use std::io::ErrorKind;
 use std::fmt::Display;
 
@@ -76,100 +76,28 @@ pub struct PciDevice {
     pub revision_id: u8,
 }
 
-
-
-// ############################## Begin hex helper functions ##############################
-pub(crate) fn ox_hex_string_to_u8(input_string: &str) -> Result<u8, ParseIntError> {
-    let input_string = if input_string.starts_with("0x") {
-        &input_string[2..]
-    } else {
-        input_string
-    }.trim();
-    u8::from_str_radix(input_string, 16)
+#[macro_export]
+macro_rules! get_pci_device_attribute {
+    ($t:ty, $dir:expr, $attribute:expr) => {{
+        let dir_usable = match $dir {
+            Ok(f) => f,
+            Err(_) => {
+                return Err(PciEnumerationError::ReadDirectory);
+            }
+        };
+    
+        let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), $attribute))?;
+        let input_string = if file_contents.starts_with("0x") {
+            &file_contents[2..]
+        } else {
+            &file_contents
+        }.trim();
+        <$t>::from_str_radix(input_string, 16)
+    }}
 }
-
-pub(crate) fn ox_hex_string_to_u16(input_string: &str) -> Result<u16, ParseIntError> {
-    let input_string = if input_string.starts_with("0x") {
-        &input_string[2..]
-    } else {
-        input_string
-    }.trim();
-    u16::from_str_radix(input_string, 16)
-}
-
-pub(crate) fn ox_hex_string_to_u32(input_string: &str) -> Result<u32, ParseIntError> {
-    let input_string = if input_string.starts_with("0x") {
-        &input_string[2..]
-    } else {
-        input_string
-    }.trim();
-    u32::from_str_radix(input_string, 16)
-}
-// ############################## End hex helper functions ##############################
-
-
-
-// ############################## Begin attribute hepler functions ##############################
-pub(crate) fn get_pci_device_attribute_u8(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u8, PciEnumerationError> {
-    let dir_usable = match dir {
-        Ok(f) => f,
-        Err(_) => {
-            return Err(PciEnumerationError::ReadDirectory);
-        }
-    };
-
-    let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute))?;
-    let decoded_number = ox_hex_string_to_u8(&file_contents)?;
-
-    Ok(decoded_number)
-}
-
-pub(crate) fn get_pci_device_attribute_u16(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u16, PciEnumerationError> {
-    let dir_usable = match dir {
-        Ok(f) => f,
-        Err(_) => {
-            return Err(PciEnumerationError::ReadDirectory);
-        }
-    };
-
-    let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute))?;
-    let decoded_number = ox_hex_string_to_u16(&file_contents)?;
-
-    Ok(decoded_number)
-}
-
-pub(crate) fn get_pci_device_attribute_u32(dir: &Result<DirEntry, std::io::Error>, attribute: &str) -> Result<u32, PciEnumerationError> {
-    let dir_usable = match dir {
-        Ok(f) => f,
-        Err(_) => {
-            return Err(PciEnumerationError::ReadDirectory);
-        }
-    };
-
-    let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), attribute))?;
-    let decoded_number = ox_hex_string_to_u32(&file_contents)?;
-
-    Ok(decoded_number)
-}
-// ############################## End attribute helper functions ##############################
-
-
 
 impl Display for PciDevice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:02x} Class={:x} Subclass={:x} PIF={:x} Rev={:x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::backend::common::{ox_hex_string_to_u16, ox_hex_string_to_u32, ox_hex_string_to_u8};
-
-    #[test]
-    fn test_hex_decoding() {
-        // Test to make sure every bit is recognized using the highest possible integer!
-        assert_eq!(ox_hex_string_to_u8("0xFF"), Ok(255));
-        assert_eq!(ox_hex_string_to_u16("0xFFFF"), Ok(65535));
-        assert_eq!(ox_hex_string_to_u32("0xFFFFFFFF"), Ok(4294967295));
     }
 }

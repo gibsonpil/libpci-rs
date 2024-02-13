@@ -25,8 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use crate::backend::common::{PciDevice, PciEnumerationError};
-use std::ffi::c_void;
+//use std::ffi::c_void;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
