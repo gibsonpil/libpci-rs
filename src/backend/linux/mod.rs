@@ -25,8 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#![allow(unused_variables)]
-
 use crate::{backend::common::PciDevice, get_pci_device_attribute};
 use std::fs::*;
 
@@ -36,7 +34,9 @@ use super::common::*;
 
 #[inline]
 fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), ()> {
-    let comps_vec: Vec<&str> = address.split(|char| (char == ':') | (char == '.')).collect();
+    let comps_vec: Vec<&str> = address
+        .split(|char| (char == ':') | (char == '.'))
+        .collect();
     if comps_vec.len() != 4 {
         return Err(());
     }
@@ -72,20 +72,23 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
     */
 
     for directory in read_dir("/sys/bus/pci/devices/").unwrap() {
-        let label = String::from("Label");
+        let label = String::from("");
+        // TODO: Figure out what the FUCK a label is supposed to be/do, and how to obtain it.
         let vendor_id = get_pci_device_attribute!(u16, &directory, "vendor")?; // Vendor ID
         let device_id = get_pci_device_attribute!(u16, &directory, "device")?; // Device ID
         let subsys_device_id = get_pci_device_attribute!(u16, &directory, "subsystem_device")?; // Subsystem Device ID
         let subsys_vendor_id = get_pci_device_attribute!(u16, &directory, "subsystem_vendor")?; // Subsystem Vendor ID
 
         let class_code = get_pci_device_attribute!(u32, &directory, "class")?;
-
         let class: u8 = ((class_code >> 16) & 0xFF) as u8; // Device Class
         let subclass: u8 = ((class_code >> 8) & 0xFF) as u8; // Device Subclass
         let programming_interface: u8 = (class_code & 0xFF) as u8; // Device Programming Interface
 
         let revision_id = get_pci_device_attribute!(u8, &directory, "revision")?; // Revision ID
-        let components = comps_from_linux_pci_addr(directory.unwrap().file_name().to_str().unwrap()).unwrap(); // TODO: handle in case of error as to not panic on unwrap.
+
+        let components =
+            comps_from_linux_pci_addr(directory.unwrap().file_name().to_str().unwrap()).unwrap();
+        // TODO: handle in case of error as to not panic on unwrap.
         let (domain, bus, device, function) = components;
 
         device_list.push(PciDevice {
@@ -113,4 +116,3 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 pub fn _get_pci_by_id(vendor: u16, device: u16) -> Result<PciDevice, PciEnumerationError> {
     todo!()
 }
-

@@ -26,9 +26,9 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use core::fmt;
-use std::num::ParseIntError;
-use std::io::ErrorKind;
 use std::fmt::Display;
+use std::io::ErrorKind;
+use std::num::ParseIntError;
 
 #[derive(Debug)]
 pub enum PciEnumerationError {
@@ -85,15 +85,20 @@ macro_rules! get_pci_device_attribute {
                 return Err(PciEnumerationError::ReadDirectory);
             }
         };
-    
-        let file_contents = read_to_string(format!("{}/{}", dir_usable.path().to_string_lossy(), $attribute))?;
+
+        let file_contents = read_to_string(format!(
+            "{}/{}",
+            dir_usable.path().to_string_lossy(),
+            $attribute
+        ))?;
         let input_string = if let Some(stripped) = file_contents.strip_prefix("0x") {
             stripped
         } else {
             &file_contents
-        }.trim();
+        }
+        .trim();
         <$t>::from_str_radix(input_string, 16)
-    }}
+    }};
 }
 
 impl Display for PciDevice {
