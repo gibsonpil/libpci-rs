@@ -83,15 +83,15 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
     0000:00:00.0 where each 0 can be a valid hex digit. These directories contain files that
     hold the information needed to populate the PCI device structure. As follows is the list
     of files and the fields they populate:
-        Label:
+        Label: We don't actually know what this is.
         Domain: First 4 digits of the address.
         Bus: Second set of digits, 2 digits long.
         Device: 3rd set of digits, 2 digits long.
         Function: Final digit.
         Vendor ID: file 'vendor', 0x prefix
         Device ID: file 'device', 0x prefix
-        Subsys Vendor ID: file 'subsystem_device', 0x prefix
-        Subsys Device ID: file 'subsystem_vendor', 0x prefix
+        Subsystem Vendor ID: file 'subsystem_vendor', 0x prefix
+        Subsystem Device ID: file 'subsystem_device', 0x prefix
         Device Class: file 'class', 0x prefix
         Revision ID: file 'revision', 0x prefix
     */
