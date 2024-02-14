@@ -98,7 +98,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 
     for directory in read_dir("/sys/bus/pci/devices/").unwrap() {
         let label = String::from("");
-        // TODO: Figure out what the FUCK a label is supposed to be/do, and how to obtain it.
+        // TODO: Figure out what the hell a label is supposed to be/do, and how to obtain it.
         let vendor_id = get_pci_device_attribute!(u16, &directory, "vendor")?; // Vendor ID
         let device_id = get_pci_device_attribute!(u16, &directory, "device")?; // Device ID
         let subsys_device_id = get_pci_device_attribute!(u16, &directory, "subsystem_device")?; // Subsystem Device ID
