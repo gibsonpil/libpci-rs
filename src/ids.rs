@@ -58,7 +58,7 @@ lazy_static! {
 }
 
 pub fn vid_did_lookup(device: &PciDevice) -> String {
-    let vendor = PCIIDS.child(device.vendor_id.to_string()).unwrap();
-    let device = vendor.child(device.device_id.to_string()).unwrap();
+    let vendor = PCIIDS.child(format!("{:x}", device.vendor_id)).unwrap();
+    let device = vendor.child(format!("{:x}", device.device_id)).unwrap();
     format!("{} {}", vendor.value().expect("Invalid vendor"), device.value().expect("Invalid device"))
 }
