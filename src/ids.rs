@@ -26,3 +26,39 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TODO: Implement ID lookup system
+
+// Syntax: (as copied from the pci.ids file)
+// vendor  vendor_name
+//      device  device_name				<-- single tab
+//		     subvendor subdevice  subsystem_name	<-- two tabs
+// This tree syntax *might* be easy to parse. might not.
+// To sanitize the database we need to get rid of all the lines with a # at the beginning, 
+// ignoring any leading whitespace.
+// First step, we find the lvl1 node with the vendor ID specified, and store the vendor name.
+// Second step, we find the lvl2 node with the device ID specified, and store the device name.
+
+use crate::backend::PciDevice;
+use lazy_static::lazy_static;
+use confindent::Confindent;
+
+// This version of the data is dirty. We cannot use it.
+static PCIIDS_DIRTY: &str = include_str!("../pciids/pci.ids");
+
+lazy_static! {
+    // The clean, structured version has to be constructed lazily. 
+    // We can't do all this in a static.
+    static ref PCIIDS: Confindent = PCIIDS_DIRTY    
+        .lines()
+        // Get rid of all comment lines
+        .filter(|line| line.trim().starts_with("#"))
+        .collect::<Vec<&str>>()
+        .join("\n")
+        .parse()
+        .expect("Error while parsing PCIIDs database.");
+}
+
+pub fn vid_did_lookup(device: &PciDevice) -> String {
+    let vendor = PCIIDS.child(device.vendor_id.to_string()).unwrap();
+    let device = vendor.child(device.device_id.to_string()).unwrap();
+    format!("{} {}", vendor.value().expect("Invalid vendor"), device.value().expect("Invalid device"))
+}
