@@ -25,9 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#![allow(dead_code)]
-#![allow(unused_variables)]
-
 use crate::backend::common::{PciDevice, PciEnumerationError};
 //use std::ffi::c_void;
 
@@ -77,7 +74,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 }
 
 #[inline]
-pub fn _get_pci_by_id(vendor: u16, device: u16) -> Result<PciDevice, PciEnumerationError> {
+pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDevice, PciEnumerationError> {
     todo!()
 }
 
