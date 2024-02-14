@@ -25,26 +25,51 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use crate::{backend::common::PciDevice, get_pci_device_attribute};
+use crate::backend::common::PciDevice;
 use std::fs::*;
 
 use super::common::*;
 
 // ahaha this particular code is by Shibe Drill
 
+macro_rules! get_pci_device_attribute {
+    ($t:ty, $dir:expr, $attribute:expr) => {{
+        let dir_usable = match $dir {
+            Ok(f) => f,
+            Err(_) => {
+                return Err(PciEnumerationError::ReadDirectory);
+            }
+        };
+
+        let file_contents = read_to_string(format!(
+            "{}/{}",
+            dir_usable.path().to_string_lossy(),
+            $attribute
+        ))?;
+        let input_string = if let Some(stripped) = file_contents.strip_prefix("0x") {
+            stripped
+        } else {
+            &file_contents
+        }
+        .trim();
+        <$t>::from_str_radix(input_string, 16)
+    }};
+}
+
 #[inline]
-fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), ()> {
+fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), PciEnumerationError> {
     let comps_vec: Vec<&str> = address
         .split(|char| (char == ':') | (char == '.'))
         .collect();
+    // If this somehow fails, the OS is probably lying to us.
     if comps_vec.len() != 4 {
-        return Err(());
+        return Err(PciEnumerationError::OsError);
     }
     Ok((
-        u32::from_str_radix(comps_vec[0], 16).unwrap(),
-        u8::from_str_radix(comps_vec[1], 16).unwrap(),
-        u8::from_str_radix(comps_vec[2], 16).unwrap(),
-        u8::from_str_radix(comps_vec[3], 16).unwrap(),
+        u32::from_str_radix(comps_vec[0], 16)?,
+        u8::from_str_radix(comps_vec[1], 16)?,
+        u8::from_str_radix(comps_vec[2], 16)?,
+        u8::from_str_radix(comps_vec[3], 16)?,
     ))
 }
 
