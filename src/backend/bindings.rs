@@ -26,7 +26,6 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use crate::backend::common::{PciDevice, PciEnumerationError};
-//use std::ffi::c_void;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -77,9 +76,3 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDevice, PciEnumerationError> {
     todo!()
 }
-
-// #[cfg(test)]
-// mod tests {
-//     #[test]
-//
-// }

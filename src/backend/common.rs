@@ -76,33 +76,8 @@ pub struct PciDevice {
     pub revision_id: u8,
 }
 
-#[macro_export]
-macro_rules! get_pci_device_attribute {
-    ($t:ty, $dir:expr, $attribute:expr) => {{
-        let dir_usable = match $dir {
-            Ok(f) => f,
-            Err(_) => {
-                return Err(PciEnumerationError::ReadDirectory);
-            }
-        };
-
-        let file_contents = read_to_string(format!(
-            "{}/{}",
-            dir_usable.path().to_string_lossy(),
-            $attribute
-        ))?;
-        let input_string = if let Some(stripped) = file_contents.strip_prefix("0x") {
-            stripped
-        } else {
-            &file_contents
-        }
-        .trim();
-        <$t>::from_str_radix(input_string, 16)
-    }};
-}
-
 impl Display for PciDevice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:02x} Class={:x} Subclass={:x} PIF={:x} Rev={:x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:x} Subclass={:02x} PIF={:02x} Rev={:02x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
     }
 }
