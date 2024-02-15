@@ -63,7 +63,7 @@ fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), PciEnum
         .collect();
     // If this somehow fails, the OS is probably lying to us.
     if comps_vec.len() != 4 {
-        return Err(PciEnumerationError::OsError);
+        return Err(PciEnumerationError::NotFound);
     }
     Ok((
         u32::from_str_radix(comps_vec[0], 16)?,
