@@ -115,6 +115,10 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             CC: First 8 bits are the device class, middle 8 bits are the subclass, and last 8 bits are the programming interface.
             I don't know why the data comes like this, in the form of a utf16-le encoded string chock full
             of null characters, but what do we expect of Microsoft?
+
+            TODO: there is way too much garbage here that needs refactoring. Remove as many unwraps as possible,
+            iterate over the entirety of the HWID data to create a set of all the unique key-value pairs,
+            and return NotFound errors if an attribute is not found in the set.
             */
             // String conversion
             let unparsed_hwid: String = String::from_utf16le_lossy(&win_hwid).replace('\0', "");

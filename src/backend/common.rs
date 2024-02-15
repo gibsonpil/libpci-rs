@@ -32,12 +32,13 @@ use std::num::ParseIntError;
 
 #[derive(Debug)]
 pub enum PciEnumerationError {
-    OsError,
-    GenericIoError(std::io::Error),
-    ReadDirectory,
-    NotFound,
-    PermissionDenied,
-    ParseInt(ParseIntError),
+    OsError, // Error interfacing with OS APIs
+    GenericIoError(std::io::Error), // Some kind of IO error
+    ReadDirectory, // Unable to read a directory
+    NotFound, // PCI device, attribute, directory, or file missing
+    PermissionDenied, // No permission to perform operation
+    ParseInt(ParseIntError), // Attribute is not valid hex
+
 }
 
 // Convert IO errors to PCI enumeration errors.
