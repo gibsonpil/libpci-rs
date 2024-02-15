@@ -25,13 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use std::collections::BTreeMap;
 use std::mem::size_of;
 
 use windows::core::HSTRING;
 use windows::Win32::Devices::DeviceAndDriverInstallation::{
-    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
-    SetupDiGetDeviceRegistryPropertyW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS,
-    SPDRP_BUSNUMBER, SP_DEVINFO_DATA,
+    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, SetupDiGetDeviceRegistryPropertyW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS, SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA
 };
 
 use crate::backend::common::{PciDevice, PciEnumerationError};
@@ -64,7 +63,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 
         let mut win_bus: u32 = 0;
         let mut win_addr: u32 = 0;
-        let mut win_hwid: [u8; 512] = [0; 512]; // TODO: parse.
+        let mut win_hwid: [u8; 394] = [0; 394]; // TODO: parse.
 
         for i in 0.. {
             if SetupDiEnumDeviceInfo(device_info, i, &mut device_info_data).is_err() {
@@ -93,11 +92,16 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             SetupDiGetDeviceRegistryPropertyW(
                 device_info,
                 &device_info_data,
-                SPDRP_ADDRESS,
+                SPDRP_HARDWAREID,
                 None,
                 Some(&mut win_hwid),
                 None,
             )?;
+
+            let unparsed_hwid: String = String::from_utf16le_lossy(&win_hwid).replace('\0', "");
+            let hwid_first_entry = unparsed_hwid.split("PCI\\").nth(1).unwrap();
+            let values_mapping: BTreeMap<&str, &str> = hwid_first_entry.split("&").into_iter().map(|data| (data.split("_").nth(0).unwrap(), data.split("_").nth(1).unwrap())).collect();
+            let subsys = u32::from_str_radix(values_mapping.get("SUBSYS").unwrap(), 16).unwrap();
 
             result.push(PciDevice {
                 domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
@@ -105,14 +109,14 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.
                 function: (win_addr & 0xFF) as u8, // Function (u8) is in low 16 bits of SDRP_ADDRESS.
                 label: "".to_string(),
-                vendor_id: 0,
-                device_id: 0,
-                subsys_device_id: 0,
-                subsys_vendor_id: 0,
+                vendor_id: u16::from_str_radix(values_mapping.get("VEN").unwrap(), 16).unwrap(),
+                device_id: u16::from_str_radix(values_mapping.get("DEV").unwrap(), 16).unwrap(),
+                subsys_device_id: (subsys >> 16) as u16,
+                subsys_vendor_id: (subsys & 0xFFFF) as u16,
                 class: 0,
                 subclass: 0,
                 programming_interface: 0,
-                revision_id: 0,
+                revision_id: u8::from_str_radix(values_mapping.get("REV").unwrap(), 16).unwrap(),
                 // TODO: Implement all these fields. This is very important!
                 // This info is necessary to look up a device's functionality and name.
             });
