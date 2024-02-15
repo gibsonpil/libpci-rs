@@ -19,12 +19,12 @@ confindent = "2.2.0"
 lazy_static = "1.4.0"
 libc = "0.2.148"
 
-[dependencies.windows]
-version = "0.52.0"
-features = [
-    "Win32_Devices_DeviceAndDriverInstallation",
-    "Win32_Foundation"
-]
+[target.'cfg(windows)'.dependencies]
+utf16string = "0.2.0"
+windows = { version = "0.52.0",features = [
+        "Win32_Devices_DeviceAndDriverInstallation", 
+        "Win32_Foundation"
+    ]}
 
 [dev-dependencies]
 fastrand = "2.0.0"

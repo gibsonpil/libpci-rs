@@ -35,6 +35,8 @@ use windows::Win32::Devices::DeviceAndDriverInstallation::{
     SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA,
 };
 
+use utf16string::WStr;
+
 use crate::backend::common::{PciDevice, PciEnumerationError};
 
 impl From<windows::core::Error> for PciEnumerationError {
@@ -121,12 +123,12 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             and return NotFound errors if an attribute is not found in the set.
             */
             // String conversion
-            let unparsed_hwid: String = String::from_utf16le_lossy(&win_hwid).replace('\0', "");
+            let unparsed_hwid: String = WStr::from_utf16le(&win_hwid).unwrap().to_utf8().replace('\0', "");
             // Get the first entry which contains DID, VID, SVID, SDID
             // Has to be the 1st, not 0th, because split produces an empty item in the 0th index
             let hwid_first_entry = unparsed_hwid.split("PCI\\").nth(1).unwrap();
             // Get the third entry which contains DID, VID, CLASS, SUBCLASS, and PIF
-            println!("{}", unparsed_hwid.split("PCI\\").nth(3).unwrap());
+            println!("{}", unparsed_hwid.split("PCI\\").nth(1).unwrap());
             // The values here can be parsed into a set, so we do that.
             // Probably should declare this map and then push to it with every single item in the HWID's entries.
             // That way we get all the usable data we could need.
