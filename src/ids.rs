@@ -32,22 +32,22 @@
 //      device  device_name				<-- single tab
 //		     subvendor subdevice  subsystem_name	<-- two tabs
 // This tree syntax *might* be easy to parse. might not.
-// To sanitize the database we need to get rid of all the lines with a # at the beginning, 
+// To sanitize the database we need to get rid of all the lines with a # at the beginning,
 // ignoring any leading whitespace.
 // First step, we find the lvl1 node with the vendor ID specified, and store the vendor name.
 // Second step, we find the lvl2 node with the device ID specified, and store the device name.
 
 use crate::backend::PciDevice;
-use lazy_static::lazy_static;
 use confindent::Confindent;
+use lazy_static::lazy_static;
 
 // This version of the data is dirty. We cannot use it.
 static PCIIDS_DIRTY: &str = include_str!("../pciids/pci.ids");
 
 lazy_static! {
-    // The clean, structured version has to be constructed lazily. 
+    // The clean, structured version has to be constructed lazily.
     // We can't do all this in a static.
-    static ref PCIIDS: Confindent = PCIIDS_DIRTY    
+    static ref PCIIDS: Confindent = PCIIDS_DIRTY
         .lines()
         // Get rid of all comment lines
         .filter(|line| line.trim().starts_with("#"))
@@ -60,5 +60,9 @@ lazy_static! {
 pub fn vid_did_lookup(device: &PciDevice) -> String {
     let vendor = PCIIDS.child(format!("{:x}", device.vendor_id)).unwrap();
     let device = vendor.child(format!("{:x}", device.device_id)).unwrap();
-    format!("{} {}", vendor.value().expect("Invalid vendor"), device.value().expect("Invalid device"))
+    format!(
+        "{} {}",
+        vendor.value().expect("Invalid vendor"),
+        device.value().expect("Invalid device")
+    )
 }

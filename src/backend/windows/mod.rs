@@ -30,7 +30,9 @@ use std::mem::size_of;
 
 use windows::core::HSTRING;
 use windows::Win32::Devices::DeviceAndDriverInstallation::{
-    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, SetupDiGetDeviceRegistryPropertyW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS, SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA
+    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
+    SetupDiGetDeviceRegistryPropertyW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS,
+    SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA,
 };
 
 use crate::backend::common::{PciDevice, PciEnumerationError};
@@ -101,15 +103,15 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             /*
             The data we want comes in the form of a set of strings.
             They look like this:
-            VEN_10EC&DEV_5765&SUBSYS_576510EC&REV_01
-            VEN_10EC&DEV_5765&CC_010802
-            ...
+                VEN_10EC&DEV_5765&SUBSYS_576510EC&REV_01
+                VEN_10EC&DEV_5765&CC_010802
+                ...
             The first string contains a lot of the info we need.
             VEN: vendor id
             DEV: device id
             SUBSYS: highest 16 bits are the subsystem device id, lowest 16 bits are the subsystem vendor ID
             REV: revision
-            The SECOND string, though, contains the device class instead of the subsystem.
+            The SECOND or THIRD string, though, contains the device class instead of the subsystem.
             CC: First 8 bits are the device class, middle 8 bits are the subclass, and last 8 bits are the programming interface.
             I don't know why the data comes like this, in the form of a utf16-le encoded string chock full
             of null characters, but what do we expect of Microsoft?
@@ -124,7 +126,16 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             // The values here can be parsed into a set, so we do that.
             // Probably should declare this map and then push to it with every single item in the HWID's entries.
             // That way we get all the usable data we could need.
-            let values_mapping: BTreeMap<&str, &str> = hwid_first_entry.split("&").into_iter().map(|data| (data.split("_").nth(0).unwrap(), data.split("_").nth(1).unwrap())).collect();
+            let values_mapping: BTreeMap<&str, &str> = hwid_first_entry
+                .split("&")
+                .into_iter()
+                .map(|data| {
+                    (
+                        data.split("_").nth(0).unwrap(),
+                        data.split("_").nth(1).unwrap(),
+                    )
+                })
+                .collect();
             // Have to perform some bitwise ops on this one so we make it its own variable
             let subsys = u32::from_str_radix(values_mapping.get("SUBSYS").unwrap(), 16).unwrap();
 
@@ -138,9 +149,9 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 device_id: u16::from_str_radix(values_mapping.get("DEV").unwrap(), 16).unwrap(),
                 subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
                 subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
-                class: 0, // High 8 bits of CC.
-                subclass: 0, // Middle 8 bits of CC.
-                programming_interface: 0, // Low 8 bits of CC????? Unsure!
+                class: 0,                                // High 8 bits of CC.
+                subclass: 0,                             // Middle 8 bits of CC.
+                programming_interface: 0,                // Low 8 bits of CC????? Unsure!
                 revision_id: u8::from_str_radix(values_mapping.get("REV").unwrap(), 16).unwrap(),
                 // TODO: Implement all these fields. This is very important!
                 // This info is necessary to look up a device's functionality and name.
