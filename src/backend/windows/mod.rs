@@ -119,31 +119,33 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             of null characters, but what do we expect of Microsoft?
 
             TODO: there is way too much garbage here that needs refactoring. Remove as many unwraps as possible,
-            iterate over the entirety of the HWID data to create a set of all the unique key-value pairs,
             and return NotFound errors if an attribute is not found in the set.
             */
             // String conversion
-            let unparsed_hwid: String = WStr::from_utf16le(&win_hwid).unwrap().to_utf8().replace('\0', "");
-            // Get the first entry which contains DID, VID, SVID, SDID
-            // Has to be the 1st, not 0th, because split produces an empty item in the 0th index
-            let hwid_first_entry = unparsed_hwid.split("PCI\\").nth(1).unwrap();
-            // Get the third entry which contains DID, VID, CLASS, SUBCLASS, and PIF
-            println!("{}", unparsed_hwid.split("PCI\\").nth(1).unwrap());
-            // The values here can be parsed into a set, so we do that.
-            // Probably should declare this map and then push to it with every single item in the HWID's entries.
-            // That way we get all the usable data we could need.
-            let values_mapping: BTreeMap<&str, &str> = hwid_first_entry
-                .split("&")
-                .into_iter()
-                .map(|data| {
-                    (
-                        data.split("_").nth(0).unwrap(),
-                        data.split("_").nth(1).unwrap(),
-                    )
-                })
-                .collect();
+            let unparsed_hwid: String = WStr::from_utf16le(&win_hwid)
+                .unwrap()
+                .to_utf8()
+                .replace('\0', "");
+            // Declare this map and then push to it with every single item in the HWID's entries.
+            // That way we get all the usable and unique data we could need.
+            let mut values_mapping: BTreeMap<&str, u32> = BTreeMap::new();
+            for key_value_pair_set in unparsed_hwid.split("PCI\\") {
+                if !key_value_pair_set.is_empty() {
+                    for key_value_pair in key_value_pair_set.split('&') {
+                        let mut key_value_split = key_value_pair.splitn(2, "_");
+                        if let Some(key) = key_value_split.next() {
+                            if let Some(value_string) = key_value_split.next() {
+                                if let Ok(value_integer) = u32::from_str_radix(value_string, 16) {
+                                    values_mapping.insert(key, value_integer);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             // Have to perform some bitwise ops on this one so we make it its own variable
-            let subsys = u32::from_str_radix(values_mapping.get("SUBSYS").unwrap(), 16).unwrap();
+            let subsys = values_mapping.get("SUBSYS").unwrap();
+            let cc = values_mapping.get("CC").unwrap();
 
             result.push(PciDevice {
                 domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
@@ -151,14 +153,14 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.
                 function: (win_addr & 0xFF) as u8, // Function (u8) is in low 16 bits of SDRP_ADDRESS.
                 label: "".to_string(),
-                vendor_id: u16::from_str_radix(values_mapping.get("VEN").unwrap(), 16).unwrap(),
-                device_id: u16::from_str_radix(values_mapping.get("DEV").unwrap(), 16).unwrap(),
+                vendor_id: values_mapping.get("VEN").unwrap().to_owned() as u16,
+                device_id: values_mapping.get("DEV").unwrap().to_owned() as u16,
                 subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
                 subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
-                class: 0,                                // High 8 bits of CC.
-                subclass: 0,                             // Middle 8 bits of CC.
-                programming_interface: 0,                // Low 8 bits of CC????? Unsure!
-                revision_id: u8::from_str_radix(values_mapping.get("REV").unwrap(), 16).unwrap(),
+                class: (cc >> 16) as u8,                 // High 8 bits of CC.
+                subclass: ((cc & 0x00FF00) >> 8) as u8,  // Middle 8 bits of CC.
+                programming_interface: (cc & 0x0000FF) as u8, // Low 8 bits of CC????? Unsure!
+                revision_id: values_mapping.get("REV").unwrap().to_owned() as u8,
                 // TODO: Implement all these fields. This is very important!
                 // This info is necessary to look up a device's functionality and name.
             });
