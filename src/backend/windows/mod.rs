@@ -98,9 +98,34 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 None,
             )?;
 
+            /*
+            The data we want comes in the form of a set of strings.
+            They look like this:
+            VEN_10EC&DEV_5765&SUBSYS_576510EC&REV_01
+            VEN_10EC&DEV_5765&CC_010802
+            ...
+            The first string contains a lot of the info we need.
+            VEN: vendor id
+            DEV: device id
+            SUBSYS: highest 16 bits are the subsystem device id, lowest 16 bits are the subsystem vendor ID
+            REV: revision
+            The SECOND string, though, contains the device class instead of the subsystem.
+            CC: First 8 bits are the device class, middle 8 bits are the subclass, and last 8 bits are the programming interface.
+            I don't know why the data comes like this, in the form of a utf16-le encoded string chock full
+            of null characters, but what do we expect of Microsoft?
+            */
+            // String conversion
             let unparsed_hwid: String = String::from_utf16le_lossy(&win_hwid).replace('\0', "");
+            // Get the first entry which contains DID, VID, SVID, SDID
+            // Has to be the 1st, not 0th, because split produces an empty item in the 0th index
             let hwid_first_entry = unparsed_hwid.split("PCI\\").nth(1).unwrap();
+            // Get the third entry which contains DID, VID, CLASS, SUBCLASS, and PIF
+            println!("{}", unparsed_hwid.split("PCI\\").nth(3).unwrap());
+            // The values here can be parsed into a set, so we do that.
+            // Probably should declare this map and then push to it with every single item in the HWID's entries.
+            // That way we get all the usable data we could need.
             let values_mapping: BTreeMap<&str, &str> = hwid_first_entry.split("&").into_iter().map(|data| (data.split("_").nth(0).unwrap(), data.split("_").nth(1).unwrap())).collect();
+            // Have to perform some bitwise ops on this one so we make it its own variable
             let subsys = u32::from_str_radix(values_mapping.get("SUBSYS").unwrap(), 16).unwrap();
 
             result.push(PciDevice {
@@ -111,11 +136,11 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 label: "".to_string(),
                 vendor_id: u16::from_str_radix(values_mapping.get("VEN").unwrap(), 16).unwrap(),
                 device_id: u16::from_str_radix(values_mapping.get("DEV").unwrap(), 16).unwrap(),
-                subsys_device_id: (subsys >> 16) as u16,
-                subsys_vendor_id: (subsys & 0xFFFF) as u16,
-                class: 0,
-                subclass: 0,
-                programming_interface: 0,
+                subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
+                subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
+                class: 0, // High 8 bits of CC.
+                subclass: 0, // Middle 8 bits of CC.
+                programming_interface: 0, // Low 8 bits of CC????? Unsure!
                 revision_id: u8::from_str_radix(values_mapping.get("REV").unwrap(), 16).unwrap(),
                 // TODO: Implement all these fields. This is very important!
                 // This info is necessary to look up a device's functionality and name.
