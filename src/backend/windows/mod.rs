@@ -143,10 +143,10 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                     }
                 }
             }
-            // Have to perform some bitwise ops on this one so we make it its own variable
+            
+            // Have to perform some bitwise ops on these two so we make them their own variables
             let subsys = values_mapping.get("SUBSYS").unwrap();
             let cc = values_mapping.get("CC").unwrap();
-            println!("{:06x}", cc);
 
             result.push(PciDevice {
                 domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
@@ -158,12 +158,10 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 device_id: values_mapping.get("DEV").unwrap().to_owned() as u16,
                 subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
                 subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
-                class: ((cc & 0x00FF00) >> 8) as u8, // Middle 8 bits of CC.
-                subclass: (cc & 0x0000FF) as u8, // Last 8 bits of CC.
+                class: ((cc & 0x00FF00) >> 8) as u8,     // Middle 8 bits of CC.
+                subclass: (cc & 0x0000FF) as u8,         // Last 8 bits of CC.
                 programming_interface: ((cc & 0xFF0000) >> 16) as u8, // High 8 bits of CC????? Unsure!
                 revision_id: values_mapping.get("REV").unwrap().to_owned() as u8,
-                // TODO: Implement all these fields. This is very important!
-                // This info is necessary to look up a device's functionality and name.
             });
         }
 
