@@ -50,7 +50,7 @@ lazy_static! {
     static ref PCIIDS: Confindent = PCIIDS_DIRTY
         .lines()
         // Get rid of all comment lines
-        .filter(|line| line.trim().starts_with("#"))
+        .filter(|line| line.trim().starts_with('#'))
         .collect::<Vec<&str>>()
         .join("\n")
         .parse()
