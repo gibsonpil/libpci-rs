@@ -114,7 +114,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             SUBSYS: highest 16 bits are the subsystem device id, lowest 16 bits are the subsystem vendor ID
             REV: revision
             The SECOND or THIRD string, though, contains the device class instead of the subsystem.
-            CC: First 8 bits are the device class, middle 8 bits are the subclass, and last 8 bits are the programming interface.
+            CC: Holds the device class, subclass, and POSSIBLY programming interface.
             I don't know why the data comes like this, in the form of a utf16-le encoded string chock full
             of null characters, but what do we expect of Microsoft?
 
@@ -132,7 +132,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             for key_value_pair_set in unparsed_hwid.split("PCI\\") {
                 if !key_value_pair_set.is_empty() {
                     for key_value_pair in key_value_pair_set.split('&') {
-                        let mut key_value_split = key_value_pair.splitn(2, "_");
+                        let mut key_value_split = key_value_pair.splitn(2, '_');
                         if let Some(key) = key_value_split.next() {
                             if let Some(value_string) = key_value_split.next() {
                                 if let Ok(value_integer) = u32::from_str_radix(value_string, 16) {
@@ -146,6 +146,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             // Have to perform some bitwise ops on this one so we make it its own variable
             let subsys = values_mapping.get("SUBSYS").unwrap();
             let cc = values_mapping.get("CC").unwrap();
+            println!("{:06x}", cc);
 
             result.push(PciDevice {
                 domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
@@ -157,9 +158,9 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 device_id: values_mapping.get("DEV").unwrap().to_owned() as u16,
                 subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
                 subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
-                class: (cc >> 16) as u8,                 // High 8 bits of CC.
-                subclass: ((cc & 0x00FF00) >> 8) as u8,  // Middle 8 bits of CC.
-                programming_interface: (cc & 0x0000FF) as u8, // Low 8 bits of CC????? Unsure!
+                class: ((cc & 0x00FF00) >> 8) as u8, // Middle 8 bits of CC.
+                subclass: (cc & 0x0000FF) as u8, // Last 8 bits of CC.
+                programming_interface: ((cc & 0xFF0000) >> 16) as u8, // High 8 bits of CC????? Unsure!
                 revision_id: values_mapping.get("REV").unwrap().to_owned() as u8,
                 // TODO: Implement all these fields. This is very important!
                 // This info is necessary to look up a device's functionality and name.

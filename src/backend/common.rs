@@ -78,6 +78,6 @@ pub struct PciDevice {
 
 impl Display for PciDevice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:x} Subclass={:02x} PIF={:02x} Rev={:02x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
     }
 }
