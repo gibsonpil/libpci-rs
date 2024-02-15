@@ -97,23 +97,18 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
     */
 
     for directory in read_dir("/sys/bus/pci/devices/").unwrap() {
-        let label = String::from("");
-        // TODO: Figure out what the hell a label is supposed to be/do, and how to obtain it.
+        let label = String::from(""); // TODO: Figure out what the hell a label is supposed to be/do, and how to obtain it.
         let vendor_id = get_pci_device_attribute!(u16, &directory, "vendor")?; // Vendor ID
         let device_id = get_pci_device_attribute!(u16, &directory, "device")?; // Device ID
         let subsys_device_id = get_pci_device_attribute!(u16, &directory, "subsystem_device")?; // Subsystem Device ID
         let subsys_vendor_id = get_pci_device_attribute!(u16, &directory, "subsystem_vendor")?; // Subsystem Vendor ID
-
         let class_code = get_pci_device_attribute!(u32, &directory, "class")?;
         let class: u8 = ((class_code >> 16) & 0xFF) as u8; // Device Class
         let subclass: u8 = ((class_code >> 8) & 0xFF) as u8; // Device Subclass
         let programming_interface: u8 = (class_code & 0xFF) as u8; // Device Programming Interface
-
         let revision_id = get_pci_device_attribute!(u8, &directory, "revision")?; // Revision ID
-
-        let components =
+        let components = // TODO: handle in case of error as to not panic on unwrap.
             comps_from_linux_pci_addr(directory.unwrap().file_name().to_str().unwrap()).unwrap();
-        // TODO: handle in case of error as to not panic on unwrap.
         let (domain, bus, device, function) = components;
 
         device_list.push(PciDevice {
