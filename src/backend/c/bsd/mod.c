@@ -47,36 +47,23 @@
 
 #include "../api.h"
 
-typedef struct bsd_pci_handle {
-	int file_desc;
-} bsd_pci_handle_t;
-
 bool check_access() {
 	return access("/dev/pci", O_RDONLY) == 0;
 }
+__attribute__((always_inline))
+int get_pci_handle() {
+	int handle = open("/dev/pci", O_RDONLY);
 
-void free_pci_handle(bsd_pci_handle_t* handle) {
-	free(handle);
-}
-
-bsd_pci_handle_t* get_pci_handle() {
-	bsd_pci_handle_t* handle = malloc(sizeof(bsd_pci_handle_t));
-	
-	handle->file_desc = open("/dev/pci", O_RDONLY);
-
-	if(handle->file_desc == -1) {
-		free_pci_handle(handle);
+	if(handle->file_desc == -1)
 		return NULL;
-	}
 
 	return handle;
 }
 
 pci_device_stack_t get_pci_stack() {
 	pci_device_stack_t result;
-	bsd_pci_handle_t *handle = get_pci_handle();
+	int handle = get_pci_handle();
 	// TODO
-	free_pci_handle(handle);
 	return result;
 }
 
