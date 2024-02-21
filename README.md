@@ -1,4 +1,4 @@
-# libpci-rs 0.2.3-testing
+# libpci-rs 0.2.4-testing
 ### ⚠ UNDER CONSTRUCTION ⚠
 
 ![Crates.io](https://img.shields.io/crates/v/libpci-rs)
