@@ -149,14 +149,14 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.
                 function: (win_addr & 0xFF) as u8, // Function (u8) is in low 16 bits of SDRP_ADDRESS.
                 label: "".to_string(),
-                vendor_id: *values_mapping.get("VEN").ok_or(PciEnumerationError::NotFound).unwrap() as u16,
-                device_id: *values_mapping.get("DEV").ok_or(PciEnumerationError::NotFound).unwrap() as u16,
+                vendor_id: *values_mapping.get("VEN").ok_or(PciEnumerationError::NotFound)? as u16,
+                device_id: *values_mapping.get("DEV").ok_or(PciEnumerationError::NotFound)? as u16,
                 subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
                 subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
                 class: ((cc & 0x00FF00) >> 8) as u8,     // Middle 8 bits of CC.
                 subclass: (cc & 0x0000FF) as u8,         // Last 8 bits of CC.
                 programming_interface: ((cc & 0xFF0000) >> 16) as u8, // High 8 bits of CC????? Unsure!
-                revision_id: *values_mapping.get("REV").ok_or(PciEnumerationError::NotFound).unwrap() as u8,
+                revision_id: *values_mapping.get("REV").ok_or(PciEnumerationError::NotFound)? as u8,
             });
         }
 
