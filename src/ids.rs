@@ -47,6 +47,7 @@ static PCIIDS_DIRTY: &str = include_str!("../pciids/pci.ids");
 lazy_static! {
     // The clean, structured version has to be constructed lazily.
     // We can't do all this in a static.
+    #[derive(Debug)]
     static ref PCIIDS: Confindent = PCIIDS_DIRTY
         .lines()
         // Get rid of all comment lines
