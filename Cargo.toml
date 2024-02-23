@@ -21,7 +21,7 @@ libc = "0.2.148"
 
 [target.'cfg(windows)'.dependencies]
 utf16string = "0.2.0"
-windows = { version = "0.52.0",features = [
+windows = { version = "0.53.0",features = [
         "Win32_Devices_DeviceAndDriverInstallation", 
         "Win32_Foundation"
     ]}
