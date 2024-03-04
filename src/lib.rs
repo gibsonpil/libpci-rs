@@ -25,10 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-pub mod backend;
 pub mod ids;
 pub mod pci;
-mod class;
+pub mod class;
+mod backend;
 
 #[cfg(test)]
 mod tests {
