@@ -1,4 +1,4 @@
-// Copyright (c) 2023 NamedNeon. All rights reserved.
+// Copyright (c) 2024 Gibson Pilconis. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -25,17 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::mem::size_of;
 
 use windows::core::HSTRING;
-use windows::Win32::Devices::DeviceAndDriverInstallation::{
-    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
-    SetupDiGetDeviceRegistryPropertyW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS,
-    SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA,
-};
-
-use utf16string::WStr;
+use windows::Win32::Devices::DeviceAndDriverInstallation::{SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS, SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA, SetupDiGetDeviceRegistryPropertyA};
 
 use crate::backend::common::{PciDevice, PciEnumerationError};
 
@@ -67,7 +61,6 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 
         let mut win_bus: u32 = 0;
         let mut win_addr: u32 = 0;
-        let mut win_hwid: [u8; 394] = [0; 394];
 
         for i in 0.. {
             if SetupDiEnumDeviceInfo(device_info, i, &mut device_info_data).is_err() {
@@ -75,7 +68,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 break;
             }
 
-            SetupDiGetDeviceRegistryPropertyW(
+            SetupDiGetDeviceRegistryPropertyA(
                 device_info,
                 &device_info_data,
                 SPDRP_BUSNUMBER,
@@ -84,7 +77,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 None,
             )?;
 
-            SetupDiGetDeviceRegistryPropertyW(
+            SetupDiGetDeviceRegistryPropertyA(
                 device_info,
                 &device_info_data,
                 SPDRP_ADDRESS,
@@ -93,7 +86,20 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 None,
             )?;
 
-            SetupDiGetDeviceRegistryPropertyW(
+            // Request size of SPDRP_HARDWAREID from Windows.
+            let mut win_hwid_size: u32 = 0;
+            let _ = SetupDiGetDeviceRegistryPropertyA(
+                device_info,
+                &device_info_data,
+                SPDRP_HARDWAREID,
+                None,
+                None,
+                Some(&mut win_hwid_size),
+            );
+
+            // Allocate a buffer on the heap and get the value.
+            let mut win_hwid: Box<[u8]> = vec![0; win_hwid_size as usize].into_boxed_slice();
+            SetupDiGetDeviceRegistryPropertyA(
                 device_info,
                 &device_info_data,
                 SPDRP_HARDWAREID,
@@ -115,27 +121,29 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             REV: revision
             The SECOND or THIRD string, though, contains the device class instead of the subsystem.
             CC: Holds the device class, subclass, and POSSIBLY programming interface.
-            I don't know why the data comes like this, in the form of a utf16-le encoded string chock full
+            I don't know why the data comes like this, in the form of a utf-8 encoded string chock full
             of null characters, but what do we expect of Microsoft?
             */
 
-            // String conversion
-            let unparsed_hwid: String = WStr::from_utf16le(&win_hwid).unwrap().to_utf8().replace('\0', "");
+            // String conversion, trim end, splitting at null terminator and removing the PCI\ prefix.
+            let win_hwid_entries: Vec<&str> = std::str::from_utf8(&win_hwid)
+                .unwrap()
+                .split("\0")
+                .map(|s| s.strip_prefix("PCI\\").unwrap_or(""))
+                .filter(|s| !s.is_empty()) // Filter out empty strings.
+                .collect();
+
             // Declare this map and then push to it with every single item in the HWID's entries.
             // That way we get all the usable and unique data we could need.
-            let mut values_mapping: BTreeMap<&str, u32> = BTreeMap::new();
-            for key_value_pair_set in unparsed_hwid.split("PCI\\") {
-                if !key_value_pair_set.is_empty() {
-                    for key_value_pair in key_value_pair_set.split('&') {
-                        let mut key_value_split = key_value_pair.splitn(2, '_');
-                        if let Some(key) = key_value_split.next() {
-                            if let Some(value_string) = key_value_split.next() {
-                                if let Ok(value_integer) = u32::from_str_radix(value_string, 16) {
-                                    values_mapping.insert(key, value_integer);
-                                }
-                            }
-                        }
-                    }
+            let mut values_mapping: HashMap<&str, u32> = HashMap::new();
+
+            for device in win_hwid_entries {
+                for kv in device.split('&') {
+                    let delimiter = kv.find('_').unwrap();
+                    let key = &kv[0..delimiter];
+                    let value =
+                        u32::from_str_radix(&kv[delimiter + 1.. kv.len()], 16).unwrap();
+                    values_mapping.insert(key, value);
                 }
             }
 

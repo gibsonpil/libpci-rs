@@ -1,11 +1,11 @@
 [package]
 name = "libpci-rs"
 description = "A cross-platform library to detect and list PCI devices and their information."
-authors = [ "NamedNeon", "shibedrill" ]
+authors = [ "Gibson Pilconis", "shibedrill" ]
 license = "BSD-3-Clause"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2021"
-homepage = "https://github.com/NamedNeon/libpci-rs"
+homepage = "https://github.com/gibsonpil/libpci-rs"
 documentation = "https://docs.rs/libpci-rs"
 readme = "README.md"
 categories = ["Operating systems", "PCI", "Bindings"]
@@ -17,11 +17,9 @@ bindgen = "0.69.4"
 cfg-if = "1.0.0"
 confindent = "2.2.0"
 lazy_static = "1.4.0"
-libc = "0.2.148"
 
 [target.'cfg(windows)'.dependencies]
-utf16string = "0.2.0"
-windows = { version = "0.52.0",features = [
+windows = { version = "0.54.0",features = [
         "Win32_Devices_DeviceAndDriverInstallation", 
         "Win32_Foundation"
     ]}
