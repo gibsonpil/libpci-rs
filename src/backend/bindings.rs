@@ -25,7 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use crate::backend::common::{PciDevice, PciEnumerationError};
+use crate::backend::common::{PciEnumerationError};
+use crate::pci::PciDevice;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

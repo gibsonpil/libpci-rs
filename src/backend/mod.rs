@@ -32,7 +32,7 @@
 mod bindings;
 mod common;
 
-pub use common::PciDevice;
+pub use crate::pci::PciDevice;
 
 use cfg_if::cfg_if;
 

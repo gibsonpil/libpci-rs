@@ -25,7 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use crate::backend::common::PciDevice;
+use crate::pci::PciDevice;
+use crate::class::DeviceClass;
 use std::fs::*;
 
 use super::common::*;
@@ -109,7 +110,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             device_id: get_pci_device_attribute!(u16, &directory, "device")?, // Device ID
             subsys_device_id: get_pci_device_attribute!(u16, &directory, "subsystem_device")?, // Subsystem Device ID
             subsys_vendor_id: get_pci_device_attribute!(u16, &directory, "subsystem_vendor")?, // Subsystem Vendor ID
-            class: ((class_code >> 16) & 0xFF) as u8, // Device Class
+            class: DeviceClass::from(((class_code >> 16) & 0xFF) as u8), // Device Class
             subclass: ((class_code >> 8) & 0xFF) as u8, // Device Subclass
             programming_interface: (class_code & 0xFF) as u8, // Device Programming Interface
             revision_id: get_pci_device_attribute!(u8, &directory, "revision")?, // Revision ID

@@ -28,6 +28,7 @@
 pub mod backend;
 pub mod ids;
 pub mod pci;
+mod class;
 
 #[cfg(test)]
 mod tests {

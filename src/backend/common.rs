@@ -57,27 +57,3 @@ impl From<ParseIntError> for PciEnumerationError {
         PciEnumerationError::ParseInt(err)
     }
 }
-
-// Define a PCI device as its component fields
-#[derive(Debug, Clone)]
-pub struct PciDevice {
-    pub domain: u32,
-    pub bus: u8,
-    pub device: u8,
-    pub function: u8,
-    pub label: String,
-    pub vendor_id: u16,
-    pub device_id: u16,
-    pub subsys_device_id: u16,
-    pub subsys_vendor_id: u16,
-    pub class: u8,
-    pub subclass: u8,
-    pub programming_interface: u8,
-    pub revision_id: u8,
-}
-
-impl Display for PciDevice {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x} VID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}", self.domain, self.bus, self.device, self.function, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class, self.subclass, self.programming_interface, self.revision_id)
-    }
-}
