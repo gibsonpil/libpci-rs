@@ -43,11 +43,12 @@ pub enum DeviceClass {
     Serial = 0x0C,
     Wireless = 0x0D,
     IntelligentIO = 0x0E,
-    Satellite = 0x10,
-    Encryption = 0x11,
-    DataAcquisition = 0x12,
-    Accelerators = 0x13,
-    NonEssential = 0x14
+    Satellite = 0x0F,
+    Encryption = 0x10,
+    DataAcquisition = 0x11,
+    Accelerators = 0x12,
+    NonEssential = 0x13,
+    Coprocessor = 0x40
 }
 
 impl From<DeviceClass> for String {
@@ -72,7 +73,8 @@ impl From<DeviceClass> for String {
             DeviceClass::Encryption => "Encryption/decryption controller",
             DeviceClass::DataAcquisition => "Data acquisition and signal processing controller",
             DeviceClass::Accelerators => "Processing accelerator",
-            DeviceClass::NonEssential => "Non-essential instrumentation"
+            DeviceClass::NonEssential => "Non-essential instrumentation",
+            DeviceClass::Coprocessor => "Coprocessor"
         }.to_string()
     }
 }
@@ -100,6 +102,7 @@ impl From<u8> for DeviceClass {
             0x12 => DeviceClass::DataAcquisition,
             0x13 => DeviceClass::Accelerators,
             0x14 => DeviceClass::NonEssential,
+            0x40 => DeviceClass::Coprocessor,
             _ => DeviceClass::Undefined,
         }
     }

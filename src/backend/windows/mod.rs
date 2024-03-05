@@ -29,7 +29,11 @@ use std::collections::HashMap;
 use std::mem::size_of;
 
 use windows::core::HSTRING;
-use windows::Win32::Devices::DeviceAndDriverInstallation::{SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW, DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS, SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA, SetupDiGetDeviceRegistryPropertyA};
+use windows::Win32::Devices::DeviceAndDriverInstallation::{
+    SetupDiDestroyDeviceInfoList, SetupDiEnumDeviceInfo, SetupDiGetClassDevsW,
+    DIGCF_ALLCLASSES, DIGCF_PRESENT, SPDRP_ADDRESS, SPDRP_BUSNUMBER, SPDRP_HARDWAREID,
+    SP_DEVINFO_DATA, SetupDiGetDeviceRegistryPropertyA
+};
 
 use crate::backend::common::{PciEnumerationError};
 use crate::class::DeviceClass;
@@ -64,12 +68,8 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
         let mut win_bus: u32 = 0;
         let mut win_addr: u32 = 0;
 
-        for i in 0.. {
-            if SetupDiEnumDeviceInfo(device_info, i, &mut device_info_data).is_err() {
-                // We either don't have any items left or ran into a problem.
-                break;
-            }
-
+        let mut i = 0;
+        while SetupDiEnumDeviceInfo(device_info, i, &mut device_info_data).is_ok() {
             SetupDiGetDeviceRegistryPropertyA(
                 device_info,
                 &device_info_data,
@@ -130,7 +130,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             // String conversion, trim end, splitting at null terminator and removing the PCI\ prefix.
             let win_hwid_entries: Vec<&str> = std::str::from_utf8(&win_hwid)
                 .unwrap()
-                .split("\0")
+                .split('\0')
                 .map(|s| s.strip_prefix("PCI\\").unwrap_or(""))
                 .filter(|s| !s.is_empty()) // Filter out empty strings.
                 .collect();
@@ -168,6 +168,8 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
                 programming_interface: ((cc & 0xFF0000) >> 16) as u8, // High 8 bits of CC????? Unsure!
                 revision_id: *values_mapping.get("REV").ok_or(PciEnumerationError::NotFound)? as u8,
             });
+
+            i += 1;
         }
 
         SetupDiDestroyDeviceInfoList(device_info)?;
