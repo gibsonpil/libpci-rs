@@ -27,9 +27,6 @@
 
 //! libpci-rs's backend module is the programmatic layer that handles making syscalls to the underlying operating system.
 
-#![allow(dead_code)]
-
-mod bindings;
 mod common;
 
 pub use crate::pci::PciDevice;
@@ -43,8 +40,6 @@ cfg_if! {
     } else if #[cfg(target_os = "windows")] {
         mod windows;
         use self::windows::{_get_pci_by_id, _get_pci_list};
-    } else {
-        use bindings::{_get_pci_by_id, _get_pci_list};
     }
 }
 
