@@ -7,6 +7,17 @@
 
 Unstable work-in-progress cross-platform library to detect and list PCI devices and their information. 
 
-This library does not bind to or require libpci. As much of the library as possible is written in Rust as a general rule, except when syscalls that would require using unstable bindings have to be made.
+This library does not bind to or require libpci. As much of the library as possible is written in Rust as a general rule.
+Unfortunately, not all operating systems have stable or maintained Rust APIs, so code for those will be split off into a
+C++17 backend.
 
 This project uses [Semantic Versioning](https://semver.org/).
+
+### Platform Support
+- Windows
+- Linux
+
+### Planned Platform Support
+- macOS
+- FreeBSD
+- OpenBSD
