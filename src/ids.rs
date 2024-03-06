@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use phf::Map;
+#![allow(dead_code)]
 
 include!(concat!(env!("OUT_DIR"), "/pci_devices_phf.rs"));
 
@@ -62,12 +62,12 @@ pub fn get_device(vendor_id: u16, device_id: u16) -> PciDeviceEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::ids::{get_device, PciDeviceEntry};
+    use crate::ids::get_device;
 
     #[test]
     fn test_get_device() { 
         let dev = get_device(4318, 7810);
-        assert_eq!(dev.name, "GF119M [Quadro NVS 4200M]");
+        assert_eq!(dev.name, "TU104 [GeForce RTX 2080]");
     }
 }
 

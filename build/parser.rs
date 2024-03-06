@@ -25,6 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use std::fs;
 use std::num::ParseIntError;
 use std::path::Path;
@@ -107,7 +110,7 @@ pub fn ingest_pci_database(data: &str) -> Map<u16> {
     let mut current_device: Option<PciDeviceEntry> = None;
     let mut current_level: usize; // 0 - vendor, 1 - device, 2 - subdevice
 
-    let mut i = 0;
+    let i = 0;
 
     for entry in data.split("\n").filter(|x| {*x != ""}) {
         // Assess our position.

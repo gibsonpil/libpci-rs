@@ -27,6 +27,8 @@
 
 //! libpci-rs's backend module is the programmatic layer that handles making syscalls to the underlying operating system.
 
+#![allow(dead_code)]
+
 mod common;
 
 pub use crate::pci::PciDeviceHardware;

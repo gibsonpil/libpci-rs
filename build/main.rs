@@ -25,6 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
+#![allow(unused_variables)]
+
 pub mod types;
 mod parser;
 
@@ -49,7 +52,7 @@ fn generate_phf_data() {
     let classes_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_classes_phf.rs");
 
     let mut devices_file = BufWriter::new(File::create(devices_path).unwrap());
-    let mut classes_file = BufWriter::new(File::create(classes_path).unwrap());
+    let classes_file = BufWriter::new(File::create(classes_path).unwrap());
 
     let pci_ids_parsed = ingest_pciids(Path::new("pciids/pci.ids"));
 
