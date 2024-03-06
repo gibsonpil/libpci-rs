@@ -54,8 +54,7 @@ fn generate_phf_data() {
 
     writeln!(
         classes_file,
-        "use once_cell::sync::Lazy;\n\
-        static CLASSES: phf::Map<u8, PciClassEntry> = {};",
+        "static CLASSES: phf::Map<u8, PciClassEntry> = {};",
         &pci_ids_parsed.class.build()
     ).expect("failed to write CLASSES to registry!");
     
