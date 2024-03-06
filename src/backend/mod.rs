@@ -29,7 +29,7 @@
 
 mod common;
 
-pub use crate::pci::PciDevice;
+pub use crate::pci::PciDeviceHardware;
 
 use cfg_if::cfg_if;
 
@@ -45,10 +45,10 @@ cfg_if! {
 
 use crate::backend::common::PciEnumerationError;
 
-pub fn get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
+pub fn get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     _get_pci_list()
 }
 
-fn get_pci_by_id(vendor: u16, device: u16) -> Result<PciDevice, PciEnumerationError> {
+fn get_pci_by_id(vendor: u16, device: u16) -> Result<PciDeviceHardware, PciEnumerationError> {
     _get_pci_by_id(vendor, device)
 }

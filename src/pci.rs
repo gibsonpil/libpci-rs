@@ -30,9 +30,13 @@ use std::fmt::Display;
 
 use crate::class::DeviceClass;
 
-// Define a PCI device as its component fields
 #[derive(Debug, Clone)]
 pub struct PciDevice {
+    
+}
+
+#[derive(Debug, Clone)]
+pub struct PciDeviceHardware {
     pub domain: u32,
     pub bus: u8,
     pub device: u8,
@@ -48,7 +52,7 @@ pub struct PciDevice {
     pub revision_id: u8,
 }
 
-impl Display for PciDevice {
+impl Display for PciDeviceHardware {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:04x}:{:02x}:{:02x}.{:x} {}: \n\tVID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, String::from(self.class), self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
     }

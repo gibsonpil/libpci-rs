@@ -25,6 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use phf::Map;
+
+include!(concat!(env!("OUT_DIR"), "/pci_classes_phf.rs"));
+
+pub type PciClassIdentifier = u8;
+pub type PciSubclassIdentifier = u8;
+pub type PciProgIdentifier = u8;
+
+pub type PciClassMap = Map<PciClassIdentifier, PciClassEntry>;
+pub type PciSubclassMap = Map<PciSubclassIdentifier,PciSubclassEntry>;
+pub type PciProgMap = Map<PciProgIdentifier, PciProgEntry>;
+
+pub struct PciClassEntry {
+    identifier: PciClassIdentifier,
+    class_name: String,
+    subclasses: PciSubclassMap,
+}
+
+pub struct PciSubclassEntry {
+    identifier: PciSubclassIdentifier,
+    subclass_name: String,
+    progs: PciProgMap,
+}
+
+pub struct PciProgEntry {
+    identifier: PciProgIdentifier,
+    device_name: String,
+}
+
 #[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 pub enum DeviceClass {
@@ -49,34 +78,6 @@ pub enum DeviceClass {
     Accelerators = 0x12,
     NonEssential = 0x13,
     Coprocessor = 0x40
-}
-
-impl From<DeviceClass> for String {
-    fn from(value: DeviceClass) -> Self {
-        match value {
-            DeviceClass::Undefined => "Undefined",
-            DeviceClass::MassStorage => "Mass storage controller",
-            DeviceClass::Network => "Network controller",
-            DeviceClass::Display => "Display controller",
-            DeviceClass::Multimedia => "Multimedia device",
-            DeviceClass::Memory => "Memory controller",
-            DeviceClass::Bridge => "Bridge device",
-            DeviceClass::Communications => "Simple communication controller",
-            DeviceClass::Peripheral => "Base system peripheral",
-            DeviceClass::Input => "Input device",
-            DeviceClass::Docking => "Docking station",
-            DeviceClass::Processor => "Processor",
-            DeviceClass::Serial => "Serial bus controller",
-            DeviceClass::Wireless => "Wireless controller",
-            DeviceClass::IntelligentIO => "Intelligent I/O controller",
-            DeviceClass::Satellite => "Satellite communication controller",
-            DeviceClass::Encryption => "Encryption/decryption controller",
-            DeviceClass::DataAcquisition => "Data acquisition and signal processing controller",
-            DeviceClass::Accelerators => "Processing accelerator",
-            DeviceClass::NonEssential => "Non-essential instrumentation",
-            DeviceClass::Coprocessor => "Coprocessor"
-        }.to_string()
-    }
 }
 
 // I like Rust but this kind of thing should not be necessary...
@@ -105,5 +106,33 @@ impl From<u8> for DeviceClass {
             0x40 => DeviceClass::Coprocessor,
             _ => DeviceClass::Undefined,
         }
+    }
+}
+
+impl From<DeviceClass> for String {
+    fn from(value: DeviceClass) -> Self {
+        match value {
+            DeviceClass::Undefined => "Undefined",
+            DeviceClass::MassStorage => "Mass storage controller",
+            DeviceClass::Network => "Network controller",
+            DeviceClass::Display => "Display controller",
+            DeviceClass::Multimedia => "Multimedia device",
+            DeviceClass::Memory => "Memory controller",
+            DeviceClass::Bridge => "Bridge device",
+            DeviceClass::Communications => "Simple communication controller",
+            DeviceClass::Peripheral => "Base system peripheral",
+            DeviceClass::Input => "Input device",
+            DeviceClass::Docking => "Docking station",
+            DeviceClass::Processor => "Processor",
+            DeviceClass::Serial => "Serial bus controller",
+            DeviceClass::Wireless => "Wireless controller",
+            DeviceClass::IntelligentIO => "Intelligent I/O controller",
+            DeviceClass::Satellite => "Satellite communication controller",
+            DeviceClass::Encryption => "Encryption/decryption controller",
+            DeviceClass::DataAcquisition => "Data acquisition and signal processing controller",
+            DeviceClass::Accelerators => "Processing accelerator",
+            DeviceClass::NonEssential => "Non-essential instrumentation",
+            DeviceClass::Coprocessor => "Coprocessor"
+        }.to_string()
     }
 }

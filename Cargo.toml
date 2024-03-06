@@ -8,14 +8,19 @@ edition = "2021"
 homepage = "https://github.com/gibsonpil/libpci-rs"
 documentation = "https://docs.rs/libpci-rs"
 readme = "README.md"
+build = "build/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = ["phf_data"]
+phf_data = []
 
 [dependencies]
 bindgen = "0.69.4"
 cfg-if = "1.0.0"
-confindent = "2.2.0"
 lazy_static = "1.4.0"
+phf = { version = "0.11.1", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.54.0",features = [
@@ -27,5 +32,6 @@ windows = { version = "0.54.0",features = [
 fastrand = "2.0.0"
 
 [build-dependencies]
-phf = { version = "0.11.1", default-features = false }
+quote = "1.0"
 phf_codegen = "0.11.1"
+proc-macro2 = "1.0.78"

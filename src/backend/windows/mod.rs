@@ -37,7 +37,7 @@ use windows::Win32::Devices::DeviceAndDriverInstallation::{
 
 use crate::backend::common::{PciEnumerationError};
 use crate::class::DeviceClass;
-use crate::pci::PciDevice;
+use crate::pci::PciDeviceHardware;
 
 impl From<windows::core::Error> for PciEnumerationError {
     fn from(_err: windows::core::Error) -> Self {
@@ -47,8 +47,8 @@ impl From<windows::core::Error> for PciEnumerationError {
 }
 
 #[inline]
-pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
-    let mut result: Vec<PciDevice> = Vec::new();
+pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
+    let mut result: Vec<PciDeviceHardware> = Vec::new();
 
     unsafe {
         let device_info = SetupDiGetClassDevsW(
@@ -153,7 +153,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
             let subsys = values_mapping.get("SUBSYS").unwrap();
             let cc = values_mapping.get("CC").unwrap();
 
-            result.push(PciDevice {
+            result.push(PciDeviceHardware {
                 domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
                 bus: (win_bus & 0xFF) as u8,       // Bus is in low 8 bits of SPDRP_BUSNUMBER.
                 device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.
@@ -179,6 +179,6 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 }
 
 #[inline]
-pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDevice, PciEnumerationError> {
+pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDeviceHardware, PciEnumerationError> {
     todo!()
 }

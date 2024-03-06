@@ -25,6 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-fn main() {
-    
+use phf_codegen::Map;
+
+pub struct PciVendorEntry {
+    pub(crate) id: u16,
+    pub(crate) name: String,
+    pub(crate) devices: Vec<PciDeviceEntry>
+}
+
+pub struct PciDeviceEntry {
+    pub(crate) id: u16,
+    pub(crate) name: String,
+    pub(crate) subsystems: Vec<PciSubsystemEntry>
+}
+
+pub struct PciSubsystemEntry {
+    pub(crate) subvendor: u16,
+    pub(crate) subdevice: u16,
+    pub(crate) name: String,
+}
+
+pub struct PciIdsParsed {
+    pub(crate) pci: Option<Map<u16>>,
+    pub(crate) class: Option<Map<u8>>
 }

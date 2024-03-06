@@ -25,49 +25,44 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use phf::Map;
+pub mod types;
+mod parser;
 
-include!(concat!(env!("OUT_DIR"), "/pci_devices_phf.rs"));
+use std::env;
+use std::fs::File;
+use std::io::{BufWriter, Write};
+use std::path::Path;
 
-#[derive(Copy, Clone)]
-pub struct PciVendorEntry {
-    id: u16,
-    name: &'static str,
-    devices: &'static [PciDeviceEntry]
+use crate::parser::ingest_pciids;
+
+// Syntax: (as copied from the pci.ids file)
+// vendor  vendor_name
+//      device  device_name				<-- single tab
+//		     subvendor subdevice  subsystem_name	<-- two tabs
+// This tree syntax *might* be easy to parse. might not.
+// To sanitize the database we need to get rid of all the lines with a # at the beginning,
+// ignoring any leading whitespace.
+// First step, we find the lvl1 node with the vendor ID specified, and store the vendor name.
+// Second step, we find the lvl2 node with the device ID specified, and store the device name.
+fn generate_phf_data() {
+    let devices_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_devices_phf.rs");
+    let classes_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_classes_phf.rs");
+
+    let mut devices_file = BufWriter::new(File::create(devices_path).unwrap());
+    let mut classes_file = BufWriter::new(File::create(classes_path).unwrap());
+
+    let pci_ids_parsed = ingest_pciids(Path::new("pciids/pci.ids"));
+
+    writeln!(
+        devices_file,
+        "static VENDORS: phf::Map<u16, PciVendorEntry> = {};",
+        pci_ids_parsed.pci.unwrap().build()
+    ).expect("failed to write VENDORS to registry!");
+    
+    println!("cargo:rerun-if-changed=pciids/pci.ids");
 }
 
-#[derive(Copy, Clone)]
-pub struct PciDeviceEntry {
-    id: u16,
-    name: &'static str,
-    subsystems: &'static [PciSubsystemEntry]
+fn main() {
+    #[cfg(feature = "phf_data")]
+    generate_phf_data();
 }
-
-#[derive(Copy, Clone)]
-pub struct PciSubsystemEntry {
-    subvendor: u16,
-    subdevice: u16,
-    name: &'static str,
-}
-
-pub fn get_device(vendor_id: u16, device_id: u16) -> PciDeviceEntry {
-    let vendor_entry = VENDORS.get(&vendor_id);
-    *vendor_entry
-        .unwrap()
-        .devices
-        .iter()
-        .find(|dev| dev.id == device_id)
-        .unwrap()
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::ids::{get_device, PciDeviceEntry};
-
-    #[test]
-    fn test_get_device() { 
-        let dev = get_device(4318, 7810);
-        assert_eq!(dev.name, "TU104 [GeForce RTX 2080]");
-    }
-}
-

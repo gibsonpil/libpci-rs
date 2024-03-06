@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-use crate::pci::PciDevice;
+use crate::pci::PciDeviceHardware;
 use crate::class::DeviceClass;
 use std::fs::*;
 
@@ -74,8 +74,8 @@ fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), PciEnum
 }
 
 #[inline]
-pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
-    let mut device_list: Vec<PciDevice> = Vec::new();
+pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
+    let mut device_list: Vec<PciDeviceHardware> = Vec::new();
 
     /*
     On Linux, PCI device information is stored in /sys/bus/pci/devices/.
@@ -100,7 +100,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
         let class_code = get_pci_device_attribute!(u32, &directory, "class")?;
         let (domain, bus, device, function) = comps_from_linux_pci_addr(&directory.as_ref().unwrap().file_name().into_string().unwrap())?;
 
-        device_list.push(PciDevice {
+        device_list.push(PciDeviceHardware {
             domain,
             bus,
             device,
@@ -122,6 +122,6 @@ pub fn _get_pci_list() -> Result<Vec<PciDevice>, PciEnumerationError> {
 }
 
 #[inline]
-pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDevice, PciEnumerationError> {
+pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDeviceHardware, PciEnumerationError> {
     todo!()
 }
