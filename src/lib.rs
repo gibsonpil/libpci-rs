@@ -41,6 +41,7 @@ mod tests {
         }
         println!("End test output: test_pci_listing");
     }
+    
     #[test]
     #[cfg(disabled)]
     fn test_pci_lookup() {

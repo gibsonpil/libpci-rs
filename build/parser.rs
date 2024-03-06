@@ -32,7 +32,6 @@ use std::fs;
 use std::num::ParseIntError;
 use std::path::Path;
 use phf_codegen::Map;
-use proc_macro2::TokenStream;
 use quote::quote;
 
 use crate::types::*;
@@ -118,9 +117,9 @@ pub fn subsystem(input: &str) -> PciSubsystemEntry {
 pub fn class(input: &str) -> PciClassEntry {
     let cleaned = clean(input);
     // ID is at position 1 due to "C" token
-    let id = id(cleaned.as_str(), 1, u8::from_str_radix); 
+    let id: u8 = id(cleaned.as_str(), 1, u8::from_str_radix).into(); 
     let name = name(cleaned.as_str()).to_string();
-
+    
     PciClassEntry {
         id,
         name,
@@ -231,73 +230,6 @@ pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
     result
 }
 
-impl quote::ToTokens for PciVendorEntry {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let PciVendorEntry {
-            id,
-            name,
-            devices
-        } = self;
-        
-        let devices = devices.iter().map(|PciDeviceEntry { id, name, subsystems }| {
-            quote! {
-                PciDeviceEntry { id: #id, name: #name, subsystems: &[#(#subsystems),*] }
-            }
-        });
-        
-        tokens.extend(quote! {
-            PciVendorEntry { id: #id, name: #name, devices: &[#(#devices),*] }
-        });
-    }
-}
-
-impl quote::ToTokens for PciSubsystemEntry {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let PciSubsystemEntry {
-            subvendor,
-            subdevice,
-            name
-        } = self;
-        
-        tokens.extend(quote! {
-            PciSubsystemEntry { subvendor: #subvendor, subdevice: #subdevice, name: #name }
-        });
-    }
-}
-
-impl quote::ToTokens for PciClassEntry {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let PciClassEntry {
-            id,
-            name,
-            subclasses
-        } = self;
-
-        let subclasses = subclasses.iter().map(|PciSubclassEntry { id, name, progs }| {
-            quote! {
-                PciSubclassEntry { id: #id, name: #name, progs: &[#(#progs),*] }
-            }
-        });
-
-        tokens.extend(quote! {
-            PciClassEntry { id: #id, name: #name, subclasses: &[#(#subclasses),*] }
-        });
-    }
-}
-
-impl quote::ToTokens for PciProgEntry {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let PciProgEntry {
-            id,
-            name
-        } = self;
-
-        tokens.extend(quote! {
-            PciProgEntry { id: #id, name: #name }
-        });
-    }
-}
-
 pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
     let pciids_raw = fs::read_to_string(path).unwrap();
     let pciids_filtered: Vec<&str> =
@@ -306,27 +238,19 @@ pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
             .filter(|str| !str.contains('#')) // Filter comments.
             .filter(|str| !str.is_empty())
             .collect();
-
-    let mut pci_database_raw: Vec<&str> = vec![];
-    let mut pci_classes_raw: Vec<&str> = vec![];
-
-    // TODO: make this more compact.
-    // Separate device entries from class entries.
-    let mut collecting_classes = false;
-    for line in pciids_filtered {
-        // Once we start getting class entries we should stash them into pci_classes_raw.
-        if line.starts_with("C ") {
-            collecting_classes = true;
-        }
-        if collecting_classes {
-            pci_classes_raw.push(line);
-        } else {
-            pci_database_raw.push(line);
-        }
-    }
-
+    
+    let split_idx = pciids_filtered
+        .iter()
+        .position(|x| x.starts_with("C "))
+        .unwrap();
+    
+    let split = pciids_filtered.split_at(split_idx);
+    
+    let pci_database_raw = split.0.to_vec();
+    let pci_classes_raw = split.1.to_vec();
+    
     PciIdsParsed {
-        pci: Some(ingest_pci_database(pci_database_raw)),
-        class: Some(ingest_class_database(pci_classes_raw))
+        pci: ingest_pci_database(pci_database_raw),
+        class: ingest_class_database(pci_classes_raw)
     }
 }

@@ -28,7 +28,7 @@
 use core::fmt;
 use std::fmt::Display;
 
-use crate::class::DeviceClass;
+use crate::class::PciClass;
 
 #[derive(Debug, Clone)]
 pub struct PciDevice {
@@ -46,7 +46,7 @@ pub struct PciDeviceHardware {
     pub device_id: u16,
     pub subsys_device_id: u16,
     pub subsys_vendor_id: u16,
-    pub class: DeviceClass,
+    pub class: PciClass,
     pub subclass: u8,
     pub programming_interface: u8,
     pub revision_id: u8,

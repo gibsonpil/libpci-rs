@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 #![allow(unused_variables)]
 
 pub mod types;
@@ -38,15 +37,6 @@ use std::path::Path;
 
 use crate::parser::ingest_pciids;
 
-// Syntax: (as copied from the pci.ids file)
-// vendor  vendor_name
-//      device  device_name				<-- single tab
-//		     subvendor subdevice  subsystem_name	<-- two tabs
-// This tree syntax *might* be easy to parse. might not.
-// To sanitize the database we need to get rid of all the lines with a # at the beginning,
-// ignoring any leading whitespace.
-// First step, we find the lvl1 node with the vendor ID specified, and store the vendor name.
-// Second step, we find the lvl2 node with the device ID specified, and store the device name.
 fn generate_phf_data() {
     let devices_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_devices_phf.rs");
     let classes_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_classes_phf.rs");
@@ -59,13 +49,14 @@ fn generate_phf_data() {
     writeln!(
         devices_file,
         "static VENDORS: phf::Map<u16, PciVendorEntry> = {};",
-        &pci_ids_parsed.pci.unwrap().build()
+        &pci_ids_parsed.pci.build()
     ).expect("failed to write VENDORS to registry!");
 
     writeln!(
         classes_file,
-        "static CLASSES: phf::Map<u8, PciClassEntry> = {};",
-        &pci_ids_parsed.class.unwrap().build()
+        "use once_cell::sync::Lazy;\n\
+        static CLASSES: phf::Map<u8, PciClassEntry> = {};",
+        &pci_ids_parsed.class.build()
     ).expect("failed to write CLASSES to registry!");
     
     println!("cargo:rerun-if-changed=pciids/pci.ids");

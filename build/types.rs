@@ -28,6 +28,8 @@
 #![allow(dead_code)]
 
 use phf_codegen::Map;
+use proc_macro2::TokenStream;
+use quote::quote;
 
 pub struct PciVendorEntry {
     pub(crate) id: u16,
@@ -65,6 +67,73 @@ pub struct PciProgEntry {
 }
 
 pub struct PciIdsParsed {
-    pub(crate) pci: Option<Map<u16>>,
-    pub(crate) class: Option<Map<u8>>
+    pub(crate) pci: Map<u16>,
+    pub(crate) class: Map<u8>
+}
+
+impl quote::ToTokens for PciVendorEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let PciVendorEntry {
+            id,
+            name,
+            devices
+        } = self;
+
+        let devices = devices.iter().map(|PciDeviceEntry { id, name, subsystems }| {
+            quote! {
+                PciDeviceEntry { id: #id, name: #name, subsystems: &[#(#subsystems),*] }
+            }
+        });
+
+        tokens.extend(quote! {
+            PciVendorEntry { id: #id, name: #name, devices: &[#(#devices),*] }
+        });
+    }
+}
+
+impl quote::ToTokens for PciSubsystemEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let PciSubsystemEntry {
+            subvendor,
+            subdevice,
+            name
+        } = self;
+
+        tokens.extend(quote! {
+            PciSubsystemEntry { subvendor: #subvendor, subdevice: #subdevice, name: #name }
+        });
+    }
+}
+
+impl quote::ToTokens for PciClassEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let PciClassEntry {
+            id,
+            name,
+            subclasses
+        } = self;
+
+        let subclasses = subclasses.iter().map(|PciSubclassEntry { id, name, progs }| {
+            quote! {
+                PciSubclassEntry { id: #id, name: #name, progs: &[#(#progs),*] }
+            }
+        });
+
+        tokens.extend(quote! {
+            PciClassEntry { id: #id, name: #name, subclasses: &[#(#subclasses),*] }
+        });
+    }
+}
+
+impl quote::ToTokens for PciProgEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let PciProgEntry {
+            id,
+            name
+        } = self;
+
+        tokens.extend(quote! {
+            PciProgEntry { id: #id, name: #name }
+        });
+    }
 }
