@@ -65,9 +65,17 @@ fn clean(input: &str) -> String {
     input.replace('\t', "")
 }
 
-pub fn get_level(input: &str) -> usize {
+fn get_level(input: &str) -> usize {
     let indices: Vec<_> = input.match_indices('\t').collect();
     indices.len()
+}
+
+fn try_level<T, F>(input: &str, level: usize, parser: F) -> Option<T>
+where F: Fn(&str) -> T {
+    if get_level(input) == level {
+        return Some(parser(input))
+    }
+    None
 }
 
 pub fn vendor(input: &str) -> PciVendorEntry {
@@ -107,11 +115,43 @@ pub fn subsystem(input: &str) -> PciSubsystemEntry {
     }
 }
 
-pub fn ingest_class_database(data: &str) -> Map<u8> {
-    todo!()
+pub fn class(input: &str) -> PciClassEntry {
+    let cleaned = clean(input);
+    // ID is at position 1 due to "C" token
+    let id = id(cleaned.as_str(), 1, u8::from_str_radix); 
+    let name = name(cleaned.as_str()).to_string();
+
+    PciClassEntry {
+        id,
+        name,
+        subclasses: vec![]
+    }
 }
 
-pub fn ingest_pci_database(data: &str) -> Map<u16> {
+pub fn subclass(input: &str) -> PciSubclassEntry {
+    let cleaned = clean(input);
+    let id = id(cleaned.as_str(), 0, u8::from_str_radix);
+    let name = name(cleaned.as_str()).to_string();
+
+    PciSubclassEntry {
+        id,
+        name,
+        progs: vec![]
+    }
+}
+
+pub fn prog(input: &str) -> PciProgEntry {
+    let cleaned = clean(input);
+    let id = id(cleaned.as_str(), 0, u8::from_str_radix);
+    let name = name(cleaned.as_str()).to_string();
+
+    PciProgEntry {
+        id,
+        name,
+    }
+}
+
+pub fn ingest_pci_database(data: Vec<&str>) -> Map<u16> {
     let mut result = Map::new();
 
     let mut current_vendor: Option<PciVendorEntry> = None;
@@ -120,16 +160,13 @@ pub fn ingest_pci_database(data: &str) -> Map<u16> {
 
     let i = 0;
 
-    for entry in data.split('\n') {
-        // Assess our position.
-        current_level = get_level(entry);
-
-        if current_level == 0 {
+    for entry in data {
+        if let Some(value) = try_level(entry, 0, vendor) {
             if let Some(vendor) = current_vendor.take() {
                 result.entry(vendor.id, &quote!(#vendor).to_string());
             }
-            current_vendor = Some(vendor(entry));
-        } else if current_level == 1 {
+            current_vendor = Some(value);
+        } else if let Some(value) = try_level(entry, 1, device) {
             if let Some(device) = current_device.take() {
                 current_vendor
                     .as_mut()
@@ -137,18 +174,58 @@ pub fn ingest_pci_database(data: &str) -> Map<u16> {
                     .devices
                     .push(device);
             }
-            current_device = Some(device(entry));
-        } else if current_level == 2 {
+            current_device = Some(value);
+        } else if let Some(value) = try_level(entry, 2, subsystem) {
             current_device
                 .as_mut()
                 .unwrap()
                 .subsystems
-                .push(subsystem(entry));
+                .push(value);
         }
     }
 
     if let Some(vendor) = current_vendor.take() {
         result.entry(vendor.id, &quote!(#vendor).to_string());
+    }
+
+    result
+}
+
+pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
+    let mut result = Map::new();
+
+    let mut current_class: Option<PciClassEntry> = None;
+    let mut current_subclass: Option<PciSubclassEntry> = None;
+    let mut current_level: usize; // 0 - class, 1 - subclass, 2 - prof
+
+    let i = 0;
+
+    for entry in data {
+        if let Some(value) = try_level(entry, 0, class) {
+            if let Some(class) = current_class.take() {
+                result.entry(class.id, &quote!(#class).to_string());
+            }
+            current_class = Some(value);
+        } else if let Some(value) = try_level(entry, 1, subclass) {
+            if let Some(subclass) = current_subclass.take() {
+                current_class
+                    .as_mut()
+                    .unwrap()
+                    .subclasses
+                    .push(subclass);
+            }
+            current_subclass = Some(value);
+        } else if let Some(value) = try_level(entry, 2, prog) {
+            current_subclass
+                .as_mut()
+                .unwrap()
+                .progs
+                .push(value);
+        }
+    }
+
+    if let Some(class) = current_class.take() {
+        result.entry(class.id, &quote!(#class).to_string());
     }
 
     result
@@ -188,6 +265,39 @@ impl quote::ToTokens for PciSubsystemEntry {
     }
 }
 
+impl quote::ToTokens for PciClassEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let PciClassEntry {
+            id,
+            name,
+            subclasses
+        } = self;
+
+        let subclasses = subclasses.iter().map(|PciSubclassEntry { id, name, progs }| {
+            quote! {
+                PciSubclassEntry { id: #id, name: #name, progs: &[#(#progs),*] }
+            }
+        });
+
+        tokens.extend(quote! {
+            PciClassEntry { id: #id, name: #name, subclasses: &[#(#subclasses),*] }
+        });
+    }
+}
+
+impl quote::ToTokens for PciProgEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let PciProgEntry {
+            id,
+            name
+        } = self;
+
+        tokens.extend(quote! {
+            PciProgEntry { id: #id, name: #name }
+        });
+    }
+}
+
 pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
     let pciids_raw = fs::read_to_string(path).unwrap();
     let pciids_filtered: Vec<&str> =
@@ -215,10 +325,8 @@ pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
         }
     }
 
-    // let pci_classes = ingest_class_database(pci_classes_raw.join("\n").as_str());
-
     PciIdsParsed {
-        pci: Some(ingest_pci_database(pci_database_raw.join("\n").as_str())),
-        class: None
+        pci: Some(ingest_pci_database(pci_database_raw)),
+        class: Some(ingest_class_database(pci_classes_raw))
     }
 }

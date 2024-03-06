@@ -27,33 +27,26 @@
 
 #![allow(dead_code)]
 
-use phf::Map;
-
 include!(concat!(env!("OUT_DIR"), "/pci_classes_phf.rs"));
 
-pub type PciClassIdentifier = u8;
-pub type PciSubclassIdentifier = u8;
-pub type PciProgIdentifier = u8;
-
-pub type PciClassMap = Map<PciClassIdentifier, PciClassEntry>;
-pub type PciSubclassMap = Map<PciSubclassIdentifier,PciSubclassEntry>;
-pub type PciProgMap = Map<PciProgIdentifier, PciProgEntry>;
-
+#[derive(Copy, Clone)]
 pub struct PciClassEntry {
-    identifier: PciClassIdentifier,
-    class_name: String,
-    subclasses: PciSubclassMap,
+    id: u8,
+    name: &'static str,
+    subclasses: &'static [PciSubclassEntry]
 }
 
+#[derive(Copy, Clone)]
 pub struct PciSubclassEntry {
-    identifier: PciSubclassIdentifier,
-    subclass_name: String,
-    progs: PciProgMap,
+    id: u8,
+    name: &'static str,
+    progs: &'static [PciProgEntry]
 }
 
+#[derive(Copy, Clone)]
 pub struct PciProgEntry {
-    identifier: PciProgIdentifier,
-    device_name: String,
+    id: u8,
+    name: &'static str,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -138,3 +131,25 @@ impl From<DeviceClass> for String {
         }.to_string()
     }
 }
+
+pub fn get_subclass(class_id: u8, subclass_id: u8) -> PciSubclassEntry {
+    let class_entry = CLASSES.get(&class_id);
+    *class_entry
+        .unwrap()
+        .subclasses
+        .iter()
+        .find(|subclass| subclass.id == subclass_id)
+        .unwrap()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::class::get_subclass;
+
+    #[test]
+    fn test_get_device() {
+        let subclass = get_subclass(16, 0);
+        assert_eq!(subclass.name, "Network and computing encryption device");
+    }
+}
+

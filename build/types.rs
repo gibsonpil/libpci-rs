@@ -47,6 +47,23 @@ pub struct PciSubsystemEntry {
     pub(crate) name: String,
 }
 
+pub struct PciClassEntry {
+    pub(crate) id: u8,
+    pub(crate) name: String,
+    pub(crate) subclasses: Vec<PciSubclassEntry>
+}
+
+pub struct PciSubclassEntry {
+    pub(crate) id: u8,
+    pub(crate) name: String,
+    pub(crate) progs: Vec<PciProgEntry>
+}
+
+pub struct PciProgEntry {
+    pub(crate) id: u8,
+    pub(crate) name: String,
+}
+
 pub struct PciIdsParsed {
     pub(crate) pci: Option<Map<u16>>,
     pub(crate) class: Option<Map<u8>>

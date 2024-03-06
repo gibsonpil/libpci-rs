@@ -52,15 +52,21 @@ fn generate_phf_data() {
     let classes_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_classes_phf.rs");
 
     let mut devices_file = BufWriter::new(File::create(devices_path).unwrap());
-    let classes_file = BufWriter::new(File::create(classes_path).unwrap());
+    let mut classes_file = BufWriter::new(File::create(classes_path).unwrap());
 
     let pci_ids_parsed = ingest_pciids(Path::new("pciids/pci.ids"));
 
     writeln!(
         devices_file,
         "static VENDORS: phf::Map<u16, PciVendorEntry> = {};",
-        pci_ids_parsed.pci.unwrap().build()
+        &pci_ids_parsed.pci.unwrap().build()
     ).expect("failed to write VENDORS to registry!");
+
+    writeln!(
+        classes_file,
+        "static CLASSES: phf::Map<u8, PciClassEntry> = {};",
+        &pci_ids_parsed.class.unwrap().build()
+    ).expect("failed to write CLASSES to registry!");
     
     println!("cargo:rerun-if-changed=pciids/pci.ids");
 }
