@@ -37,6 +37,14 @@ use quote::quote;
 
 use crate::types::*;
 
+cfg_if::cfg_if! {
+    if #[cfg(target_os = "windows")] {
+        const LINE_BREAK: &str = "\r\n";
+    } else {
+        const LINE_BREAK: &str = "\n";
+    }
+}
+
 // A lot of inspiration for the overall architecture of this script
 // (i.e. using PHF with quote) was taken from here: 
 // https://github.com/lienching/pci-ids.rs/blob/main/build.rs
@@ -112,7 +120,7 @@ pub fn ingest_pci_database(data: &str) -> Map<u16> {
 
     let i = 0;
 
-    for entry in data.split('\n').filter(|x| {!x.is_empty()}) {
+    for entry in data.split('\n') {
         // Assess our position.
         current_level = get_level(entry);
 
@@ -184,7 +192,7 @@ pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
     let pciids_raw = fs::read_to_string(path).unwrap();
     let pciids_filtered: Vec<&str> =
         pciids_raw
-            .split("\r\n") // Can we please drop carriage returns already?
+            .split(LINE_BREAK)
             .filter(|str| !str.contains('#')) // Filter comments.
             .filter(|str| !str.is_empty())
             .collect();
