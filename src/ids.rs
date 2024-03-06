@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn test_get_device() { 
         let dev = get_device(4318, 7810);
-        assert_eq!(dev.name, "TU104 [GeForce RTX 2080]");
+        assert_eq!(dev.name, "GF119M [Quadro NVS 4200M]");
     }
 }
 

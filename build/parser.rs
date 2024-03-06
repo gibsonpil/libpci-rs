@@ -109,7 +109,7 @@ pub fn ingest_pci_database(data: &str) -> Map<u16> {
 
     let mut i = 0;
 
-    for entry in data.split("\n") {
+    for entry in data.split("\n").filter(|x| {*x != ""}) {
         // Assess our position.
         current_level = get_level(entry);
 
