@@ -25,10 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-pub mod ids;
+use cfg_if::cfg_if;
+
 pub mod pci;
-pub mod class;
 mod backend;
+
+cfg_if! {
+    if #[cfg(feature = "pciids")] {
+        pub mod ids;
+        pub mod class;
+    }
+}
 
 #[cfg(test)]
 mod tests {

@@ -36,7 +36,6 @@ use windows::Win32::Devices::DeviceAndDriverInstallation::{
 };
 
 use crate::backend::common::{PciEnumerationError};
-use crate::class::PciClass;
 use crate::pci::PciDeviceHardware;
 
 impl From<windows::core::Error> for PciEnumerationError {
@@ -163,7 +162,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
                 device_id: *values_mapping.get("DEV").ok_or(PciEnumerationError::NotFound)? as u16,
                 subsys_device_id: (subsys >> 16) as u16, // High 16 bits of SUBSYS.
                 subsys_vendor_id: (subsys & 0xFFFF) as u16, // Low 16 bits of SUBSYS.
-                class: PciClass::from(((cc & 0x00FF00) >> 8) as u8),     // Middle 8 bits of CC.
+                class: ((cc & 0x00FF00) >> 8) as u8,     // Middle 8 bits of CC.
                 subclass: (cc & 0x0000FF) as u8,         // Last 8 bits of CC.
                 programming_interface: ((cc & 0xFF0000) >> 16) as u8, // High 8 bits of CC????? Unsure!
                 revision_id: *values_mapping.get("REV").ok_or(PciEnumerationError::NotFound)? as u8,

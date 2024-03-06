@@ -49,107 +49,69 @@ pub struct PciProgEntry {
     name: &'static str,
 }
 
-#[derive(Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum PciClass {
-    Undefined = 0x00,
-    MassStorage = 0x01,
-    Network = 0x02,
-    Display = 0x03,
-    Multimedia = 0x04,
-    Memory = 0x05,
-    Bridge = 0x06,
-    Communications = 0x07,
-    Peripheral = 0x08,
-    Input = 0x09,
-    Docking = 0x0A,
-    Processor = 0x0B,
-    Serial = 0x0C,
-    Wireless = 0x0D,
-    IntelligentIO = 0x0E,
-    Satellite = 0x0F,
-    Encryption = 0x10,
-    DataAcquisition = 0x11,
-    Accelerators = 0x12,
-    NonEssential = 0x13,
-    Coprocessor = 0x40
+pub fn get_class(id: u8) -> Option<PciClassEntry> {
+    let result = CLASSES.get(&id);
+    result?;
+    Some(*result.unwrap())
 }
 
-// I like Rust but this kind of thing should not be necessary...
-impl From<u8> for PciClass {
-    fn from(value: u8) -> Self {
-        match value {
-            0x01 => PciClass::MassStorage,
-            0x02 => PciClass::Network,
-            0x03 => PciClass::Display,
-            0x04 => PciClass::Multimedia,
-            0x05 => PciClass::Memory,
-            0x06 => PciClass::Bridge,
-            0x07 => PciClass::Communications,
-            0x08 => PciClass::Peripheral,
-            0x09 => PciClass::Input,
-            0x0A => PciClass::Docking,
-            0x0B => PciClass::Processor,
-            0x0C => PciClass::Serial,
-            0x0D => PciClass::Wireless,
-            0x0E => PciClass::IntelligentIO,
-            0x10 => PciClass::Satellite,
-            0x11 => PciClass::Encryption,
-            0x12 => PciClass::DataAcquisition,
-            0x13 => PciClass::Accelerators,
-            0x14 => PciClass::NonEssential,
-            0x40 => PciClass::Coprocessor,
-            _ => PciClass::Undefined,
-        }
+impl PciClassEntry {
+    pub fn get_id(&self) -> u8 {
+        self.id
+    }
+    
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
+    
+    /// Gets all the subclasses associated with a class.
+    pub fn get_subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
+        todo!()
+    }
+    
+    /// Gets a subclass associated with a class by its ID.
+    pub fn get_subclass(&self, _id: u8) -> Option<PciSubclassEntry> {
+        todo!();
     }
 }
 
-impl From<PciClass> for String {
-    fn from(value: PciClass) -> Self {
-        match value {
-            PciClass::Undefined => "Undefined",
-            PciClass::MassStorage => "Mass storage controller",
-            PciClass::Network => "Network controller",
-            PciClass::Display => "Display controller",
-            PciClass::Multimedia => "Multimedia device",
-            PciClass::Memory => "Memory controller",
-            PciClass::Bridge => "Bridge device",
-            PciClass::Communications => "Simple communication controller",
-            PciClass::Peripheral => "Base system peripheral",
-            PciClass::Input => "Input device",
-            PciClass::Docking => "Docking station",
-            PciClass::Processor => "Processor",
-            PciClass::Serial => "Serial bus controller",
-            PciClass::Wireless => "Wireless controller",
-            PciClass::IntelligentIO => "Intelligent I/O controller",
-            PciClass::Satellite => "Satellite communication controller",
-            PciClass::Encryption => "Encryption/decryption controller",
-            PciClass::DataAcquisition => "Data acquisition and signal processing controller",
-            PciClass::Accelerators => "Processing accelerator",
-            PciClass::NonEssential => "Non-essential instrumentation",
-            PciClass::Coprocessor => "Coprocessor"
-        }.to_string()
+impl PciSubclassEntry {
+    pub fn get_id(&self) -> u8 {
+        self.id
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
+    
+    /// Gets all the progs associated with a subclass.
+    pub fn get_progs(&self) -> Option<Vec<PciProgEntry>> {
+        todo!()
+    }
+    
+    /// Gets a prog associated with a subclass by its ID.
+    pub fn get_prog(&self, _id: u8) -> Option<PciProgEntry> {
+        todo!();
     }
 }
 
-pub fn get_subclass(class_id: u8, subclass_id: u8) -> PciSubclassEntry {
-    let class_entry = CLASSES.get(&class_id);
-    *class_entry
-        .unwrap()
-        .subclasses
-        .iter()
-        .find(|subclass| subclass.id == subclass_id)
-        .unwrap()
+impl PciProgEntry {
+    pub fn get_id(&self) -> u8 {
+        self.id
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::class::get_subclass;
+    use crate::class::get_class;
 
     #[test]
-    fn test_get_subclass() {
-        let subclass = get_subclass(16, 0);
-        assert_eq!(subclass.name, "Network and computing encryption device");
+    fn test_get_class() {
+        let class = get_class(9).unwrap();
+        assert_eq!(class.get_name(), "Input device controller");
     }
 }
-

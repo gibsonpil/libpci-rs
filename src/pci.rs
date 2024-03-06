@@ -27,8 +27,7 @@
 
 use core::fmt;
 use std::fmt::Display;
-
-use crate::class::PciClass;
+use crate::class::get_class;
 
 #[derive(Debug, Clone)]
 pub struct PciDevice {
@@ -46,7 +45,7 @@ pub struct PciDeviceHardware {
     pub device_id: u16,
     pub subsys_device_id: u16,
     pub subsys_vendor_id: u16,
-    pub class: PciClass,
+    pub class: u8,
     pub subclass: u8,
     pub programming_interface: u8,
     pub revision_id: u8,
@@ -54,6 +53,6 @@ pub struct PciDeviceHardware {
 
 impl Display for PciDeviceHardware {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x} {}: \n\tVID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, String::from(self.class), self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x} {}: \n\tVID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, get_class(self.class).unwrap().get_name(), self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
     }
 }

@@ -62,6 +62,6 @@ fn generate_phf_data() {
 }
 
 fn main() {
-    #[cfg(feature = "phf_data")]
+    #[cfg(feature = "pciids")]
     generate_phf_data();
 }

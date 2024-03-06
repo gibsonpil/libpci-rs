@@ -50,24 +50,63 @@ pub struct PciSubsystemEntry {
     name: &'static str,
 }
 
-pub fn get_device(vendor_id: u16, device_id: u16) -> PciDeviceEntry {
-    let vendor_entry = VENDORS.get(&vendor_id);
-    *vendor_entry
-        .unwrap()
-        .devices
-        .iter()
-        .find(|dev| dev.id == device_id)
-        .unwrap()
+pub fn get_vendor(id: u16) -> Option<PciVendorEntry> {
+    let result = VENDORS.get(&id);
+    result?;
+    Some(*result.unwrap())
+}
+
+impl PciVendorEntry {
+    pub fn get_id(&self) -> u16 {
+        self.id
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
+
+    /// Gets all the devices associated with a vendor.
+    pub fn get_device(_id: u16) -> Option<PciDeviceEntry> {
+        todo!()
+    }
+}
+
+impl PciDeviceEntry {
+    pub fn get_id(&self) -> u16 {
+        self.id
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
+
+    /// Gets all the subsystems associated with a device.
+    pub fn get_subsystems(_id: u16) -> Option<PciSubsystemEntry> {
+        todo!()
+    }
+}
+
+impl PciSubsystemEntry {
+    pub fn get_subvendor(&self) -> u16 {
+        self.subvendor
+    }
+    
+    pub fn get_subdevice(&self) -> u16 {
+        self.subdevice
+    }
+
+    pub fn get_name(&self) -> &'static str {
+        self.name
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::ids::get_device;
+    use crate::ids::get_vendor;
 
     #[test]
     fn test_get_device() { 
-        let dev = get_device(4318, 7810);
-        assert_eq!(dev.name, "TU104 [GeForce RTX 2080]");
+        let vendor = get_vendor(20).unwrap();
+        assert_eq!(vendor.get_name(), "Loongson Technology LLC");
     }
 }
-

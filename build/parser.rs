@@ -33,7 +33,6 @@ use std::num::ParseIntError;
 use std::path::Path;
 use phf_codegen::Map;
 use quote::quote;
-
 use crate::types::*;
 
 cfg_if::cfg_if! {
@@ -54,9 +53,9 @@ where F: Fn(&str, u32) -> Result<T, ParseIntError> {
     radix_function(id, 16).unwrap()
 }
 
-fn name(input: &str) -> &str {
+fn name(input: &str) -> String {
     // pci.ids puts two spaces before the name.
-    input.split("  ").last().unwrap()
+    input.split("  ").last().unwrap().to_string()
 }
 
 fn clean(input: &str) -> String {
@@ -80,7 +79,7 @@ where F: Fn(&str) -> T {
 pub fn vendor(input: &str) -> PciVendorEntry {
     let cleaned = clean(input);
     let id = id(cleaned.as_str(), 0, u16::from_str_radix);
-    let name = name(cleaned.as_str()).to_string();
+    let name = name(cleaned.as_str());
 
     PciVendorEntry {
         id,
@@ -92,7 +91,7 @@ pub fn vendor(input: &str) -> PciVendorEntry {
 pub fn device(input: &str) -> PciDeviceEntry {
     let cleaned = clean(input);
     let id = id(cleaned.as_str(), 0, u16::from_str_radix);
-    let name = name(cleaned.as_str()).to_string();
+    let name = name(cleaned.as_str());
 
     PciDeviceEntry {
         id,
@@ -105,7 +104,7 @@ pub fn subsystem(input: &str) -> PciSubsystemEntry {
     let cleaned = clean(input);
     let subvendor = id(cleaned.as_str(), 0, u16::from_str_radix);
     let subdevice = id(cleaned.as_str(), 1, u16::from_str_radix);
-    let name = name(cleaned.as_str()).to_string();
+    let name = name(cleaned.as_str());
 
     PciSubsystemEntry {
         subvendor,
@@ -118,7 +117,7 @@ pub fn class(input: &str) -> PciClassEntry {
     let cleaned = clean(input);
     // ID is at position 1 due to "C" token
     let id: u8 = id(cleaned.as_str(), 1, u8::from_str_radix).into(); 
-    let name = name(cleaned.as_str()).to_string();
+    let name = name(cleaned.as_str());
     
     PciClassEntry {
         id,
@@ -130,7 +129,7 @@ pub fn class(input: &str) -> PciClassEntry {
 pub fn subclass(input: &str) -> PciSubclassEntry {
     let cleaned = clean(input);
     let id = id(cleaned.as_str(), 0, u8::from_str_radix);
-    let name = name(cleaned.as_str()).to_string();
+    let name = name(cleaned.as_str());
 
     PciSubclassEntry {
         id,
@@ -142,7 +141,7 @@ pub fn subclass(input: &str) -> PciSubclassEntry {
 pub fn prog(input: &str) -> PciProgEntry {
     let cleaned = clean(input);
     let id = id(cleaned.as_str(), 0, u8::from_str_radix);
-    let name = name(cleaned.as_str()).to_string();
+    let name = name(cleaned.as_str());
 
     PciProgEntry {
         id,

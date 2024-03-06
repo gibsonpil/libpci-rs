@@ -13,8 +13,8 @@ build = "build/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["phf_data"]
-phf_data = []
+default = ["pciids"]
+pciids = []
 
 [dependencies]
 bindgen = "0.69.4"
@@ -37,3 +37,8 @@ quote = "1.0"
 phf_codegen = "0.11.1"
 proc-macro2 = "1.0.78"
 cfg-if = "1.0.0"
+
+[profile.release]
+strip = true
+lto = true
+opt-level = "z"
