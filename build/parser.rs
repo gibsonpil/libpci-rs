@@ -54,11 +54,11 @@ fn name(input: &str) -> &str {
 
 fn clean(input: &str) -> String {
     // Filter out tabs as we don't need them to parse data.
-    input.replace("\t", "")
+    input.replace('\t', "")
 }
 
 pub fn get_level(input: &str) -> usize {
-    let indices: Vec<_> = input.match_indices("\t").collect();
+    let indices: Vec<_> = input.match_indices('\t').collect();
     indices.len()
 }
 
@@ -112,7 +112,7 @@ pub fn ingest_pci_database(data: &str) -> Map<u16> {
 
     let i = 0;
 
-    for entry in data.split("\n").filter(|x| {*x != ""}) {
+    for entry in data.split('\n').filter(|x| {!x.is_empty()}) {
         // Assess our position.
         current_level = get_level(entry);
 
