@@ -80,8 +80,8 @@ impl PciVendorEntry {
     }
 
     /// Gets all the devices associated with a vendor.
-    pub fn get_device(_id: u16) -> Option<PciDeviceEntry> {
-        todo!()
+    pub fn get_device(&self, _id: u16) -> Option<&PciDeviceEntry> {
+        self.devices.iter().find(|x| {x.id == _id})
     }
 }
 
@@ -97,8 +97,17 @@ impl PciDeviceEntry {
     }
 
     /// Gets all the subsystems associated with a device.
-    pub fn get_subsystems(_id: u16) -> Option<PciSubsystemEntry> {
-        todo!()
+    pub fn get_subsystems(&self) -> Option<Vec<&PciSubsystemEntry>> {
+        let ret: Vec<&PciSubsystemEntry> = self.subsystems.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
+    }
+
+    /// Gets a specific subsystem by ID
+    pub fn get_subsystem(&self, _id: u16) -> Option<&PciSubsystemEntry> {
+        self.subsystems.iter().find(|x| {x.subdevice == _id})
     }
 }
 

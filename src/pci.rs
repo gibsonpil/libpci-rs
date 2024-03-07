@@ -25,9 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#[allow(unused_imports)]
 #[cfg(feature = "pciids")]
-use crate::class::get_class;
+use crate::{ids::*, class::*};
 
 use core::fmt;
 use std::fmt::Display;
@@ -76,32 +75,29 @@ impl Display for PciDeviceHardware {
 impl PciDeviceHardware {
     /// Get the pretty name of the device.
     pub fn device_name(&self) -> Option<String> {
-        todo!()
+        Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_name().to_owned())
     }
     /// Get the pretty name of the vendor.
     pub fn vendor_name(&self) -> Option<String> {
-        todo!()
+        Some(get_vendor(self.vendor_id)?.get_name().to_owned())
     }
     /// Get the description of the device class.
     pub fn class_name(&self) -> Option<String> {
-        Some(crate::class::get_class(self.class)?.get_name().to_owned())
+        Some(get_class(self.class)?.get_name().to_owned())
     }
     /// Get the description of the device subclass.
     pub fn subclass_name(&self) -> Option<String> {
-        todo!()
+        Some(get_class(self.class)?.get_subclass(self.subclass)?.get_name().to_owned())
     }
     /// Get the description of the device programming interface.
     pub fn progint_name(&self) -> Option<String> {
-        todo!()
+        Some(get_class(self.class)?.get_subclass(self.subclass)?.get_prog(self.programming_interface)?.get_name().to_owned())
     }
     /// Get the pretty name of the subdevice.
     pub fn subdevice_name(&self) -> Option<String> {
-        todo!()
+        Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_subsystem(self.subsys_device_id)?.get_name().to_owned())
     }
-    /// Get the pretty name of the subvendor.
-    pub fn subvendor_name(&self) -> Option<String> {
-        todo!()
-    }
+
 }
 
 /// Get all the installed PCI devices in the system.

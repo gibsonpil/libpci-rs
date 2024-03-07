@@ -71,13 +71,17 @@ impl PciClassEntry {
     }
 
     /// Gets all the subclasses associated with a class.
-    pub fn get_subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
-        todo!();
+    pub fn get_subclasses(&self) -> Option<Vec<&PciSubclassEntry>> {
+        let ret: Vec<&PciSubclassEntry> = self.subclasses.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
     }
 
     /// Gets a subclass associated with a class by its ID.
-    pub fn get_subclass(&self, _id: u8) -> Option<PciSubclassEntry> {
-        todo!();
+    pub fn get_subclass(&self, _id: u8) -> Option<&PciSubclassEntry> {
+        self.subclasses.iter().find(|x| {x.id == _id})
     }
 }
 
@@ -93,13 +97,17 @@ impl PciSubclassEntry {
     }
 
     /// Gets all the progs associated with a subclass.
-    pub fn get_progs(&self) -> Option<Vec<PciProgEntry>> {
-        todo!()
+    pub fn get_progs(&self) -> Option<Vec<&PciProgEntry>> {
+        let ret: Vec<&PciProgEntry> = self.progs.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
     }
 
     /// Gets a prog associated with a subclass by its ID.
-    pub fn get_prog(&self, _id: u8) -> Option<PciProgEntry> {
-        todo!();
+    pub fn get_prog(&self, _id: u8) -> Option<&PciProgEntry> {
+        self.progs.iter().find(|x| {x.id == _id})
     }
 }
 
