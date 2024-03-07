@@ -53,7 +53,7 @@ pub struct PciProgEntry {
 }
 
 /// Parses an integer ID to a `PciClassEntry`, if one with the ID exists.
-pub fn get_class(id: u8) -> Option<PciClassEntry> {
+pub fn lookup_class(id: u8) -> Option<PciClassEntry> {
     let result = CLASSES.get(&id);
     result?;
     Some(*result.unwrap())
@@ -61,67 +61,67 @@ pub fn get_class(id: u8) -> Option<PciClassEntry> {
 
 impl PciClassEntry {
     /// Gets the ID of the class.
-    pub fn get_id(&self) -> u8 {
+    pub fn id(&self) -> u8 {
         self.id
     }
 
     /// Gets the name of the class.
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 
     /// Gets all the subclasses associated with a class.
-    pub fn get_subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
+    pub fn subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
         todo!();
     }
 
     /// Gets a subclass associated with a class by its ID.
-    pub fn get_subclass(&self, _id: u8) -> Option<PciSubclassEntry> {
+    pub fn subclass(&self, _id: u8) -> Option<PciSubclassEntry> {
         todo!();
     }
 }
 
 impl PciSubclassEntry {
     /// Gets the ID of the subclass.
-    pub fn get_id(&self) -> u8 {
+    pub fn id(&self) -> u8 {
         self.id
     }
 
     /// Gets the name of the subclass.
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 
     /// Gets all the progs associated with a subclass.
-    pub fn get_progs(&self) -> Option<Vec<PciProgEntry>> {
+    pub fn progs(&self) -> Option<Vec<PciProgEntry>> {
         todo!()
     }
 
     /// Gets a prog associated with a subclass by its ID.
-    pub fn get_prog(&self, _id: u8) -> Option<PciProgEntry> {
+    pub fn prog(&self, _id: u8) -> Option<PciProgEntry> {
         todo!();
     }
 }
 
 impl PciProgEntry {
     /// Gets the ID of a programming interface.
-    pub fn get_id(&self) -> u8 {
+    pub fn id(&self) -> u8 {
         self.id
     }
 
     /// Gets the name of a programming interface.
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::class::get_class;
+    use crate::class::lookup_class;
 
     #[test]
-    fn test_get_class() {
-        let class = get_class(9).unwrap();
-        assert_eq!(class.get_name(), "Input device controller");
+    fn test_lookup_class() {
+        let class = lookup_class(9).unwrap();
+        assert_eq!(class.name(), "Input device controller");
     }
 }

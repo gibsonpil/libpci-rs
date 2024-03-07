@@ -62,7 +62,7 @@ pub struct PciSubsystemEntry {
     name: &'static str,
 }
 
-pub fn get_vendor(id: u16) -> Option<PciVendorEntry> {
+pub fn vendor(id: u16) -> Option<PciVendorEntry> {
     let result = VENDORS.get(&id);
     result?;
     Some(*result.unwrap())
@@ -70,62 +70,62 @@ pub fn get_vendor(id: u16) -> Option<PciVendorEntry> {
 
 impl PciVendorEntry {
     /// Returns the vendor ID.
-    pub fn get_id(&self) -> u16 {
+    pub fn id(&self) -> u16 {
         self.id
     }
 
     /// Returns the vendor name.
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 
     /// Gets all the devices associated with a vendor.
-    pub fn get_device(_id: u16) -> Option<PciDeviceEntry> {
+    pub fn device(_id: u16) -> Option<PciDeviceEntry> {
         todo!()
     }
 }
 
 impl PciDeviceEntry {
     /// Returns the device ID.
-    pub fn get_id(&self) -> u16 {
+    pub fn id(&self) -> u16 {
         self.id
     }
 
     /// Returns the device name.
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 
     /// Gets all the subsystems associated with a device.
-    pub fn get_subsystems(_id: u16) -> Option<PciSubsystemEntry> {
+    pub fn subsystems(_id: u16) -> Option<PciSubsystemEntry> {
         todo!()
     }
 }
 
 impl PciSubsystemEntry {
     /// Returns the subsystem vendor.
-    pub fn get_subvendor(&self) -> u16 {
+    pub fn subvendor(&self) -> u16 {
         self.subvendor
     }
 
     /// Returns the subsystem device.
-    pub fn get_subdevice(&self) -> u16 {
+    pub fn subdevice(&self) -> u16 {
         self.subdevice
     }
 
     /// Returns the subsystem name.
-    pub fn get_name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::ids::get_vendor;
+    use crate::ids::vendor;
 
     #[test]
-    fn test_get_device() {
-        let vendor = get_vendor(20).unwrap();
-        assert_eq!(vendor.get_name(), "Loongson Technology LLC");
+    fn test_lookup_device() {
+        let vendor = vendor(20).unwrap();
+        assert_eq!(vendor.name(), "Loongson Technology LLC");
     }
 }

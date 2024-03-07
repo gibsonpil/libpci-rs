@@ -25,9 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#[allow(unused_imports)]
-#[cfg(feature = "pciids")]
-use crate::class::get_class;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "pciids")] {
+        use crate::class::{lookup_class};
+    }
+}
 
 use core::fmt;
 use std::fmt::Display;
@@ -75,31 +77,31 @@ impl Display for PciDeviceHardware {
 #[cfg(feature = "pciids")]
 impl PciDeviceHardware {
     /// Get the pretty name of the device.
-    pub fn device_name(&self) -> Option<String> {
+    pub fn device_name(&self) -> Option<&'static str> {
         todo!()
     }
     /// Get the pretty name of the vendor.
-    pub fn vendor_name(&self) -> Option<String> {
+    pub fn vendor_name(&self) -> Option<&'static str> {
         todo!()
     }
     /// Get the description of the device class.
-    pub fn class_name(&self) -> Option<String> {
-        Some(crate::class::get_class(self.class)?.get_name().to_owned())
+    pub fn class_name(&self) -> Option<&'static str> {
+        Some(lookup_class(self.class)?.name())
     }
     /// Get the description of the device subclass.
-    pub fn subclass_name(&self) -> Option<String> {
+    pub fn subclass_name(&self) -> Option<&'static str> {
         todo!()
     }
     /// Get the description of the device programming interface.
-    pub fn progint_name(&self) -> Option<String> {
+    pub fn progint_name(&self) -> Option<&'static str> {
         todo!()
     }
     /// Get the pretty name of the subdevice.
-    pub fn subdevice_name(&self) -> Option<String> {
+    pub fn subdevice_name(&self) -> Option<&'static str> {
         todo!()
     }
     /// Get the pretty name of the subvendor.
-    pub fn subvendor_name(&self) -> Option<String> {
+    pub fn subvendor_name(&self) -> Option<&'static str> {
         todo!()
     }
 }
