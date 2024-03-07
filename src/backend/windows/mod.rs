@@ -175,8 +175,3 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 
     Ok(result)
 }
-
-#[inline]
-pub fn _get_pci_by_id(_vendor: u16, _device: u16) -> Result<PciDeviceHardware, PciEnumerationError> {
-    todo!()
-}

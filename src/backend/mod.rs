@@ -25,8 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#![allow(dead_code)]
-
 pub use crate::pci::*;
 
 use cfg_if::cfg_if;
@@ -34,17 +32,13 @@ use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(target_os = "linux")] {
         mod linux;
-        use linux::{_get_pci_by_id, _get_pci_list};
+        use linux::_get_pci_list;
     } else if #[cfg(target_os = "windows")] {
         mod windows;
-        use self::windows::{_get_pci_by_id, _get_pci_list};
+        use self::windows::_get_pci_list;
     }
 }
 
 pub fn get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     _get_pci_list()
-}
-
-fn get_pci_by_id(vendor: u16, device: u16) -> Result<PciDeviceHardware, PciEnumerationError> {
-    _get_pci_by_id(vendor, device)
 }

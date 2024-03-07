@@ -25,9 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#![allow(dead_code)]
-#![allow(unused_variables)]
-
 use std::fs;
 use std::num::ParseIntError;
 use std::path::Path;
