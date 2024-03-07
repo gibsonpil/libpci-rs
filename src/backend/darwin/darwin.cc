@@ -52,7 +52,7 @@
  */
 
 CFTypeRef get_property_type_ref(io_service_t service, const CFStringRef key) {
-    return IORegistryEntrySearchCFProperty(service, kIOServicePlane, key, NULL, NULL);
+    return IORegistryEntrySearchCFProperty(service, kIOServicePlane, key, NULL, 0);
 }
 
 template <typename T>
