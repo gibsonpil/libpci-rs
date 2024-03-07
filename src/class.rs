@@ -53,7 +53,7 @@ pub struct PciProgEntry {
 }
 
 /// Parses an integer ID to a `PciClassEntry`, if one with the ID exists.
-pub fn lookup_class(id: u8) -> Option<PciClassEntry> {
+pub fn get_class(id: u8) -> Option<PciClassEntry> {
     let result = CLASSES.get(&id);
     result?;
     Some(*result.unwrap())
@@ -71,13 +71,17 @@ impl PciClassEntry {
     }
 
     /// Gets all the subclasses associated with a class.
-    pub fn subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
-        todo!();
+    pub fn subclasses(&self) -> Option<Vec<&PciSubclassEntry>> {
+        let ret: Vec<&PciSubclassEntry> = self.subclasses.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
     }
 
     /// Gets a subclass associated with a class by its ID.
-    pub fn subclass(&self, _id: u8) -> Option<PciSubclassEntry> {
-        todo!();
+    pub fn subclass(&self, _id: u8) -> Option<&PciSubclassEntry> {
+        self.subclasses.iter().find(|x| x.id == _id)
     }
 }
 
@@ -93,13 +97,17 @@ impl PciSubclassEntry {
     }
 
     /// Gets all the progs associated with a subclass.
-    pub fn progs(&self) -> Option<Vec<PciProgEntry>> {
-        todo!()
+    pub fn progs(&self) -> Option<Vec<&PciProgEntry>> {
+        let ret: Vec<&PciProgEntry> = self.progs.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
     }
 
     /// Gets a prog associated with a subclass by its ID.
-    pub fn prog(&self, _id: u8) -> Option<PciProgEntry> {
-        todo!();
+    pub fn prog(&self, _id: u8) -> Option<&PciProgEntry> {
+        self.progs.iter().find(|x| x.id == _id)
     }
 }
 
@@ -117,11 +125,11 @@ impl PciProgEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::class::lookup_class;
+    use crate::class::get_class;
 
     #[test]
     fn test_lookup_class() {
-        let class = lookup_class(9).unwrap();
+        let class = get_class(9).unwrap();
         assert_eq!(class.name(), "Input device controller");
     }
 }

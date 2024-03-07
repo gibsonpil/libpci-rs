@@ -62,8 +62,8 @@ pub struct PciSubsystemEntry {
     name: &'static str,
 }
 
-pub fn vendor(id: u16) -> Option<PciVendorEntry> {
-    let result = VENDORS.get(&id);
+pub fn get_vendor(vid: u16) -> Option<PciVendorEntry> {
+    let result = VENDORS.get(&vid);
     result?;
     Some(*result.unwrap())
 }
@@ -78,10 +78,19 @@ impl PciVendorEntry {
     pub fn name(&self) -> &'static str {
         self.name
     }
+    
+    /// Gets a specific device by ID.
+    pub fn device(&self, did: u16) -> Option<&PciDeviceEntry> {
+        self.devices.iter().find(|x| x.id == did)
+    }
 
-    /// Gets all the devices associated with a vendor.
-    pub fn device(_id: u16) -> Option<PciDeviceEntry> {
-        todo!()
+    /// Gets all devices associated with a vendor.
+    pub fn devices(&self) -> Option<Vec<&PciDeviceEntry>> {
+        let ret: Vec<&PciDeviceEntry> = self.devices.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
     }
 }
 
@@ -97,8 +106,19 @@ impl PciDeviceEntry {
     }
 
     /// Gets all the subsystems associated with a device.
-    pub fn subsystems(_id: u16) -> Option<PciSubsystemEntry> {
-        todo!()
+    pub fn subsystems(&self) -> Option<Vec<&PciSubsystemEntry>> {
+        let ret: Vec<&PciSubsystemEntry> = self.subsystems.iter().collect();
+        match ret.is_empty() {
+            true => None,
+            false => Some(ret),
+        }
+    }
+
+    /// Gets a specific subsystem by ID
+    pub fn subsystem(&self, did: u16, vid: u16) -> Option<&PciSubsystemEntry> {
+        self.subsystems
+            .iter()
+            .find(|x| x.subdevice == did && x.subvendor == vid)
     }
 }
 
@@ -121,11 +141,40 @@ impl PciSubsystemEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::ids::vendor;
+    use crate::ids::get_vendor;
+    
+    fn test_get_vendor() {
+        let vendor = get_vendor(20).unwrap();
+        assert_eq!(vendor.name(), "Loongson Technology LLC");
+    }
 
     #[test]
-    fn test_lookup_device() {
-        let vendor = vendor(20).unwrap();
-        assert_eq!(vendor.name(), "Loongson Technology LLC");
+    fn test_get_device() {
+        let vendor = get_vendor(0x10de).unwrap();
+        let device = vendor.device(0x1056).unwrap();
+        assert_eq!(device.name(), "GF119M [NVS 4200M]");
+    }
+
+    #[test]
+    fn test_pci_listing_pretty() {
+        println!("Begin test output: test_pci_listing_pretty");
+        let device_list = crate::backend::get_pci_list().unwrap();
+        for device in device_list {
+            println!(
+                "{}",
+                device.pretty_print().expect(&format!(
+                    "Could not obtain pretty-print for device ({:04x}:{:04x}).",
+                    device.vendor_id, device.device_id
+                ))
+            );
+        }
+        println!("End test output: test_pci_listing_pretty");
+    }
+
+    #[test]
+    fn what_is_your_problem() {
+        let intel = get_vendor(0x8086).unwrap();
+        let devices = intel.devices().unwrap();
+        assert!(devices.iter().find(|x| { x.id() == 0x1c3a }).is_some())
     }
 }
