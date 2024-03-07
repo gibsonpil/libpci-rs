@@ -62,7 +62,7 @@ pub struct PciSubsystemEntry {
     name: &'static str,
 }
 
-pub fn get_vendor(vid: u16) -> Option<PciVendorEntry> {
+pub fn lookup_vendor(vid: u16) -> Option<PciVendorEntry> {
     let result = VENDORS.get(&vid);
     result?;
     Some(*result.unwrap())
@@ -141,16 +141,17 @@ impl PciSubsystemEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::ids::get_vendor;
+    use crate::ids::lookup_vendor;
 
-    fn test_get_vendor() {
-        let vendor = get_vendor(20).unwrap();
+    #[test]
+    fn test_lookup_vendor() {
+        let vendor = lookup_vendor(20).unwrap();
         assert_eq!(vendor.name(), "Loongson Technology LLC");
     }
 
     #[test]
     fn test_get_device() {
-        let vendor = get_vendor(0x10de).unwrap();
+        let vendor = lookup_vendor(0x10de).unwrap();
         let device = vendor.device(0x1056).unwrap();
         assert_eq!(device.name(), "GF119M [NVS 4200M]");
     }
@@ -162,9 +163,10 @@ mod tests {
         for device in device_list {
             println!(
                 "{}",
-                device.pretty_print().unwrap_or_else(||
-                    format!("Could not obtain pretty-print for device ({:04x}:{:04x}).",
-                    device.vendor_id, device.device_id))
+                device.pretty_print().unwrap_or_else(|| format!(
+                    "Could not obtain pretty-print for device ({:04x}:{:04x}).",
+                    device.vendor_id, device.device_id
+                ))
             );
         }
         println!("End test output: test_pci_listing_pretty");

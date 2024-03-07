@@ -74,7 +74,7 @@ impl PciDeviceHardware {
     /// Get the pretty name of the device.
     pub fn device_name(&self) -> Option<String> {
         Some(
-            get_vendor(self.vendor_id)?
+            lookup_vendor(self.vendor_id)?
                 .device(self.device_id)?
                 .name()
                 .to_owned(),
@@ -82,16 +82,16 @@ impl PciDeviceHardware {
     }
     /// Get the pretty name of the vendor.
     pub fn vendor_name(&self) -> Option<String> {
-        Some(get_vendor(self.vendor_id)?.name().to_owned())
+        Some(lookup_vendor(self.vendor_id)?.name().to_owned())
     }
     /// Get the description of the device class.
     pub fn class_name(&self) -> Option<String> {
-        Some(get_class(self.class)?.name().to_owned())
+        Some(lookup_class(self.class)?.name().to_owned())
     }
     /// Get the description of the device subclass.
     pub fn subclass_name(&self) -> Option<String> {
         Some(
-            get_class(self.class)?
+            lookup_class(self.class)?
                 .subclass(self.subclass)?
                 .name()
                 .to_owned(),
@@ -100,7 +100,7 @@ impl PciDeviceHardware {
     /// Get the description of the device programming interface.
     pub fn progint_name(&self) -> Option<String> {
         Some(
-            get_class(self.class)?
+            lookup_class(self.class)?
                 .subclass(self.subclass)?
                 .prog(self.programming_interface)?
                 .name()
@@ -110,7 +110,7 @@ impl PciDeviceHardware {
     /// Get the pretty name of the subdevice.
     pub fn subdevice_name(&self) -> Option<String> {
         Some(
-            get_vendor(self.vendor_id)?
+            lookup_vendor(self.vendor_id)?
                 .device(self.device_id)?
                 .subsystem(self.subsys_device_id, self.subsys_vendor_id)?
                 .name()
@@ -120,10 +120,21 @@ impl PciDeviceHardware {
     /// Get a pretty representation of the entire device.
     pub fn pretty_print(&self) -> Option<String> {
         Some(format!(
-            "{} {} (rev {:02x})",
+            "{:04x}:{:02x}:{:02x}.{:x} {}: {} {} {}",
+            self.domain,
+            self.bus,
+            self.device,
+            self.function,
+            self.subclass_name()?,
             self.vendor_name()?,
             self.device_name()?,
-            self.revision_id
+            {
+                if self.revision_id != 0 {
+                    format!(" (rev {:02x})", self.revision_id)
+                } else {
+                    "".to_string()
+                }
+            }
         ))
     }
 }

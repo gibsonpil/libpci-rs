@@ -53,7 +53,7 @@ pub struct PciProgEntry {
 }
 
 /// Parses an integer ID to a `PciClassEntry`, if one with the ID exists.
-pub fn get_class(id: u8) -> Option<PciClassEntry> {
+pub fn lookup_class(id: u8) -> Option<PciClassEntry> {
     let result = CLASSES.get(&id);
     result?;
     Some(*result.unwrap())
@@ -125,11 +125,11 @@ impl PciProgEntry {
 
 #[cfg(test)]
 mod tests {
-    use crate::class::get_class;
+    use crate::class::lookup_class;
 
     #[test]
     fn test_lookup_class() {
-        let class = get_class(9).unwrap();
+        let class = lookup_class(9).unwrap();
         assert_eq!(class.name(), "Input device controller");
     }
 }
