@@ -37,7 +37,7 @@ pub struct PciVendorEntry {
     /// The name of the vendor.
     name: &'static str,
     /// The list of devices manufactured by the vendor.
-    devices: &'static [PciDeviceEntry]
+    devices: &'static [PciDeviceEntry],
 }
 
 /// An ID entry representing a PCI device.
@@ -48,7 +48,7 @@ pub struct PciDeviceEntry {
     /// The name of the device.
     name: &'static str,
     /// The list of possible subsystems for the device.
-    subsystems: &'static [PciSubsystemEntry]
+    subsystems: &'static [PciSubsystemEntry],
 }
 
 /// An ID entry representing a PCI device subsystem.
@@ -107,7 +107,7 @@ impl PciSubsystemEntry {
     pub fn get_subvendor(&self) -> u16 {
         self.subvendor
     }
-    
+
     /// Returns the subsystem device.
     pub fn get_subdevice(&self) -> u16 {
         self.subdevice
@@ -124,7 +124,7 @@ mod tests {
     use crate::ids::get_vendor;
 
     #[test]
-    fn test_get_device() { 
+    fn test_get_device() {
         let vendor = get_vendor(20).unwrap();
         assert_eq!(vendor.get_name(), "Loongson Technology LLC");
     }

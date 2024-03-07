@@ -34,7 +34,7 @@ include!(concat!(env!("OUT_DIR"), "/pci_classes_phf.rs"));
 pub struct PciClassEntry {
     id: u8,
     name: &'static str,
-    subclasses: &'static [PciSubclassEntry]
+    subclasses: &'static [PciSubclassEntry],
 }
 
 /// An ID entry representing a PCI device subclass.
@@ -42,7 +42,7 @@ pub struct PciClassEntry {
 pub struct PciSubclassEntry {
     id: u8,
     name: &'static str,
-    progs: &'static [PciProgEntry]
+    progs: &'static [PciProgEntry],
 }
 
 /// An ID entry representing a PCI device programming interface.
@@ -64,17 +64,17 @@ impl PciClassEntry {
     pub fn get_id(&self) -> u8 {
         self.id
     }
-    
+
     /// Gets the name of the class.
     pub fn get_name(&self) -> &'static str {
         self.name
     }
-    
+
     /// Gets all the subclasses associated with a class.
     pub fn get_subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
         todo!();
     }
-    
+
     /// Gets a subclass associated with a class by its ID.
     pub fn get_subclass(&self, _id: u8) -> Option<PciSubclassEntry> {
         todo!();
@@ -91,12 +91,12 @@ impl PciSubclassEntry {
     pub fn get_name(&self) -> &'static str {
         self.name
     }
-    
+
     /// Gets all the progs associated with a subclass.
     pub fn get_progs(&self) -> Option<Vec<PciProgEntry>> {
         todo!()
     }
-    
+
     /// Gets a prog associated with a subclass by its ID.
     pub fn get_prog(&self, _id: u8) -> Option<PciProgEntry> {
         todo!();

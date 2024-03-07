@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use crate::class::get_class;
 use core::fmt;
 use std::fmt::Display;
-use crate::class::get_class;
 use std::io::ErrorKind;
 use std::num::ParseIntError;
 
@@ -70,7 +70,7 @@ impl Display for PciDeviceHardware {
 }
 
 /// Get all the installed PCI devices in the system.
-/// 
+///
 /// Returns a `PciEnumerationError` or a `Vec<PciDeviceHardware`, containing
 /// representations of every PCI device installed in the system.
 pub use crate::backend::get_pci_list;

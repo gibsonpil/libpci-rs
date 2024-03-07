@@ -95,7 +95,14 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 
     for directory in read_dir("/sys/bus/pci/devices/")? {
         let class_code = get_pci_device_attribute!(u32, &directory, "class")?;
-        let (domain, bus, device, function) = comps_from_linux_pci_addr(&directory.as_ref().unwrap().file_name().into_string().unwrap())?;
+        let (domain, bus, device, function) = comps_from_linux_pci_addr(
+            &directory
+                .as_ref()
+                .unwrap()
+                .file_name()
+                .into_string()
+                .unwrap(),
+        )?;
 
         device_list.push(PciDeviceHardware {
             domain,

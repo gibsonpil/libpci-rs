@@ -27,8 +27,8 @@
 
 #![allow(unused_variables)]
 
-pub mod types;
 mod parser;
+pub mod types;
 
 use std::env;
 use std::fs::File;
@@ -50,14 +50,16 @@ fn generate_phf_data() {
         devices_file,
         "static VENDORS: phf::Map<u16, PciVendorEntry> = {};",
         &pci_ids_parsed.pci.build()
-    ).expect("failed to write VENDORS to registry!");
+    )
+    .expect("failed to write VENDORS to registry!");
 
     writeln!(
         classes_file,
         "static CLASSES: phf::Map<u8, PciClassEntry> = {};",
         &pci_ids_parsed.class.build()
-    ).expect("failed to write CLASSES to registry!");
-    
+    )
+    .expect("failed to write CLASSES to registry!");
+
     println!("cargo:rerun-if-changed=pciids/pci.ids");
 }
 

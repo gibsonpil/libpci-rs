@@ -32,13 +32,13 @@ use quote::quote;
 pub struct PciVendorEntry {
     pub(crate) id: u16,
     pub(crate) name: String,
-    pub(crate) devices: Vec<PciDeviceEntry>
+    pub(crate) devices: Vec<PciDeviceEntry>,
 }
 
 pub struct PciDeviceEntry {
     pub(crate) id: u16,
     pub(crate) name: String,
-    pub(crate) subsystems: Vec<PciSubsystemEntry>
+    pub(crate) subsystems: Vec<PciSubsystemEntry>,
 }
 
 pub struct PciSubsystemEntry {
@@ -50,13 +50,13 @@ pub struct PciSubsystemEntry {
 pub struct PciClassEntry {
     pub(crate) id: u8,
     pub(crate) name: String,
-    pub(crate) subclasses: Vec<PciSubclassEntry>
+    pub(crate) subclasses: Vec<PciSubclassEntry>,
 }
 
 pub struct PciSubclassEntry {
     pub(crate) id: u8,
     pub(crate) name: String,
-    pub(crate) progs: Vec<PciProgEntry>
+    pub(crate) progs: Vec<PciProgEntry>,
 }
 
 pub struct PciProgEntry {
@@ -66,22 +66,24 @@ pub struct PciProgEntry {
 
 pub struct PciIdsParsed {
     pub(crate) pci: Map<u16>,
-    pub(crate) class: Map<u8>
+    pub(crate) class: Map<u8>,
 }
 
 impl quote::ToTokens for PciVendorEntry {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let PciVendorEntry {
-            id,
-            name,
-            devices
-        } = self;
+        let PciVendorEntry { id, name, devices } = self;
 
-        let devices = devices.iter().map(|PciDeviceEntry { id, name, subsystems }| {
-            quote! {
-                PciDeviceEntry { id: #id, name: #name, subsystems: &[#(#subsystems),*] }
-            }
-        });
+        let devices = devices.iter().map(
+            |PciDeviceEntry {
+                 id,
+                 name,
+                 subsystems,
+             }| {
+                quote! {
+                    PciDeviceEntry { id: #id, name: #name, subsystems: &[#(#subsystems),*] }
+                }
+            },
+        );
 
         tokens.extend(quote! {
             PciVendorEntry { id: #id, name: #name, devices: &[#(#devices),*] }
@@ -94,7 +96,7 @@ impl quote::ToTokens for PciSubsystemEntry {
         let PciSubsystemEntry {
             subvendor,
             subdevice,
-            name
+            name,
         } = self;
 
         tokens.extend(quote! {
@@ -108,14 +110,16 @@ impl quote::ToTokens for PciClassEntry {
         let PciClassEntry {
             id,
             name,
-            subclasses
+            subclasses,
         } = self;
 
-        let subclasses = subclasses.iter().map(|PciSubclassEntry { id, name, progs }| {
-            quote! {
-                PciSubclassEntry { id: #id, name: #name, progs: &[#(#progs),*] }
-            }
-        });
+        let subclasses = subclasses
+            .iter()
+            .map(|PciSubclassEntry { id, name, progs }| {
+                quote! {
+                    PciSubclassEntry { id: #id, name: #name, progs: &[#(#progs),*] }
+                }
+            });
 
         tokens.extend(quote! {
             PciClassEntry { id: #id, name: #name, subclasses: &[#(#subclasses),*] }
@@ -125,10 +129,7 @@ impl quote::ToTokens for PciClassEntry {
 
 impl quote::ToTokens for PciProgEntry {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let PciProgEntry {
-            id,
-            name
-        } = self;
+        let PciProgEntry { id, name } = self;
 
         tokens.extend(quote! {
             PciProgEntry { id: #id, name: #name }
