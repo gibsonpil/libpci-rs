@@ -29,6 +29,7 @@
 
 include!(concat!(env!("OUT_DIR"), "/pci_classes_phf.rs"));
 
+/// An ID entry representing a PCI device class.
 #[derive(Copy, Clone)]
 pub struct PciClassEntry {
     id: u8,
@@ -36,6 +37,7 @@ pub struct PciClassEntry {
     subclasses: &'static [PciSubclassEntry]
 }
 
+/// An ID entry representing a PCI device subclass.
 #[derive(Copy, Clone)]
 pub struct PciSubclassEntry {
     id: u8,
@@ -43,12 +45,14 @@ pub struct PciSubclassEntry {
     progs: &'static [PciProgEntry]
 }
 
+/// An ID entry representing a PCI device programming interface.
 #[derive(Copy, Clone)]
 pub struct PciProgEntry {
     id: u8,
     name: &'static str,
 }
 
+/// Parses an integer ID to a `PciClassEntry`, if one with the ID exists.
 pub fn get_class(id: u8) -> Option<PciClassEntry> {
     let result = CLASSES.get(&id);
     result?;
@@ -56,17 +60,19 @@ pub fn get_class(id: u8) -> Option<PciClassEntry> {
 }
 
 impl PciClassEntry {
+    /// Gets the ID of the class.
     pub fn get_id(&self) -> u8 {
         self.id
     }
     
+    /// Gets the name of the class.
     pub fn get_name(&self) -> &'static str {
         self.name
     }
     
     /// Gets all the subclasses associated with a class.
     pub fn get_subclasses(&self) -> Option<Vec<PciSubclassEntry>> {
-        todo!()
+        todo!();
     }
     
     /// Gets a subclass associated with a class by its ID.
@@ -76,10 +82,12 @@ impl PciClassEntry {
 }
 
 impl PciSubclassEntry {
+    /// Gets the ID of the subclass.
     pub fn get_id(&self) -> u8 {
         self.id
     }
 
+    /// Gets the name of the subclass.
     pub fn get_name(&self) -> &'static str {
         self.name
     }
@@ -96,10 +104,12 @@ impl PciSubclassEntry {
 }
 
 impl PciProgEntry {
+    /// Gets the ID of a programming interface.
     pub fn get_id(&self) -> u8 {
         self.id
     }
 
+    /// Gets the name of a programming interface.
     pub fn get_name(&self) -> &'static str {
         self.name
     }

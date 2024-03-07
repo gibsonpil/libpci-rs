@@ -27,12 +27,16 @@
 
 use cfg_if::cfg_if;
 
+/// Structures and functions related to enumerating PCI devices.
 pub mod pci;
+
 mod backend;
 
 cfg_if! {
     if #[cfg(feature = "pciids")] {
+        /// Structures and functions related to the PCI IDs database.
         pub mod ids;
+        /// Structures and functions related to PCI device class classifications.
         pub mod class;
     }
 }

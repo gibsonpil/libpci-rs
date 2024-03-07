@@ -116,7 +116,7 @@ pub fn subsystem(input: &str) -> PciSubsystemEntry {
 pub fn class(input: &str) -> PciClassEntry {
     let cleaned = clean(input);
     // ID is at position 1 due to "C" token
-    let id: u8 = id(cleaned.as_str(), 1, u8::from_str_radix).into(); 
+    let id: u8 = id(cleaned.as_str(), 1, u8::from_str_radix); 
     let name = name(cleaned.as_str());
     
     PciClassEntry {

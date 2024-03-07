@@ -29,24 +29,36 @@
 
 include!(concat!(env!("OUT_DIR"), "/pci_devices_phf.rs"));
 
+/// An ID entry representing a PCI device vendor.
 #[derive(Copy, Clone)]
 pub struct PciVendorEntry {
+    /// The integer vendor ID.
     id: u16,
+    /// The name of the vendor.
     name: &'static str,
+    /// The list of devices manufactured by the vendor.
     devices: &'static [PciDeviceEntry]
 }
 
+/// An ID entry representing a PCI device.
 #[derive(Copy, Clone)]
 pub struct PciDeviceEntry {
+    /// The integer device ID.
     id: u16,
+    /// The name of the device.
     name: &'static str,
+    /// The list of possible subsystems for the device.
     subsystems: &'static [PciSubsystemEntry]
 }
 
+/// An ID entry representing a PCI device subsystem.
 #[derive(Copy, Clone)]
 pub struct PciSubsystemEntry {
+    /// The integer subvendor ID.
     subvendor: u16,
+    /// The integer subdevice ID.
     subdevice: u16,
+    /// The subsystem name.
     name: &'static str,
 }
 
@@ -57,10 +69,12 @@ pub fn get_vendor(id: u16) -> Option<PciVendorEntry> {
 }
 
 impl PciVendorEntry {
+    /// Returns the vendor ID.
     pub fn get_id(&self) -> u16 {
         self.id
     }
 
+    /// Returns the vendor name.
     pub fn get_name(&self) -> &'static str {
         self.name
     }
@@ -72,10 +86,12 @@ impl PciVendorEntry {
 }
 
 impl PciDeviceEntry {
+    /// Returns the device ID.
     pub fn get_id(&self) -> u16 {
         self.id
     }
 
+    /// Returns the device name.
     pub fn get_name(&self) -> &'static str {
         self.name
     }
@@ -87,14 +103,17 @@ impl PciDeviceEntry {
 }
 
 impl PciSubsystemEntry {
+    /// Returns the subsystem vendor.
     pub fn get_subvendor(&self) -> u16 {
         self.subvendor
     }
     
+    /// Returns the subsystem device.
     pub fn get_subdevice(&self) -> u16 {
         self.subdevice
     }
 
+    /// Returns the subsystem name.
     pub fn get_name(&self) -> &'static str {
         self.name
     }

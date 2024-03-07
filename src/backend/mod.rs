@@ -25,13 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//! libpci-rs's backend module is the programmatic layer that handles making syscalls to the underlying operating system.
-
 #![allow(dead_code)]
 
-mod common;
-
-pub use crate::pci::PciDeviceHardware;
+pub use crate::pci::*;
 
 use cfg_if::cfg_if;
 
@@ -44,8 +40,6 @@ cfg_if! {
         use self::windows::{_get_pci_by_id, _get_pci_list};
     }
 }
-
-use crate::backend::common::PciEnumerationError;
 
 pub fn get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     _get_pci_list()
