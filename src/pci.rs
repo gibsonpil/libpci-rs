@@ -25,7 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#[allow(unused_imports)]
+#[cfg(feature = "pciids")]
 use crate::class::get_class;
+
 use core::fmt;
 use std::fmt::Display;
 use std::io::ErrorKind;
@@ -65,7 +68,39 @@ pub struct PciDeviceHardware {
 
 impl Display for PciDeviceHardware {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x} {}: \n\tVID={:04x} DID={:04x} SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, get_class(self.class).unwrap().get_name(), self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, self.class, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
+    }
+}
+
+#[cfg(feature = "pciids")]
+impl PciDeviceHardware {
+    /// Get the pretty name of the device.
+    pub fn device_name(&self) -> Option<String> {
+        todo!()
+    }
+    /// Get the pretty name of the vendor.
+    pub fn vendor_name(&self) -> Option<String> {
+        todo!()
+    }
+    /// Get the description of the device class.
+    pub fn class_name(&self) -> Option<String> {
+        Some(crate::class::get_class(self.class)?.get_name().to_owned())
+    }
+    /// Get the description of the device subclass.
+    pub fn subclass_name(&self) -> Option<String> {
+        todo!()
+    }
+    /// Get the description of the device programming interface.
+    pub fn progint_name(&self) -> Option<String> {
+        todo!()
+    }
+    /// Get the pretty name of the subdevice.
+    pub fn subdevice_name(&self) -> Option<String> {
+        todo!()
+    }
+    /// Get the pretty name of the subvendor.
+    pub fn subvendor_name(&self) -> Option<String> {
+        todo!()
     }
 }
 
