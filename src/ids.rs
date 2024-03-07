@@ -133,8 +133,15 @@ mod tests {
     use crate::ids::get_vendor;
 
     #[test]
-    fn test_get_device() {
+    fn test_get_vendor() {
         let vendor = get_vendor(20).unwrap();
         assert_eq!(vendor.get_name(), "Loongson Technology LLC");
+    }
+
+    #[test]
+    fn test_get_device() {
+        let vendor = get_vendor(0x10de).unwrap();
+        let device = vendor.get_device(0x1056).unwrap();
+        assert_eq!(device.get_name(), "GF119M [NVS 4200M]");
     }
 }
