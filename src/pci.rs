@@ -26,7 +26,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #[cfg(feature = "pciids")]
-use crate::{ids::*, class::*};
+use crate::{class::*, ids::*};
 
 use core::fmt;
 use std::fmt::Display;
@@ -75,7 +75,12 @@ impl Display for PciDeviceHardware {
 impl PciDeviceHardware {
     /// Get the pretty name of the device.
     pub fn device_name(&self) -> Option<String> {
-        Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_name().to_owned())
+        Some(
+            get_vendor(self.vendor_id)?
+                .get_device(self.device_id)?
+                .get_name()
+                .to_owned(),
+        )
     }
     /// Get the pretty name of the vendor.
     pub fn vendor_name(&self) -> Option<String> {
@@ -87,21 +92,42 @@ impl PciDeviceHardware {
     }
     /// Get the description of the device subclass.
     pub fn subclass_name(&self) -> Option<String> {
-        Some(get_class(self.class)?.get_subclass(self.subclass)?.get_name().to_owned())
+        Some(
+            get_class(self.class)?
+                .get_subclass(self.subclass)?
+                .get_name()
+                .to_owned(),
+        )
     }
     /// Get the description of the device programming interface.
     pub fn progint_name(&self) -> Option<String> {
-        Some(get_class(self.class)?.get_subclass(self.subclass)?.get_prog(self.programming_interface)?.get_name().to_owned())
+        Some(
+            get_class(self.class)?
+                .get_subclass(self.subclass)?
+                .get_prog(self.programming_interface)?
+                .get_name()
+                .to_owned(),
+        )
     }
     /// Get the pretty name of the subdevice.
     pub fn subdevice_name(&self) -> Option<String> {
-        Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_subsystem(self.subsys_device_id, self.subsys_vendor_id)?.get_name().to_owned())
+        Some(
+            get_vendor(self.vendor_id)?
+                .get_device(self.device_id)?
+                .get_subsystem(self.subsys_device_id, self.subsys_vendor_id)?
+                .get_name()
+                .to_owned(),
+        )
     }
     /// Get a pretty representation of the entire device.
     pub fn pretty_print(&self) -> Option<String> {
-        Some(format!("{} {} (rev {:02x})", self.vendor_name()?, self.device_name()?, self.revision_id))
+        Some(format!(
+            "{} {} (rev {:02x})",
+            self.vendor_name()?,
+            self.device_name()?,
+            self.revision_id
+        ))
     }
-
 }
 
 /// Get all the installed PCI devices in the system.
@@ -147,6 +173,7 @@ impl From<ParseIntError> for PciEnumerationError {
 
 #[cfg(test)]
 mod tests {
+    use super::get_vendor;
 
     #[test]
     fn test_pci_listing() {
@@ -163,8 +190,21 @@ mod tests {
         println!("Begin test output: test_pci_listing_pretty");
         let device_list = crate::backend::get_pci_list().unwrap();
         for device in device_list {
-            println!("{}", device.pretty_print().expect(&format!("Could not obtain pretty-print for device ({:04x}:{:04x}).", device.vendor_id, device.device_id)));
+            println!(
+                "{}",
+                device.pretty_print().expect(&format!(
+                    "Could not obtain pretty-print for device ({:04x}:{:04x}).",
+                    device.vendor_id, device.device_id
+                ))
+            );
         }
         println!("End test output: test_pci_listing_pretty");
+    }
+
+    #[test]
+    fn what_is_your_problem() {
+        let intel = get_vendor(0x8086).unwrap();
+        let devices = intel.get_devices().unwrap();
+        assert!(devices.iter().find(|x| { x.get_id() == 0x1c3a }).is_some())
     }
 }

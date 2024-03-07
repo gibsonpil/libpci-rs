@@ -81,7 +81,7 @@ impl PciClassEntry {
 
     /// Gets a subclass associated with a class by its ID.
     pub fn get_subclass(&self, _id: u8) -> Option<&PciSubclassEntry> {
-        self.subclasses.iter().find(|x| {x.id == _id})
+        self.subclasses.iter().find(|x| x.id == _id)
     }
 }
 
@@ -107,7 +107,7 @@ impl PciSubclassEntry {
 
     /// Gets a prog associated with a subclass by its ID.
     pub fn get_prog(&self, _id: u8) -> Option<&PciProgEntry> {
-        self.progs.iter().find(|x| {x.id == _id})
+        self.progs.iter().find(|x| x.id == _id)
     }
 }
 
