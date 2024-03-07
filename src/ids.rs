@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn test_pci_listing_pretty() {
         println!("Begin test output: test_pci_listing_pretty");
-        let device_list = crate::backend::get_pci_list().unwrap();
+        let device_list = crate::pci::get_pci_list().unwrap();
         for device in device_list {
             println!(
                 "{}",
@@ -170,5 +170,15 @@ mod tests {
             );
         }
         println!("End test output: test_pci_listing_pretty");
+    }
+
+    #[test]
+    fn test_lookup_subdevice() {
+        println!("Begin test output: test_lookup_subdevice");
+        let device_list = crate::pci::get_pci_list().unwrap();
+        for device in device_list {
+            println!("{} {} {}", device.vendor_name().unwrap(), device.subclass_name().unwrap(), device.subdevice_name().unwrap_or("(no subdevice name)".to_string()));
+        }
+        println!("End test output: test_lookup_subdevice");
     }
 }
