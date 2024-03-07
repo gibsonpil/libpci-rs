@@ -152,10 +152,7 @@ pub fn ingest_pci_database(data: Vec<&str>) -> Map<u16> {
 
     let mut current_vendor: Option<PciVendorEntry> = None;
     let mut current_device: Option<PciDeviceEntry> = None;
-    let mut current_level: usize; // 0 - vendor, 1 - device, 2 - subdevice
-
-    let i = 0;
-
+    
     for entry in data {
         if let Some(value) = try_level(entry, 0, vendor) {
             if let Some(vendor) = current_vendor.take() {
@@ -184,10 +181,7 @@ pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
 
     let mut current_class: Option<PciClassEntry> = None;
     let mut current_subclass: Option<PciSubclassEntry> = None;
-    let mut current_level: usize; // 0 - class, 1 - subclass, 2 - prof
-
-    let i = 0;
-
+    
     for entry in data {
         if let Some(value) = try_level(entry, 0, class) {
             if let Some(class) = current_class.take() {

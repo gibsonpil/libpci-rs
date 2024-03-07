@@ -26,7 +26,6 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 pub use crate::pci::*;
-
 use cfg_if::cfg_if;
 
 cfg_if! {
@@ -35,7 +34,11 @@ cfg_if! {
         use linux::_get_pci_list;
     } else if #[cfg(target_os = "windows")] {
         mod windows;
-        use self::windows::_get_pci_list;
+        use windows::_get_pci_list;
+    } else {
+        // It is safe to assume we are probably running under a C++ backend.
+        mod bridge;
+        use bridge::_get_pci_list;
     }
 }
 
