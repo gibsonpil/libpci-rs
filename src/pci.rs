@@ -95,7 +95,7 @@ impl PciDeviceHardware {
     }
     /// Get the pretty name of the subdevice.
     pub fn subdevice_name(&self) -> Option<String> {
-        Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_subsystem(self.subsys_device_id)?.get_name().to_owned())
+        Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_subsystem(self.subsys_device_id, self.subsys_vendor_id)?.get_name().to_owned())
     }
 
 }

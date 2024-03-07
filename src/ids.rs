@@ -62,8 +62,8 @@ pub struct PciSubsystemEntry {
     name: &'static str,
 }
 
-pub fn get_vendor(id: u16) -> Option<PciVendorEntry> {
-    let result = VENDORS.get(&id);
+pub fn get_vendor(vid: u16) -> Option<PciVendorEntry> {
+    let result = VENDORS.get(&vid);
     result?;
     Some(*result.unwrap())
 }
@@ -80,8 +80,8 @@ impl PciVendorEntry {
     }
 
     /// Gets all the devices associated with a vendor.
-    pub fn get_device(&self, _id: u16) -> Option<&PciDeviceEntry> {
-        self.devices.iter().find(|x| {x.id == _id})
+    pub fn get_device(&self, did: u16) -> Option<&PciDeviceEntry> {
+        self.devices.iter().find(|x| {x.id == did})
     }
 }
 
@@ -106,8 +106,8 @@ impl PciDeviceEntry {
     }
 
     /// Gets a specific subsystem by ID
-    pub fn get_subsystem(&self, _id: u16) -> Option<&PciSubsystemEntry> {
-        self.subsystems.iter().find(|x| {x.subdevice == _id})
+    pub fn get_subsystem(&self, did: u16, vid: u16) -> Option<&PciSubsystemEntry> {
+        self.subsystems.iter().find(|x| {x.subdevice == did && x.subvendor == vid})
     }
 }
 
