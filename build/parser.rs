@@ -215,7 +215,7 @@ pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
     let pciids_raw = fs::read_to_string(path).unwrap();
     let pciids_filtered: Vec<&str> = pciids_raw
         .split(LINE_BREAK)
-        .filter(|str| !str.contains('#')) // Filter comments.
+        .filter(|str| !clean(str).starts_with('#')) // Filter comments.
         .filter(|str| !str.is_empty())
         .collect();
 

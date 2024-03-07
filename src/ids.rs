@@ -78,7 +78,7 @@ impl PciVendorEntry {
     pub fn name(&self) -> &'static str {
         self.name
     }
-    
+
     /// Gets a specific device by ID.
     pub fn device(&self, did: u16) -> Option<&PciDeviceEntry> {
         self.devices.iter().find(|x| x.id == did)
@@ -142,7 +142,7 @@ impl PciSubsystemEntry {
 #[cfg(test)]
 mod tests {
     use crate::ids::get_vendor;
-    
+
     fn test_get_vendor() {
         let vendor = get_vendor(20).unwrap();
         assert_eq!(vendor.name(), "Loongson Technology LLC");
@@ -173,8 +173,8 @@ mod tests {
 
     #[test]
     fn what_is_your_problem() {
-        let intel = get_vendor(0x8086).unwrap();
-        let devices = intel.devices().unwrap();
-        assert!(devices.iter().find(|x| { x.id() == 0x1c3a }).is_some())
+        let intel = get_vendor(0x8086u16).unwrap();
+        let device = intel.device(0x1c3au16);
+        assert_eq!(device.unwrap().name, "6 Series/C200 Series Chipset Family MEI Controller #1")
     }
 }
