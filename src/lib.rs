@@ -25,6 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! A library to enumerate, identify, and retrieve info about PCI devices.
+//! 
+//! # About
+//! `libpci-rs` is a cross-platform Rust rewrite of `libpci`, which is written 
+//! in C. It contains functionality to list the devices installed in a system, 
+//! and to obtain information about a device, its functionality, or its 
+//! manufacturer. Currently, it supports Linux and Windows. macOS, BSD, and
+//! other flavors of Unix are planned to be supported soon.
+//! 
+//! # Enumeration
+//! By default, it includes the functions and structures needed to list the
+//! PCI devices installed on the host system.
+//! # `pciids`
+//! The `pciids` feature includes functions and structures useful for 
+//! obtaining more detailed, catalogued information about a PCI device, 
+//! whether it's installed or not. Because this feature requires compiling in 
+//! the PCIIDs database, it will increase the size of the library. It is 
+//! enabled by default.
+
 use cfg_if::cfg_if;
 
 /// Structures and functions related to enumerating PCI devices.
@@ -34,9 +53,9 @@ mod backend;
 
 cfg_if! {
     if #[cfg(feature = "pciids")] {
-        /// Structures and functions related to the PCI IDs database.
+        /// Structures and functions related to the PCI IDs database. Depends on the `pciids` feature.
         pub mod ids;
-        /// Structures and functions related to PCI device class classifications.
+        /// Structures and functions related to PCI device class classifications. Depends on the `pciids` feature.
         pub mod class;
     }
 }
