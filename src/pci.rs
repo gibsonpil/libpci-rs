@@ -97,6 +97,10 @@ impl PciDeviceHardware {
     pub fn subdevice_name(&self) -> Option<String> {
         Some(get_vendor(self.vendor_id)?.get_device(self.device_id)?.get_subsystem(self.subsys_device_id, self.subsys_vendor_id)?.get_name().to_owned())
     }
+    /// Get a pretty representation of the entire device.
+    pub fn pretty_print(&self) -> Option<String> {
+        Some(format!("{} {} (rev {:02x})", self.vendor_name()?, self.device_name()?, self.revision_id))
+    }
 
 }
 
@@ -143,6 +147,7 @@ impl From<ParseIntError> for PciEnumerationError {
 
 #[cfg(test)]
 mod tests {
+
     #[test]
     fn test_pci_listing() {
         println!("Begin test output: test_pci_listing");
@@ -151,5 +156,15 @@ mod tests {
             println!("{}", device);
         }
         println!("End test output: test_pci_listing");
+    }
+
+    #[test]
+    fn test_pci_listing_pretty() {
+        println!("Begin test output: test_pci_listing_pretty");
+        let device_list = crate::backend::get_pci_list().unwrap();
+        for device in device_list {
+            println!("{}", device.pretty_print().expect(&format!("Could not obtain pretty-print for device ({:04x}:{:04x}).", device.vendor_id, device.device_id)));
+        }
+        println!("End test output: test_pci_listing_pretty");
     }
 }
