@@ -177,7 +177,7 @@ mod tests {
         println!("Begin test output: test_lookup_subdevice");
         let device_list = crate::pci::get_pci_list().unwrap();
         for device in device_list {
-            println!("{} {} {}", device.vendor_name().unwrap(), device.subclass_name().unwrap(), device.subdevice_name().unwrap_or("(no subdevice name)".to_string()));
+            println!("{} {} {}", device.vendor_name().unwrap_or("(no vendor name)".to_string()), device.subclass_name().unwrap_or("(no subclass name)".to_string()), device.subdevice_name().unwrap_or("(no subdevice name)".to_string()));
         }
         println!("End test output: test_lookup_subdevice");
     }
