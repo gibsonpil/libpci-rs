@@ -35,8 +35,7 @@ use windows::Win32::Devices::DeviceAndDriverInstallation::{
     SP_DEVINFO_DATA, SetupDiGetDeviceRegistryPropertyA
 };
 
-use crate::backend::common::PciEnumerationError;
-use crate::pci::PciDeviceHardware;
+use crate::pci::*;
 
 impl From<windows::core::Error> for PciEnumerationError {
     fn from(_err: windows::core::Error) -> Self {
