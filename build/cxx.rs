@@ -35,6 +35,7 @@ pub fn build_cxx_module() {
             panic!("No suitable CXX modules found. Cannot build.");
         }
     }
+    println!("cargo:rerun-if-changed=src/backend/include/common.h");
 }
 
 pub fn build_cxx_darwin() {
@@ -43,6 +44,7 @@ pub fn build_cxx_darwin() {
         .std("c++17")
         .compile("libpci-rs-darwin");
 
+    println!("cargo:rerun-if-changed=src/backend/darwin/darwin.cc");
     println!("cargo:rustc-flags=-l framework=CoreFoundation");
     println!("cargo:rustc-flags=-l framework=IOKit");
 }
