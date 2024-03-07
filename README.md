@@ -16,8 +16,8 @@ This project uses [Semantic Versioning](https://semver.org/).
 ### Platform Support
 - Windows
 - Linux
+- macOS/Darwin
 
 ### Planned Platform Support
-- macOS
 - FreeBSD
 - OpenBSD

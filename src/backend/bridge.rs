@@ -25,54 +25,54 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-mod parser;
-pub mod types;
-mod cxx;
+use crate::backend::PciEnumerationError;
+use crate::pci::PciDeviceHardware;
 
-use std::env;
-use std::fs::File;
-use std::io::{BufWriter, Write};
-use std::path::Path;
-
-use crate::parser::ingest_pciids;
-
-#[allow(unused_imports)]
-use crate::cxx::build_cxx_module;
-
-fn generate_phf_data() {
-    let devices_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_devices_phf.rs");
-    let classes_path = Path::new(&env::var("OUT_DIR").unwrap()).join("pci_classes_phf.rs");
-
-    let mut devices_file = BufWriter::new(File::create(devices_path).unwrap());
-    let mut classes_file = BufWriter::new(File::create(classes_path).unwrap());
-
-    let pci_ids_parsed = ingest_pciids(Path::new("pciids/pci.ids"));
-
-    writeln!(
-        devices_file,
-        "static VENDORS: phf::Map<u16, PciVendorEntry> = {};",
-        &pci_ids_parsed.pci.build()
-    )
-    .expect("failed to write VENDORS to registry!");
-
-    writeln!(
-        classes_file,
-        "static CLASSES: phf::Map<u8, PciClassEntry> = {};",
-        &pci_ids_parsed.class.build()
-    )
-    .expect("failed to write CLASSES to registry!");
-
-    println!("cargo:rerun-if-changed=pciids/pci.ids");
-}
-
-fn main() {
-    cfg_if::cfg_if! {
-        // Add targets with backends written entirely in Rust to this list.
-        if #[cfg(not(any(target_os = "windows", target_os = "linux")))] {
-            build_cxx_module();
-        }
+#[cxx::bridge]
+mod ffi {
+    struct CXXPciDeviceHardware {
+        domain: u32,
+        bus: u8,
+        device: u8,
+        function: u8,
+        vendor_id: u16,
+        device_id: u16,
+        subsys_device_id: u16,
+        subsys_vendor_id: u16,
+        class_id: u8,
+        subclass: u8,
+        programming_interface: u8,
+        revision_id: u8,
     }
 
-    #[cfg(feature = "pciids")]
-    generate_phf_data();
+    unsafe extern "C++" {
+        include!("libpci-rs/src/backend/include/common.h");
+
+        fn _get_pci_list() -> Vec<CXXPciDeviceHardware>;
+    }
 }
+
+pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
+    let mut result: Vec<PciDeviceHardware> = vec![];
+    let list = ffi::_get_pci_list();
+
+    for device in list {
+        result.push(PciDeviceHardware {
+            domain: device.domain,
+            bus: device.bus,
+            device: device.device,
+            function: device.function,
+            vendor_id: device.vendor_id,
+            device_id: device.device_id,
+            subsys_device_id: device.subsys_device_id,
+            subsys_vendor_id: device.subsys_vendor_id,
+            class: device.class_id,
+            subclass: device.subclass,
+            programming_interface: device.programming_interface,
+            revision_id: device.revision_id,
+        });
+    }
+
+    Ok(result)
+}
+
