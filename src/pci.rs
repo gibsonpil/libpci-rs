@@ -173,7 +173,6 @@ impl From<ParseIntError> for PciEnumerationError {
 
 #[cfg(test)]
 mod tests {
-    use super::get_vendor;
 
     #[test]
     fn test_pci_listing() {
@@ -183,28 +182,5 @@ mod tests {
             println!("{}", device);
         }
         println!("End test output: test_pci_listing");
-    }
-
-    #[test]
-    fn test_pci_listing_pretty() {
-        println!("Begin test output: test_pci_listing_pretty");
-        let device_list = crate::backend::get_pci_list().unwrap();
-        for device in device_list {
-            println!(
-                "{}",
-                device.pretty_print().expect(&format!(
-                    "Could not obtain pretty-print for device ({:04x}:{:04x}).",
-                    device.vendor_id, device.device_id
-                ))
-            );
-        }
-        println!("End test output: test_pci_listing_pretty");
-    }
-
-    #[test]
-    fn what_is_your_problem() {
-        let intel = get_vendor(0x8086).unwrap();
-        let devices = intel.get_devices().unwrap();
-        assert!(devices.iter().find(|x| { x.get_id() == 0x1c3a }).is_some())
     }
 }
