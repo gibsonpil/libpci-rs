@@ -109,7 +109,6 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
             bus,
             device,
             function,
-            label: String::from(""), // TODO: Figure out what the FUCK a label is supposed to be/do, and how to obtain it.
             vendor_id: get_pci_device_attribute!(u16, &directory, "vendor")?, // Vendor ID
             device_id: get_pci_device_attribute!(u16, &directory, "device")?, // Device ID
             subsys_device_id: get_pci_device_attribute!(u16, &directory, "subsystem_device")?, // Subsystem Device ID

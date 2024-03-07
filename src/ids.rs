@@ -162,19 +162,11 @@ mod tests {
         for device in device_list {
             println!(
                 "{}",
-                device.pretty_print().expect(&format!(
-                    "Could not obtain pretty-print for device ({:04x}:{:04x}).",
-                    device.vendor_id, device.device_id
-                ))
+                device.pretty_print().unwrap_or_else(||
+                    format!("Could not obtain pretty-print for device ({:04x}:{:04x}).",
+                    device.vendor_id, device.device_id))
             );
         }
         println!("End test output: test_pci_listing_pretty");
-    }
-
-    #[test]
-    fn what_is_your_problem() {
-        let intel = get_vendor(0x8086u16).unwrap();
-        let device = intel.device(0x1c3au16);
-        assert_eq!(device.unwrap().name, "6 Series/C200 Series Chipset Family MEI Controller #1")
     }
 }

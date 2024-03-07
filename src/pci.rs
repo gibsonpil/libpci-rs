@@ -45,8 +45,6 @@ pub struct PciDeviceHardware {
     pub device: u8,
     /// An even more specific sub-function of a PCI device. Graphics cards often have 2, for graphics and sound.
     pub function: u8,
-    /// I'm not even sure what this is.
-    pub label: String,
     /// The ID of the device manufacturer.
     pub vendor_id: u16,
     /// The ID of the device.
