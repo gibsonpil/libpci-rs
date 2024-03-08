@@ -27,7 +27,7 @@
 
 use crate::backend;
 use crate::backend::PciEnumerationError;
-use crate::pci::PciDeviceHardware;
+use crate::pci::{PciDeviceHardware};
 
 #[cxx::bridge]
 mod ffi {

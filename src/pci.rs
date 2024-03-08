@@ -63,6 +63,25 @@ pub struct PciDeviceHardware {
     pub revision_id: u8,
 }
 
+impl Default for PciDeviceHardware {
+    fn default() -> Self {
+        PciDeviceHardware {
+            domain: 0,
+            bus: 0,
+            device: 0,
+            function: 0,
+            vendor_id: 0,
+            device_id: 0,
+            subsys_device_id: 0,
+            subsys_vendor_id: 0,
+            class: 0,
+            subclass: 0,
+            programming_interface: 0,
+            revision_id: 0
+        }
+    }
+}
+
 impl Display for PciDeviceHardware {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:04x}:{:02x}:{:02x}.{:x}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, self.class, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
@@ -144,6 +163,7 @@ impl PciDeviceHardware {
 /// Returns a `PciEnumerationError` or a `Vec<PciDeviceHardware`, containing
 /// representations of every PCI device installed in the system.
 pub use crate::backend::get_pci_list;
+use crate::pci::PciInformationError::{PermissionDenied, Unavailable, Unknown};
 
 /// A list of errors that can occur while enumerating PCI devices.
 #[derive(Debug)]
@@ -180,9 +200,31 @@ impl From<ParseIntError> for PciEnumerationError {
     }
 }
 
+// A list of errors that can occur when getting information from a PCI device.
+#[derive(Debug)]
+#[repr(u8)]
+pub enum PciInformationError {
+    /// libpci-rs was unable to fetch the information requested as the target OS doesn't make it available.
+    Unavailable = 1,
+    /// libpci-rs was unable to fetch the information requested due to a permission issue.
+    PermissionDenied = 2,
+    /// An unknown error occured.
+    Unknown = 3,
+}
+
+// Convert raw u8 values to PciInformationError.
+impl From<u8> for PciInformationError {
+    fn from(value: u8) -> Self {
+        match value {
+            1 => Unavailable,
+            2 => PermissionDenied,
+            _ => Unknown
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-
     #[test]
     fn test_pci_listing() {
         println!("Begin test output: test_pci_listing");

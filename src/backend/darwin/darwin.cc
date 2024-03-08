@@ -119,14 +119,10 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 CXXPciDeviceHardware _get_field_availability() {
     CXXPciDeviceHardware hardware = {};
 
-    hardware.vendor_id = 1;
-    hardware.device_id = 1;
-    hardware.subsys_device_id = 1;
-    hardware.subsys_vendor_id = 1;
-    hardware.revision_id = 1;
-    hardware.class_id = 1;
-    hardware.subclass = 1;
-    hardware.programming_interface = 1;
+    hardware.domain = PIE(PciInformationError::Unavailable);
+    hardware.bus = PIE(PciInformationError::Unavailable);
+    hardware.device = PIE(PciInformationError::Unavailable);
+    hardware.function = PIE(PciInformationError::Unavailable);
 
     return hardware;
 }

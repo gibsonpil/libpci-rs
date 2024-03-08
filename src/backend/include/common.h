@@ -26,7 +26,17 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
+#include <stdint.h>
 #include "libpci-rs/src/backend/bridge.rs.h"
+
+// Handy PCI information error macro.
+#define PIE(x) static_cast<int>(x)
+
+enum class PciInformationError {
+    Unavailable = 1,
+    PermissionDenied = 2,
+    Unknown = 3,
+};
 
 rust::Vec<CXXPciDeviceHardware> _get_pci_list();
 CXXPciDeviceHardware _get_field_availability();

@@ -47,26 +47,14 @@ pub fn get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 }
 
 /// Returns a PciDeviceHardware object in which available fields are set to
-/// one and unavailable field are set to zero.
+/// zero and unavailable field are set to a value in the PciInformationError enum.
 pub fn get_field_availability() -> PciDeviceHardware {
     _get_field_availability()
 }
 
 /// Code for use within backend modules. Simply sets returns a
-/// PciDeviceHardware object with all fields set to one.
+/// PciDeviceHardware object with all fields set to zero.
 pub(crate) fn all_fields_available() -> PciDeviceHardware {
-    PciDeviceHardware {
-        domain: 1,
-        bus: 1,
-        device: 1,
-        function: 1,
-        vendor_id: 1,
-        device_id: 1,
-        subsys_device_id: 1,
-        subsys_vendor_id: 1,
-        class: 1,
-        subclass: 1,
-        programming_interface: 1,
-        revision_id: 1
-    }
+    // Fields are zero-initialized by default.
+    PciDeviceHardware::default()
 }
