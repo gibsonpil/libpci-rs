@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use crate::backend::all_fields_available;
 use crate::pci::*;
 use std::fs::*;
 
@@ -122,4 +123,8 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 
     // return the list at the end once all the devices are in it.
     Ok(device_list)
+}
+
+pub fn _get_field_availability() -> PciDeviceHardware {
+    all_fields_available()
 }

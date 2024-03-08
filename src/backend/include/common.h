@@ -29,3 +29,4 @@
 #include "libpci-rs/src/backend/bridge.rs.h"
 
 rust::Vec<CXXPciDeviceHardware> _get_pci_list();
+CXXPciDeviceHardware _get_field_availability();

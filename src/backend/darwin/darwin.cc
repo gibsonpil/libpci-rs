@@ -115,3 +115,19 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
     IOObjectRelease(iter);
     return pci_devices;
 }
+
+CXXPciDeviceHardware _get_field_availability() {
+    CXXPciDeviceHardware hardware = {};
+
+    hardware.vendor_id = 1;
+    hardware.device_id = 1;
+    hardware.subsys_device_id = 1;
+    hardware.subsys_vendor_id = 1;
+    hardware.revision_id = 1;
+    hardware.class_id = 1;
+    hardware.subclass = 1;
+    hardware.programming_interface = 1;
+
+    return hardware;
+}
+

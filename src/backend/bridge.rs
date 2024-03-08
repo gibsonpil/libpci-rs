@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+use crate::backend;
 use crate::backend::PciEnumerationError;
 use crate::pci::PciDeviceHardware;
 
@@ -45,19 +46,20 @@ mod ffi {
         revision_id: u8,
     }
 
+    extern "Rust" {
+        fn all_fields_available() -> CXXPciDeviceHardware;
+    }
+
     unsafe extern "C++" {
         include!("libpci-rs/src/backend/include/common.h");
-
         fn _get_pci_list() -> Vec<CXXPciDeviceHardware>;
+        fn _get_field_availability() -> CXXPciDeviceHardware;
     }
 }
 
-pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
-    let mut result: Vec<PciDeviceHardware> = vec![];
-    let list = ffi::_get_pci_list();
-
-    for device in list {
-        result.push(PciDeviceHardware {
+impl From<ffi::CXXPciDeviceHardware> for PciDeviceHardware {
+    fn from(device: ffi::CXXPciDeviceHardware) -> Self {
+        PciDeviceHardware {
             domain: device.domain,
             bus: device.bus,
             device: device.device,
@@ -70,9 +72,45 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
             subclass: device.subclass,
             programming_interface: device.programming_interface,
             revision_id: device.revision_id,
-        });
+        }
+    }
+}
+
+impl From<PciDeviceHardware> for ffi::CXXPciDeviceHardware {
+    fn from(device: PciDeviceHardware) -> Self {
+        ffi::CXXPciDeviceHardware {
+            domain: device.domain,
+            bus: device.bus,
+            device: device.device,
+            function: device.function,
+            vendor_id: device.vendor_id,
+            device_id: device.device_id,
+            subsys_device_id: device.subsys_device_id,
+            subsys_vendor_id: device.subsys_vendor_id,
+            class_id: device.class,
+            subclass: device.subclass,
+            programming_interface: device.programming_interface,
+            revision_id: device.revision_id,
+        }
+    }
+}
+
+pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
+    let mut result: Vec<PciDeviceHardware> = vec![];
+    let list = ffi::_get_pci_list();
+
+    for device in list {
+        result.push(PciDeviceHardware::from(device));
     }
 
     Ok(result)
 }
 
+pub fn _get_field_availability() -> PciDeviceHardware {
+    let availability = ffi::_get_field_availability();
+    PciDeviceHardware::from(availability)
+}
+
+fn all_fields_available() -> ffi::CXXPciDeviceHardware {
+    backend::all_fields_available().into()
+}

@@ -35,6 +35,7 @@ use windows::Win32::Devices::DeviceAndDriverInstallation::{
     SPDRP_BUSNUMBER, SPDRP_HARDWAREID, SP_DEVINFO_DATA,
 };
 
+use crate::backend::all_fields_available;
 use crate::pci::*;
 
 impl From<windows::core::Error> for PciEnumerationError {
@@ -179,3 +180,8 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 
     Ok(result)
 }
+
+pub fn _get_field_availability() -> PciDeviceHardware {
+    all_fields_available()
+}
+
