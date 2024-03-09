@@ -51,8 +51,65 @@
  * some kernel-level wizardry, but the situation may be different under amd64.
  */
 
+union IOPCIAddressSpace {
+    UInt32              bits;
+    struct {
+#if __BIG_ENDIAN__
+        unsigned int    reloc:1;
+        unsigned int    prefetch:1;
+        unsigned int    t:1;
+        unsigned int    resv:3;
+        unsigned int    space:2;
+        unsigned int    busNum:8;
+        unsigned int    deviceNum:5;
+        unsigned int    functionNum:3;
+        unsigned int    registerNum:8;
+#elif __LITTLE_ENDIAN__
+        unsigned int    registerNum:8;
+        unsigned int    functionNum:3;
+        unsigned int    deviceNum:5;
+        unsigned int    busNum:8;
+        unsigned int    space:2;
+        unsigned int    resv:3;
+        unsigned int    t:1;
+        unsigned int    prefetch:1;
+        unsigned int    reloc:1;
+#endif
+    } s;
+    struct {
+#if __BIG_ENDIAN__
+        unsigned int    resv:4;
+        unsigned int    registerNumExtended:4;
+        unsigned int    busNum:8;
+        unsigned int    deviceNum:5;
+        unsigned int    functionNum:3;
+        unsigned int    registerNum:8;
+#elif __LITTLE_ENDIAN__
+        unsigned int    registerNum:8;
+        unsigned int    functionNum:3;
+        unsigned int    deviceNum:5;
+        unsigned int    busNum:8;
+        unsigned int    registerNumExtended:4;
+        unsigned int    resv:4;
+#endif
+    } es;
+};
+
 CFTypeRef get_property_type_ref(io_service_t service, const CFStringRef key) {
     return IORegistryEntrySearchCFProperty(service, kIOServicePlane, key, NULL, 0);
+}
+
+template <typename T>
+const T* get_property_ptr(io_service_t service, const CFStringRef key) {
+    CFTypeRef type_ref = get_property_type_ref(service, key);
+
+    // type_ref == NULL evaluates first, making this statement safe.
+    if(type_ref == NULL || CFGetTypeID(type_ref) != CFDataGetTypeID())
+        return NULL; // None of these properties are normally 0, so returning 0 is fine.
+    
+    const T* data = reinterpret_cast<const T*>((CFDataGetBytePtr(ToCFDataRef(type_ref))));
+    CFRelease(type_ref);
+    return data;
 }
 
 template <typename T>
@@ -109,6 +166,11 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
         device.subclass = (darwin_class_code >> 8) & 0xFF;
         device.programming_interface = darwin_class_code & 0xFF;
         
+	const IOPCIAddressSpace* address = get_property_ptr<IOPCIAddressSpace>(service, CFSTR("reg"));
+	device.bus = address->s.busNum;
+	device.device = address->s.deviceNum;
+	device.function = address->s.functionNum;
+
         pci_devices.push_back(device);
     }
     
@@ -119,10 +181,10 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 CXXPciDeviceHardware _get_field_availability() {
     CXXPciDeviceHardware hardware = {};
 
-    hardware.domain = PIE(PciInformationError::Unavailable);
-    hardware.bus = PIE(PciInformationError::Unavailable);
-    hardware.device = PIE(PciInformationError::Unavailable);
-    hardware.function = PIE(PciInformationError::Unavailable);
+    // hardware.domain = PIE(PciInformationError::Unavailable);
+    // hardware.bus = PIE(PciInformationError::Unavailable);
+    // hardware.device = PIE(PciInformationError::Unavailable);
+    // hardware.function = PIE(PciInformationError::Unavailable);
 
     return hardware;
 }
