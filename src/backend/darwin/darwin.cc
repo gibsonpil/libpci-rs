@@ -46,11 +46,6 @@
   #define kIOMainPortDefault kIOMasterPortDefault
 #endif
 
-/*
- * TODO: Test out on amd64 macOS. Fetching BDF values seems to be impossible on M1 Macs without
- * some kernel-level wizardry, but the situation may be different under amd64.
- */
-
 union IOPCIAddressSpace {
     UInt32              bits;
     struct {
