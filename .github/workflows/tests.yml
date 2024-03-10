@@ -49,7 +49,7 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
            prepare : |
-             pkg install -y cargo llvm
+             pkg install -y rust llvm
            run : |
              cargo build --verbose
              cargo test -- --color always --nocapture
