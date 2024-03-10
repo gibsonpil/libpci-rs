@@ -38,3 +38,18 @@ jobs:
         run: cargo build --verbose
       - name: Run tests
         run: cargo test -- --color always --nocapture
+  freebsd:
+    runs-on: ubuntu-latest # Ubuntu w/ FreeBSD-vm from vmactions 
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+       - name: Build and run tests
+         id: freebsd
+         uses: vmactions/freebsd-vm@v1
+         with:
+           prepare : |
+             pkg install -y cargo llvm
+           run : |
+             cargo build --verbose
+             cargo test -- --color always --nocapture

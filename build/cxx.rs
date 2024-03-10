@@ -31,6 +31,8 @@ pub fn build_cxx_module() {
     cfg_if::cfg_if! {
         if #[cfg(any(target_os = "macos", target_os = "ios"))] { // Darwin targets.
             build_cxx_darwin();
+        } else if #[cfg(target_os = "freebsd")] {
+            build_cxx_freebsd();
         } else {
             panic!("No suitable CXX modules found. Cannot build.");
         }
@@ -48,3 +50,13 @@ pub fn build_cxx_darwin() {
     println!("cargo:rustc-flags=-l framework=CoreFoundation");
     println!("cargo:rustc-flags=-l framework=IOKit");
 }
+
+pub fn build_cxx_freebsd() {
+    cxx_build::bridge("src/backend/bridge.rs")
+        .file("src/backend/freebsd/freebsd.cc")
+        .std("c++17")
+        .compile("libpci-rs-freebsd");
+
+    println!("cargo:rerun-if-changed=src/backend/freebsd/freebsd.cc");
+}
+
