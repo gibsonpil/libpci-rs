@@ -25,6 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! # About this module
+//! The functions, structures, and methods here can be used to look up info
+//! about a PCI device that might be physically installed in a system, or
+//! might not be (and you just have its ID numbers). Let's say you want info
+//! on a device you don't have installed, with VID `0x8086` and DID `0xA0F0`, 
+//! you can chain these calls to get a device or vendor entry like so:
+//! ```rust
+//! # use libpci_rs::ids::{PciDeviceEntry, PciVendorEntry, lookup_vendor};
+//! let ven_entry: PciVendorEntry = lookup_vendor(0x8086).unwrap();
+//! let dev_entry: &PciDeviceEntry = ven_entry.device(0xA0F0).unwrap();
+//! assert_eq!("Wi-Fi 6 AX201", dev_entry.name());
+//! ```
+//! Similarly, you can get an ID entry regarding a vendor, and get its name:
+//! ```rust
+//! # use libpci_rs::ids::{PciVendorEntry, lookup_vendor};
+//! let ven_entry: PciVendorEntry = lookup_vendor(0x8086).unwrap();
+//! assert_eq!("Intel Corporation", ven_entry.name());
+//! ```
+//! This code is also used behind-the-scenes in the methods of 
+//! `PciDeviceHardware`, so you can easily obtain info about a device that is
+//! physically present. You don't even need to know its IDs to get the info.
+//! ```rust
+//! # use libpci_rs::pci::{PciDeviceHardware, get_pci_list};
+//! let pci_list: Vec<PciDeviceHardware> = get_pci_list().unwrap();
+//! let pci_device: &PciDeviceHardware = pci_list.get(0).unwrap();
+//! println!("{}", pci_device.device_name().unwrap_or("Unknown device name".to_string()));
+//! ```
+
 #![allow(dead_code)]
 
 include!(concat!(env!("OUT_DIR"), "/pci_devices_phf.rs"));

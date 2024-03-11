@@ -25,6 +25,24 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! # About this module
+//! This module contains useful code for obtaining info about a PCI device's
+//! class, subclass, and programming interface. You can call this code either
+//! directly, passing in a class code & subclass code as integers, like so:
+//! ```rust
+//! # use libpci_rs::class::{PciClassEntry, PciSubclassEntry, lookup_class};
+//! let class_entry: PciClassEntry = lookup_class(0x03).unwrap();
+//! let subclass_entry: &PciSubclassEntry = class_entry.subclass(0x00).unwrap();
+//! assert_eq!("VGA compatible controller", subclass_entry.name().to_owned());
+//! ```
+//! Or by calling the gated methods of `PciDeviceHardware`:
+//! ```rust
+//! # use libpci_rs::pci::{PciDeviceHardware, get_pci_list};
+//! let pci_list: Vec<PciDeviceHardware> = get_pci_list().unwrap();
+//! let pci_device: &PciDeviceHardware = pci_list.get(0).unwrap();
+//! println!("{}", pci_device.class_name().unwrap_or("Unknown class name".to_string()));
+//! ```
+
 #![allow(dead_code)]
 
 include!(concat!(env!("OUT_DIR"), "/pci_classes_phf.rs"));

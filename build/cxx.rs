@@ -27,6 +27,7 @@
 
 #![allow(dead_code)]
 
+#[allow(unreachable_code)]
 pub fn build_cxx_module() {
     cfg_if::cfg_if! {
         if #[cfg(any(target_os = "macos", target_os = "ios"))] { // Darwin targets.

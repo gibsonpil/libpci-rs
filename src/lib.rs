@@ -31,13 +31,13 @@
 //! `libpci-rs` is a cross-platform Rust rewrite of `libpci`, which is written
 //! in C. It contains functionality to list the devices installed in a system,
 //! and to obtain information about a device, its functionality, or its
-//! manufacturer. Currently, it supports Linux and Windows. macOS, BSD, and
-//! other flavors of Unix are planned to be supported soon.
+//! manufacturer. Currently, it supports Linux, Windows, and macOS. FreeBSD, 
+//! OpenBSD, and other flavors of Unix are planned to be supported soon.
 //!
 //! # Enumeration
 //! By default, it includes the functions and structures needed to list the
 //! PCI devices installed on the host system.
-//! # `pciids`
+//! # The `pciids` feature
 //! The `pciids` feature includes functions and structures useful for
 //! obtaining more detailed, catalogued information about a PCI device,
 //! whether it's installed or not. Because this feature requires compiling in
@@ -48,7 +48,8 @@ use cfg_if::cfg_if;
 
 /// Structures and functions related to enumerating PCI devices.
 pub mod pci;
-
+/// The platform-dependent backend modules responsible for handling platform
+/// specific syscalls, parsing, and error handling.
 mod backend;
 
 cfg_if! {

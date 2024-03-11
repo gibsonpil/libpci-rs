@@ -25,6 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! # About this module
+//! This module is the core of `libpci-rs`. It contains the most important
+//! structs, methods, and functions that you might need to enumerate the PCI
+//! devices on a system, or programmatically represent a PCI device in an
+//! efficient data structure.
+
 #[cfg(feature = "pciids")]
 use crate::{class::*, ids::*};
 
@@ -34,8 +40,9 @@ use std::io::ErrorKind;
 use std::num::ParseIntError;
 
 /// A struct representing a PCI device, all its hardcoded information, and its
-/// location on the system's PCI device bus.
-#[derive(Debug, Clone)]
+/// location on the system's PCI device bus. It implements several methods to
+/// get ID related information, gated behind the `pciids` feature.
+#[derive(Debug, Clone, Default)]
 pub struct PciDeviceHardware {
     /// One of a set of "segments" containing multiple PCI buses.
     pub domain: u32,
@@ -63,31 +70,27 @@ pub struct PciDeviceHardware {
     pub revision_id: u8,
 }
 
-impl Default for PciDeviceHardware {
-    fn default() -> Self {
-        PciDeviceHardware {
-            domain: 0,
-            bus: 0,
-            device: 0,
-            function: 0,
-            vendor_id: 0,
-            device_id: 0,
-            subsys_device_id: 0,
-            subsys_vendor_id: 0,
-            class: 0,
-            subclass: 0,
-            programming_interface: 0,
-            revision_id: 0
-        }
-    }
-}
-
 impl Display for PciDeviceHardware {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  self.domain, self.bus, self.device, self.function, self.class, self.vendor_id, self.device_id, self.subsys_vendor_id, self.subsys_device_id, self.class as u32, self.subclass, self.programming_interface, self.revision_id)
+        write!(f, "{:04x}:{:02x}:{:02x}.{:x}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  
+            self.domain, 
+            self.bus, 
+            self.device, 
+            self.function, 
+            self.class, 
+            self.vendor_id, 
+            self.device_id, 
+            self.subsys_vendor_id, 
+            self.subsys_device_id, 
+            self.class as u32, 
+            self.subclass, 
+            self.programming_interface, 
+            self.revision_id
+        )
     }
 }
 
+/// All of the following methods in this block require `pciids`.
 #[cfg(feature = "pciids")]
 impl PciDeviceHardware {
     /// Get the pretty name of the device.
