@@ -56,22 +56,6 @@ macro_rules! get_pci_device_attribute {
 }
 
 #[inline]
-fn comps_from_linux_pci_addr(address: &str) -> Result<(u32, u8, u8, u8), PciEnumerationError> {
-    let comps_vec: Vec<&str> = address
-        .split(|char| (char == ':') | (char == '.'))
-        .collect();
-    if comps_vec.len() != 4 {
-        return Err(PciEnumerationError::NotFound);
-    }
-    Ok((
-        u32::from_str_radix(comps_vec[0], 16)?,
-        u8::from_str_radix(comps_vec[1], 16)?,
-        u8::from_str_radix(comps_vec[2], 16)?,
-        u8::from_str_radix(comps_vec[3], 16)?,
-    ))
-}
-
-#[inline]
 pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     let mut device_list: Vec<PciDeviceHardware> = Vec::new();
 
@@ -96,20 +80,18 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 
     for directory in read_dir("/sys/bus/pci/devices/")? {
         let class_code = get_pci_device_attribute!(u32, &directory, "class")?;
-        let (domain, bus, device, function) = comps_from_linux_pci_addr(
-            &directory
+        let address = PciDeviceAddress::try_from(
+            directory
                 .as_ref()
                 .unwrap()
                 .file_name()
                 .into_string()
                 .unwrap(),
-        )?;
+        )
+        .ok();
 
         device_list.push(PciDeviceHardware {
-            domain,
-            bus,
-            device,
-            function,
+            address,
             vendor_id: get_pci_device_attribute!(u16, &directory, "vendor")?, // Vendor ID
             device_id: get_pci_device_attribute!(u16, &directory, "device")?, // Device ID
             subsys_device_id: get_pci_device_attribute!(u16, &directory, "subsystem_device")?, // Subsystem Device ID

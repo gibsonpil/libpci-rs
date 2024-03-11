@@ -34,16 +34,13 @@
 #[cfg(feature = "pciids")]
 use crate::{class::*, ids::*};
 
-use core::fmt;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter, Result};
 use std::io::ErrorKind;
 use std::num::ParseIntError;
 
-/// A struct representing a PCI device, all its hardcoded information, and its
-/// location on the system's PCI device bus. It implements several methods to
-/// get ID related information, gated behind the `pciids` feature.
-#[derive(Debug, Clone, Default)]
-pub struct PciDeviceHardware {
+#[derive(Debug, Copy, Clone)]
+/// A structure representing the physical address of a PCI device.
+pub struct PciDeviceAddress {
     /// One of a set of "segments" containing multiple PCI buses.
     pub domain: u32,
     /// A specific bus to handle PCI device connections.
@@ -52,39 +49,82 @@ pub struct PciDeviceHardware {
     pub device: u8,
     /// An even more specific sub-function of a PCI device. Graphics cards often have 2, for graphics and sound.
     pub function: u8,
+}
+
+impl Display for PciDeviceAddress {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(
+            f,
+            "{}:{}:{}.{}",
+            self.domain, self.bus, self.device, self.function,
+        )
+    }
+}
+
+impl TryFrom<String> for PciDeviceAddress {
+    type Error = crate::pci::PciEnumerationError;
+    fn try_from(
+        address_string: String,
+    ) -> std::result::Result<crate::pci::PciDeviceAddress, crate::pci::PciEnumerationError> {
+        let parts: Vec<&str> = address_string.split(|c| c == ':' || c == '.').collect();
+
+        if parts.len() != 4 {
+            return Err(PciEnumerationError::NotFound);
+        }
+
+        Ok(PciDeviceAddress {
+            domain: u32::from_str_radix(parts[0], 16)?,
+            bus: u8::from_str_radix(parts[1], 16)?,
+            device: u8::from_str_radix(parts[2], 16)?,
+            function: u8::from_str_radix(parts[3], 16)?,
+        })
+    }
+}
+
+/// A struct representing a PCI device, all its hardcoded information, and its
+/// location on the system's PCI device bus. It implements several methods to
+/// get ID related information, gated behind the `pciids` feature.
+#[derive(Debug, Clone, Default)]
+pub struct PciDeviceHardware {
+    /// The address of a PCI device. May or may not be accessible, depending
+    /// on the platform.
+    pub address: Option<PciDeviceAddress>,
     /// The ID of the device manufacturer.
     pub vendor_id: u16,
     /// The ID of the device.
     pub device_id: u16,
     /// The ID of the sub-device.
     pub subsys_device_id: u16,
-    /// The ID of the sub-device vendor (normally the same as the device vendor).
+    /// The ID of the sub-device vendor (normally the same as the device
+    /// vendor).
     pub subsys_vendor_id: u16,
     /// A category of functionality that the device provides.
     pub class: u8,
     /// A more specific category of functionality, organized by class.
     pub subclass: u8,
-    /// An even more specific subcategory of functionality, defining how the device is programmed.
+    /// An even more specific subcategory of functionality, defining how the
+    /// device is programmed.
     pub programming_interface: u8,
     /// The device's hardware revision.
     pub revision_id: u8,
 }
 
 impl Display for PciDeviceHardware {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:04x}:{:02x}:{:02x}.{:x}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  
-            self.domain, 
-            self.bus, 
-            self.device, 
-            self.function, 
-            self.class, 
-            self.vendor_id, 
-            self.device_id, 
-            self.subsys_vendor_id, 
-            self.subsys_device_id, 
-            self.class as u32, 
-            self.subclass, 
-            self.programming_interface, 
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "{}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  
+            if let Some(addr) = self.address {
+                format!("{}", addr)
+            } else {
+                "[address inaccessible]".to_owned()
+            },
+            self.class,
+            self.vendor_id,
+            self.device_id,
+            self.subsys_vendor_id,
+            self.subsys_device_id,
+            self.class as u32,
+            self.subclass,
+            self.programming_interface,
             self.revision_id
         )
     }
@@ -142,11 +182,12 @@ impl PciDeviceHardware {
     /// Get a pretty representation of the entire device.
     pub fn pretty_print(&self) -> Option<String> {
         Some(format!(
-            "{:04x}:{:02x}:{:02x}.{:x} {}: {} {} {}",
-            self.domain,
-            self.bus,
-            self.device,
-            self.function,
+            "{} {}: {} {} {}",
+            if let Some(address) = self.address {
+                format!("{}", address)
+            } else {
+                "[address inaccessible]".to_owned()
+            },
             self.subclass_name()?,
             self.vendor_name()?,
             self.device_name()?,
@@ -185,6 +226,25 @@ pub enum PciEnumerationError {
     ParseInt(ParseIntError),
 }
 
+impl Display for PciEnumerationError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::OsError => "OsError",
+                Self::GenericIoError(_ioerr) => "GenericIoError",
+                Self::ReadDirectory => "ReadDirectory",
+                Self::NotFound => "NotFound",
+                Self::PermissionDenied => "PermissionDenied",
+                Self::ParseInt(_parserr) => "ParseIntError",
+            }
+        )
+    }
+}
+
+impl std::error::Error for PciEnumerationError {}
+
 // Convert IO errors to PCI enumeration errors.
 impl From<std::io::Error> for PciEnumerationError {
     fn from(err: std::io::Error) -> Self {
@@ -221,7 +281,7 @@ impl From<u8> for PciInformationError {
         match value {
             1 => Unavailable,
             2 => PermissionDenied,
-            _ => Unknown
+            _ => Unknown,
         }
     }
 }

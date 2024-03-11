@@ -29,7 +29,7 @@
 //! The functions, structures, and methods here can be used to look up info
 //! about a PCI device that might be physically installed in a system, or
 //! might not be (and you just have its ID numbers). Let's say you want info
-//! on a device you don't have installed, with VID `0x8086` and DID `0xA0F0`, 
+//! on a device you don't have installed, with VID `0x8086` and DID `0xA0F0`,
 //! you can chain these calls to get a device or vendor entry like so:
 //! ```rust
 //! # use libpci_rs::ids::{PciDeviceEntry, PciVendorEntry, lookup_vendor};
@@ -43,7 +43,7 @@
 //! let ven_entry: PciVendorEntry = lookup_vendor(0x8086).unwrap();
 //! assert_eq!("Intel Corporation", ven_entry.name());
 //! ```
-//! This code is also used behind-the-scenes in the methods of 
+//! This code is also used behind-the-scenes in the methods of
 //! `PciDeviceHardware`, so you can easily obtain info about a device that is
 //! physically present. You don't even need to know its IDs to get the info.
 //! ```rust
@@ -205,7 +205,18 @@ mod tests {
         println!("Begin test output: test_lookup_subdevice");
         let device_list = crate::pci::get_pci_list().unwrap();
         for device in device_list {
-            println!("{} {} {}", device.vendor_name().unwrap_or("(no vendor name)".to_string()), device.subclass_name().unwrap_or("(no subclass name)".to_string()), device.subdevice_name().unwrap_or("(no subdevice name)".to_string()));
+            println!(
+                "{} {} {}",
+                device
+                    .vendor_name()
+                    .unwrap_or("(no vendor name)".to_string()),
+                device
+                    .subclass_name()
+                    .unwrap_or("(no subclass name)".to_string()),
+                device
+                    .subdevice_name()
+                    .unwrap_or("(no subdevice name)".to_string())
+            );
         }
         println!("End test output: test_lookup_subdevice");
     }

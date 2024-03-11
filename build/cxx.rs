@@ -71,4 +71,3 @@ pub fn build_cxx_netbsd() {
 
     println!("cargo:rerun-if-changed=src/backend/netbsd/netbsd.cc");
 }
-

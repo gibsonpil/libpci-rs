@@ -152,10 +152,12 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
             let cc = values_mapping.get("CC").unwrap();
 
             result.push(PciDeviceHardware {
-                domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
-                bus: (win_bus & 0xFF) as u8,       // Bus is in low 8 bits of SPDRP_BUSNUMBER.
-                device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.
-                function: (win_addr & 0xFF) as u8, // Function (u8) is in low 16 bits of SDRP_ADDRESS.
+                address: PciDeviceAddress {
+                    domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
+                    bus: (win_bus & 0xFF) as u8,       // Bus is in low 8 bits of SPDRP_BUSNUMBER.
+                    device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.
+                    function: (win_addr & 0xFF) as u8, // Function (u8) is in low 16 bits of SDRP_ADDRESS.
+                },
                 vendor_id: *values_mapping
                     .get("VEN")
                     .ok_or(PciEnumerationError::NotFound)? as u16,
@@ -184,4 +186,3 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
 pub fn _get_field_availability() -> PciDeviceHardware {
     all_fields_available()
 }
-
