@@ -32,10 +32,16 @@
 // the functions within libpci would use, and since OpenBSD doesn't have
 // libpci, it makes more sense to not use it and keep this all in one module.
 
+#include <iostream>
 #include <vector>
 #include <optional>
 
+#ifdef __OpenBSD__
 #include <sys/pciio.h>
+#else
+#include <dev/pci/pciio.h>
+#endif
+
 #include <sys/ioctl.h>
 #include <sys/types.h>
 
@@ -49,28 +55,41 @@
 
 #include "libpci-rs/src/backend/include/common.h"
 
-#ifndef __NetBSD__
+#ifdef __OpenBSD__
 #define PCI_SUBSYS_VENDOR(x) PCI_VENDOR(x)
 #define PCI_SUBSYS_ID(x) PCI_PRODUCT(x)
+#define PCI_IOC_BDF_CFGREAD PCIOCREAD
+#define PCI_DEV "/dev/pci"
+#else
+#define PCI_DEV "/dev/pci0"
 #endif
 
 int pci_fd;
 
 int pci_read(int bus, int dev, int func, uint32_t reg, uint32_t *out) {
 	int status;
-	struct pci_io io = {};
-
+#ifdef __OpenBSD__
+	struct pci_io io = {};	
 	io.pi_sel.pc_bus = bus;
 	io.pi_sel.pc_dev = dev;
 	io.pi_sel.pc_func = func;
 	io.pi_reg = reg;
 	io.pi_width = 4;
-
-	status = ioctl(pci_fd, PCIOCREAD, &io);
+#else
+	struct pciio_bdf_cfgreg io = {};
+	io.bus = bus;
+	io.device = dev;
+	io.function = func;
+	io.cfgreg.reg = reg;
+#endif
+	status = ioctl(pci_fd, PCI_IOC_BDF_CFGREAD, &io);
 	if(status != 0)
 		return status;
-
+#ifdef __OpenBSD__
 	*out = io.pi_data;
+#else
+	*out = io.cfgreg.val;
+#endif
 
 	return 0;
 }
@@ -110,7 +129,7 @@ std::optional<CXXPciDeviceHardware> pci_read_info(int bus, int dev, int func) {
 rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 	rust::Vec<CXXPciDeviceHardware> devices;
 
-	pci_fd = open("/dev/pci", O_RDONLY);
+	pci_fd = open(PCI_DEV, O_RDONLY);
 		
 	if(pci_fd == -1) {
 		if(errno == EACCES) {
@@ -121,7 +140,7 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 	}
 
 	// Though this method of discovering PCI devices may seem kind of dumb,
-	// it is what the NetBSD developers used in libpci, so it is kosher.
+	// it is what the NetBSD developers used in pcictl, so it is kosher.
 	for(int bus = 0; bus < 256; bus++) {
 		for(int dev = 0; dev < 32; dev++) {
 			int nfuncs;
