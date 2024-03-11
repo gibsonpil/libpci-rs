@@ -48,7 +48,6 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 
 	fd = open("/dev/pci", O_RDONLY, 0);
 	if(fd < 0) { // Catch errors.
-		std::cout << "failed to open /dev/pci" << std::endl;
 		return {};
 	}
 
@@ -57,7 +56,6 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 
 	do {
 		if(ioctl(fd, PCIOCGETCONF, &pc) == -1) {
-			std::cout << "ioctl failed" << std::endl;
 			return {};
 		}
 
@@ -66,7 +64,6 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 			close(fd);
 			return _get_pci_list(); 
 		} else if(pc.status == PCI_GETCONF_ERROR) {
-			std::cout << "pci getconf error occured" << std::endl;
 			return {};
 		}
 		
@@ -99,3 +96,4 @@ CXXPciDeviceHardware _get_field_availability() {
 	CXXPciDeviceHardware hardware = {};
 	return hardware;
 }
+

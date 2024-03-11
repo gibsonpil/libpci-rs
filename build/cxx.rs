@@ -31,8 +31,10 @@ pub fn build_cxx_module() {
     cfg_if::cfg_if! {
         if #[cfg(any(target_os = "macos", target_os = "ios"))] { // Darwin targets.
             build_cxx_darwin();
-        } else if #[cfg(target_os = "freebsd")] {
+        } else if #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))] {
             build_cxx_freebsd();
+        } else if #[cfg(any(traget_os = "netbsd", target_os = "openbsd"))] {
+            build_cxx_netbsd();
         } else {
             panic!("No suitable CXX modules found. Cannot build.");
         }
@@ -58,5 +60,14 @@ pub fn build_cxx_freebsd() {
         .compile("libpci-rs-freebsd");
 
     println!("cargo:rerun-if-changed=src/backend/freebsd/freebsd.cc");
+}
+
+pub fn build_cxx_netbsd() {
+    cxx_build::bridge("src/backend/bridge.rs")
+        .file("src/backend/netbsd/netbsd.cc")
+        .std("c++17")
+        .compile("libpci-rs-netbsd");
+
+    println!("cargo:rerun-if-changed=src/backend/netbsd/netbsd.cc");
 }
 

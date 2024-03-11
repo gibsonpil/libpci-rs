@@ -53,3 +53,48 @@ jobs:
            run : |
              cargo build --verbose
              cargo test -- --color always --nocapture
+  dragonflybsd:
+    runs-on: ubuntu-latest # Ubuntu w/ DragonFlyBSD-vm from vmactions 
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build and run tests
+        id: dragonflybsd
+        uses: vmactions/dragonflybsd-vm@v1
+        with:
+           prepare : |
+             pkg install -y rust llvm
+           run : |
+             cargo build --verbose
+             cargo test -- --color always --nocapture
+  netbsd:
+    runs-on: ubuntu-latest # Ubuntu w/ NetBSD-vm from vmactions 
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build and run tests
+        id: netbsd
+        uses: vmactions/netbsd-vm@v1
+        with:
+           prepare : |
+             /usr/sbin/pkg_add -I rust llvm
+           run : |
+             cargo build --verbose
+             cargo test -- --color always --nocapture
+  openbsd:
+    runs-on: ubuntu-latest # Ubuntu w/ OpenBSD-vm from vmactions 
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build and run tests
+        id: openbsd
+        uses: vmactions/openbsd-vm@v1
+        with:
+           prepare : 
+             pkg_add -I rust llvm
+           run : |
+             cargo build --verbose
+             cargo test -- --color always --nocapture
