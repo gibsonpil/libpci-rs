@@ -31,9 +31,11 @@
 //! `libpci-rs` is a cross-platform Rust rewrite of `libpci`, which is written
 //! in C. It contains functionality to list the devices installed in a system,
 //! and to obtain information about a device, its functionality, or its
-//! manufacturer. Currently, it supports Linux, Windows, and macOS. FreeBSD, 
-//! OpenBSD, and other flavors of Unix are planned to be supported soon.
-//!
+//! manufacturer. Currently, it supports Linux, Windows, macOS/Darwin kernels, 
+//! FreeBSD, OpenBSD, NetBSD, and DragonflyBSD. It is also not dependent on
+//! processor architecture, and should support any architecture that the Rust
+//! compiler supports.
+//! 
 //! # Enumeration
 //! By default, it includes the functions and structures needed to list the
 //! PCI devices installed on the host system.
