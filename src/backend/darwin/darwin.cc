@@ -46,6 +46,13 @@
   #define kIOMainPortDefault kIOMasterPortDefault
 #endif
 
+// __arm__ should be fairly standard on ARM, but
+// it wasn't defined on my Macbook Air while __arm64__
+// was, so I'm adding in this code just to be safe.
+#ifdef __arm64__
+#define __arm__
+#endif
+
 union IOPCIAddressSpace {
     UInt32              bits;
     struct {
@@ -160,11 +167,14 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
         device.class_id = (darwin_class_code >> 16) & 0xFF;
         device.subclass = (darwin_class_code >> 8) & 0xFF;
         device.programming_interface = darwin_class_code & 0xFF;
-        
+
+	// Fetching BDF values only works on x86_64.
+#ifndef __arm__	
 	const IOPCIAddressSpace* address = get_property_ptr<IOPCIAddressSpace>(service, CFSTR("reg"));
 	device.bus = address->s.busNum;
 	device.device = address->s.deviceNum;
 	device.function = address->s.functionNum;
+#endif
 
         pci_devices.push_back(device);
     }
@@ -175,12 +185,12 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 
 CXXPciDeviceHardware _get_field_availability() {
     CXXPciDeviceHardware hardware = {};
-
-    // hardware.domain = PIE(PciInformationError::Unavailable);
-    // hardware.bus = PIE(PciInformationError::Unavailable);
-    // hardware.device = PIE(PciInformationError::Unavailable);
-    // hardware.function = PIE(PciInformationError::Unavailable);
-
+#ifdef __arm__
+    hardware.domain = PIE(PciInformationError::Unavailable);
+    hardware.bus = PIE(PciInformationError::Unavailable);
+    hardware.device = PIE(PciInformationError::Unavailable);
+    hardware.function = PIE(PciInformationError::Unavailable);
+#endif
     return hardware;
 }
 
