@@ -65,6 +65,7 @@ jobs:
         with:
            prepare : |
              pkg install -y rust llvm
+             pkg upgrade -y # DragonFlyBSD is sensitive to out of date packages for some reaosn.
            run : |
              cargo build --verbose
              cargo test -- --color always --nocapture

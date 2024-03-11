@@ -33,7 +33,7 @@ pub fn build_cxx_module() {
             build_cxx_darwin();
         } else if #[cfg(any(target_os = "freebsd", target_os = "dragonfly"))] {
             build_cxx_freebsd();
-        } else if #[cfg(any(traget_os = "netbsd", target_os = "openbsd"))] {
+        } else if #[cfg(any(target_os = "netbsd", target_os = "openbsd"))] {
             build_cxx_netbsd();
         } else {
             panic!("No suitable CXX modules found. Cannot build.");

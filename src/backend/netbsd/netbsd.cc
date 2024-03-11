@@ -93,8 +93,8 @@ std::optional<CXXPciDeviceHardware> pci_read_info(int bus, int dev, int func) {
 	
 	device.vendor_id = PCI_VENDOR(id_reg);
 	device.device_id = PCI_PRODUCT(id_reg);
-	device.subsys_vendor_id = PCI_VENDOR(subsys_reg);
-	device.subsys_device_id = PCI_PRODUCT(subsys_reg);
+	device.subsys_vendor_id = PCI_SUBSYS_VENDOR(subsys_reg);
+	device.subsys_device_id = PCI_SUBSYS_ID(subsys_reg);
 	device.class_id = PCI_CLASS(class_reg);
 	device.subclass = PCI_SUBCLASS(class_reg);
 	device.programming_interface = PCI_INTERFACE(class_reg);
