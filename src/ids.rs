@@ -90,10 +90,10 @@ pub struct PciSubsystemEntry {
     name: &'static str,
 }
 
+/// Gets a vendor with a given ID, if there is one.
 pub fn lookup_vendor(vid: u16) -> Option<PciVendorEntry> {
     let result = VENDORS.get(&vid);
-    result?;
-    Some(*result.unwrap())
+    Some(*result?)
 }
 
 impl PciVendorEntry {
@@ -133,7 +133,8 @@ impl PciDeviceEntry {
         self.name
     }
 
-    /// Gets all the subsystems associated with a device.
+    /// Gets all the subsystems associated with a device. Many devices do not
+    /// have subsystems, so it is common for this function to return None.
     pub fn subsystems(&self) -> Option<Vec<&PciSubsystemEntry>> {
         let ret: Vec<&PciSubsystemEntry> = self.subsystems.iter().collect();
         match ret.is_empty() {
@@ -142,7 +143,8 @@ impl PciDeviceEntry {
         }
     }
 
-    /// Gets a specific subsystem by ID
+    /// Gets a specific subsystem by ID. Many devices do not have subsystems, 
+    /// so it is common for this function to return None.
     pub fn subsystem(&self, did: u16, vid: u16) -> Option<&PciSubsystemEntry> {
         self.subsystems
             .iter()
@@ -171,12 +173,14 @@ impl PciSubsystemEntry {
 mod tests {
     use crate::ids::lookup_vendor;
 
+    /// Test looking up a specific vendor.
     #[test]
     fn test_lookup_vendor() {
         let vendor = lookup_vendor(20).unwrap();
         assert_eq!(vendor.name(), "Loongson Technology LLC");
     }
 
+    /// Test looking up a specific device.
     #[test]
     fn test_get_device() {
         let vendor = lookup_vendor(0x10de).unwrap();
@@ -184,6 +188,7 @@ mod tests {
         assert_eq!(device.name(), "GF119M [NVS 4200M]");
     }
 
+    /// Test looking up all the information of every device in the system.
     #[test]
     fn test_pci_listing_pretty() {
         println!("Begin test output: test_pci_listing_pretty");
@@ -200,6 +205,8 @@ mod tests {
         println!("End test output: test_pci_listing_pretty");
     }
 
+    /// Test looking up all the subdevice information of every device in the
+    /// system.
     #[test]
     fn test_lookup_subdevice() {
         println!("Begin test output: test_lookup_subdevice");

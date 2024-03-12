@@ -31,6 +31,10 @@ use std::fs::*;
 
 // ahaha this particular code is by Shibe Drill
 
+/// Internal macro to get an integer of a specific type from a file in a
+/// directory. The integer type must implement from_str_radix().
+/// The path must be specified as a valid Path, and the attribute should
+/// be a string representing a filename.
 macro_rules! get_pci_device_attribute {
     ($t:ty, $dir:expr, $attribute:expr) => {{
         let dir_usable = match $dir {
@@ -55,50 +59,40 @@ macro_rules! get_pci_device_attribute {
     }};
 }
 
+/// Primary Linux backend functionality. Iterates through /sys/bus/pci/devices
+/// and gets information from it. Each directory is an address, and each file
+/// in that directory is information about the device. These files contain hex
+/// strings prefixed by 0x. The file names are the names of the attributes,
+/// and the numbers contained inside them are the values of those attributes.
 #[inline]
 pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     let mut device_list: Vec<PciDeviceHardware> = Vec::new();
 
-    /*
-    On Linux, PCI device information is stored in /sys/bus/pci/devices/.
-    In this directory, there are multiple directories named after PCI addresses in the form of
-    0000:00:00.0 where each 0 can be a valid hex digit. These directories contain files that
-    hold the information needed to populate the PCI device structure. As follows is the list
-    of files and the fields they populate:
-        Label: Not currently known.
-        Domain: First 4 digits of the address.
-        Bus: Second set of digits, 2 digits long.
-        Device: 3rd set of digits, 2 digits long.
-        Function: Final digit.
-        Vendor ID: file 'vendor', 0x prefix
-        Device ID: file 'device', 0x prefix
-        Subsys Vendor ID: file 'subsystem_device', 0x prefix
-        Subsys Device ID: file 'subsystem_vendor', 0x prefix
-        Device Class: file 'class', 0x prefix
-        Revision ID: file 'revision', 0x prefix
-    */
-
     for directory in read_dir("/sys/bus/pci/devices/")? {
+        // Class contains multiple items: class, subclass, and the programming
+        // interface.
         let class_code = get_pci_device_attribute!(u32, &directory, "class")?;
-        let address = PciDeviceAddress::try_from(
-            directory
-                .as_ref()
-                .unwrap()
-                .file_name()
-                .into_string()
-                .unwrap(),
-        )
-        .ok();
 
         device_list.push(PciDeviceHardware {
-            address,
+            address: PciDeviceAddress::try_from(
+                // try_from parses an address in the 0000:00:00.0 format
+                directory
+                    .as_ref()
+                    .unwrap()
+                    .file_name()
+                    .into_string()
+                    .unwrap(),
+            )
+            .ok(), // TODO: delete this when we change from an
+            // Option<PciDeviceAddress> to a Result<PciDeviceAddress,
+            // PciInformationError>
             vendor_id: get_pci_device_attribute!(u16, &directory, "vendor")?, // Vendor ID
             device_id: get_pci_device_attribute!(u16, &directory, "device")?, // Device ID
             subsys_device_id: get_pci_device_attribute!(u16, &directory, "subsystem_device")?, // Subsystem Device ID
             subsys_vendor_id: get_pci_device_attribute!(u16, &directory, "subsystem_vendor")?, // Subsystem Vendor ID
-            class: ((class_code >> 16) & 0xFF) as u8, // Device Class
-            subclass: ((class_code >> 8) & 0xFF) as u8, // Device Subclass
-            programming_interface: (class_code & 0xFF) as u8, // Device Programming Interface
+            class: ((class_code >> 16) & 0xFF) as u8, // Class
+            subclass: ((class_code >> 8) & 0xFF) as u8, // Subclass
+            programming_interface: (class_code & 0xFF) as u8, // Programming Interface
             revision_id: get_pci_device_attribute!(u8, &directory, "revision")?, // Revision ID
         })
     }

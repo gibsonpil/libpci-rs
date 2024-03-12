@@ -50,23 +50,31 @@ include!(concat!(env!("OUT_DIR"), "/pci_classes_phf.rs"));
 /// An ID entry representing a PCI device class.
 #[derive(Copy, Clone)]
 pub struct PciClassEntry {
+    /// The numeric ID of the class.
     id: u8,
+    /// The written name of the class.
     name: &'static str,
+    /// The list of subclasses the class has.
     subclasses: &'static [PciSubclassEntry],
 }
 
 /// An ID entry representing a PCI device subclass.
 #[derive(Copy, Clone)]
 pub struct PciSubclassEntry {
+    /// The numeric ID of the subclass.
     id: u8,
+    /// The written name of the subclass.
     name: &'static str,
+    /// The list of programming interfaces the subclass has.
     progs: &'static [PciProgEntry],
 }
 
 /// An ID entry representing a PCI device programming interface.
 #[derive(Copy, Clone)]
 pub struct PciProgEntry {
+    /// The numeric ID of the programming interface.
     id: u8,
+    /// The written name of the programming interface.
     name: &'static str,
 }
 
@@ -145,6 +153,7 @@ impl PciProgEntry {
 mod tests {
     use crate::class::lookup_class;
 
+    /// Test looking up a specific device class.
     #[test]
     fn test_lookup_class() {
         let class = lookup_class(9).unwrap();

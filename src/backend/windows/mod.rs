@@ -152,7 +152,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
             let cc = values_mapping.get("CC").unwrap();
 
             result.push(PciDeviceHardware {
-                address: Some (PciDeviceAddress {
+                address: Some(PciDeviceAddress {
                     domain: (win_bus >> 8) & 0xFFFFFF, // Domain is in high 24 bits of SPDRP_BUSNUMBER.
                     bus: (win_bus & 0xFF) as u8,       // Bus is in low 8 bits of SPDRP_BUSNUMBER.
                     device: ((win_addr >> 16) & 0xFF) as u8, // Device (u8) is in high 16 bits of SPDRP_ADDRESS.

@@ -47,7 +47,8 @@ pub struct PciDeviceAddress {
     pub bus: u8,
     /// A specific device on a PCI bus.
     pub device: u8,
-    /// An even more specific sub-function of a PCI device. Graphics cards often have 2, for graphics and sound.
+    /// An even more specific sub-function of a PCI device. Graphics cards 
+    /// often have 2, for graphics and sound.
     pub function: u8,
 }
 
@@ -55,7 +56,7 @@ impl Display for PciDeviceAddress {
     fn fmt(&self, f: &mut Formatter) -> Result {
         write!(
             f,
-            "{}:{}:{}.{}",
+            "{:04x}:{:02x}:{:02x}.{:01x}",
             self.domain, self.bus, self.device, self.function,
         )
     }
@@ -68,6 +69,8 @@ impl TryFrom<String> for PciDeviceAddress {
     ) -> std::result::Result<crate::pci::PciDeviceAddress, crate::pci::PciEnumerationError> {
         let parts: Vec<&str> = address_string.split(|c| c == ':' || c == '.').collect();
 
+        // We know that if we somehow don't have all 4 segments of the address
+        // then something has gone horribly wrong.
         if parts.len() != 4 {
             return Err(PciEnumerationError::NotFound);
         }
@@ -111,18 +114,17 @@ pub struct PciDeviceHardware {
 
 impl Display for PciDeviceHardware {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "{}, class {}: \n\t({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  
+        write!(f, "{}: ({:04x}:{:04x}) SVID={:04x} SDID={:04x} Class={:02x} Subclass={:02x} PIF={:02x} Rev={:02x}",  
             if let Some(addr) = self.address {
                 format!("{}", addr)
             } else {
                 "[address inaccessible]".to_owned()
             },
-            self.class,
             self.vendor_id,
             self.device_id,
             self.subsys_vendor_id,
             self.subsys_device_id,
-            self.class as u32,
+            self.class,
             self.subclass,
             self.programming_interface,
             self.revision_id
