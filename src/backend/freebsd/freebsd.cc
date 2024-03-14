@@ -29,6 +29,7 @@
 // such as DragonFlyBSD.
 
 #include <unistd.h>
+#include <errno.h>
 #include <iostream>
 
 #include <sys/fcntl.h>
@@ -38,8 +39,7 @@
 
 #define CONF_SIZE 512
 
-rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
-	rust::Vec<CXXPciDeviceHardware> devices;
+CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
 	struct pci_conf_io pc = {};
 	int fd;
 
@@ -51,7 +51,13 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 
 	fd = open("/dev/pci", O_RDONLY, 0);
 	if(fd < 0) { // Catch errors.
-		return {};
+		if(errno == EACCES) {
+            return CXXPciEnumerationError::PermissionDenied;
+        } else if(errno == ENOENT) {
+            return CXXPciEnumerationError::NotFound;
+        } else {
+            return CXXPciEnumerationError::OsError;
+        }
 	}
 
 	pc.match_buf_len = CONF_SIZE;
@@ -59,7 +65,7 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 
 	do {
 		if(ioctl(fd, PCIOCGETCONF, &pc) == -1) {
-			return {};
+            return CXXPciEnumerationError::OsError;
 		}
 
 		if(pc.status == PCI_GETCONF_LIST_CHANGED) {
@@ -67,7 +73,7 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 			close(fd);
 			return _get_pci_list(); 
 		} else if(pc.status == PCI_GETCONF_ERROR) {
-			return {};
+			return CXXPciEnumerationError::OsError;
 		}
 		
 		for(device = conf; device < &conf[pc.num_matches]; device++) {
@@ -86,13 +92,13 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 			d.device = device->pc_sel.pc_dev;
 			d.function = device->pc_sel.pc_func;
 
-			devices.push_back(d);
+			output.push_back(d);
 		}
 	} while(pc.status == PCI_GETCONF_MORE_DEVS);
 
 	close(fd);
 
-	return devices;
+	return CXXPciEnumerationError::Success;
 }
 
 CXXPciDeviceHardware _get_field_availability() {

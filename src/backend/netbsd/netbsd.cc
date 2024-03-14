@@ -126,17 +126,17 @@ std::optional<CXXPciDeviceHardware> pci_read_info(int bus, int dev, int func) {
 	return device;
 }
 
-rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
-	rust::Vec<CXXPciDeviceHardware> devices;
-
+CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
 	pci_fd = open(PCI_DEV, O_RDONLY);
 		
-	if(pci_fd == -1) {
-		if(errno == EACCES) {
-			// TODO: handle no access.
-		} else {
-			// TODO: handle abberant error.
-		}
+	if(pci_fd < 0) {
+        if(errno == EACCES) {
+            return CXXPciEnumerationError::PermissionDenied;
+        } else if(errno == ENOENT) {
+            return CXXPciEnumerationError::NotFound;
+        } else {
+            return CXXPciEnumerationError::OsError;
+        }
 	}
 
 	// Though this method of discovering PCI devices may seem kind of dumb,
@@ -155,14 +155,14 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 			for(int func = 0; func < nfuncs; func++) {
 				auto info = pci_read_info(bus, dev, func);
 				if(info)
-					devices.push_back(info.value());
+					output.push_back(info.value());
 			}
 		}
 	}
 
 	close(pci_fd);
 
-	return devices;
+	return CXXPciEnumerationError::Success;
 }
 
 CXXPciDeviceHardware _get_field_availability() {
