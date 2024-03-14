@@ -46,7 +46,6 @@ mod ffi {
         revision_id: u8,
     }
 
-    #[repr(u8)]
     enum CXXPciEnumerationError {
         Success,
         OsError,
@@ -97,6 +96,19 @@ impl From<ffi::CXXPciDeviceHardware> for PciDeviceHardware {
     }
 }
 
+impl From<ffi::CXXPciEnumerationError> for PciEnumerationError {
+    fn from(value: ffi::CXXPciEnumerationError) -> Self {
+        match value {
+            ffi::CXXPciEnumerationError::OsError => PciEnumerationError::OsError,
+            ffi::CXXPciEnumerationError::ReadDirectory => PciEnumerationError::ReadDirectory,
+            ffi::CXXPciEnumerationError::NotFound => PciEnumerationError::NotFound,
+            ffi::CXXPciEnumerationError::PermissionDenied => PciEnumerationError::PermissionDenied,
+            ffi::CXXPciEnumerationError::GenericForeignError => PciEnumerationError::GenericForeignError,
+            _ => PciEnumerationError::GenericForeignError, // This shouldn't be reachable.
+        }
+    }
+}
+
 impl From<PciDeviceHardware> for ffi::CXXPciDeviceHardware {
     fn from(device: PciDeviceHardware) -> Self {
         let mut domain: u32 = 0;
@@ -134,6 +146,11 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     let mut result: Vec<PciDeviceHardware> = vec![];
     let mut output: Vec<ffi::CXXPciDeviceHardware> = vec![];
     let code = ffi::_get_pci_list(&mut output);
+
+    // Handle errors.
+    if code != ffi::CXXPciEnumerationError::Success {
+        return Err(PciEnumerationError::from(code));
+    }
 
     for device in output {
         result.push(PciDeviceHardware::from(device));
