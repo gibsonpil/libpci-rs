@@ -127,7 +127,7 @@ const T get_property(io_service_t service, const CFStringRef key) {
     return data;
 }
 
-rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
+CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
     rust::Vec<CXXPciDeviceHardware> pci_devices; 
     CFMutableDictionaryRef matching_dictionary;
     io_service_t service;
@@ -136,12 +136,12 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
     
     matching_dictionary = IOServiceMatching("IOPCIDevice");
     if(matching_dictionary == NULL) {
-        return pci_devices;
+        return CXXPciEnumerationError::OsError;
     }
     
     ret = IOServiceGetMatchingServices(kIOMainPortDefault, matching_dictionary, &iter);
     if(ret != KERN_SUCCESS) {
-        return pci_devices;
+        return CXXPciEnumerationError::OsError;
     }
     
     while((service = IOIteratorNext(iter))) {
@@ -170,17 +170,17 @@ rust::Vec<CXXPciDeviceHardware> _get_pci_list() {
 
 	// Fetching BDF values only works on x86_64.
 #ifndef __arm__	
-	const IOPCIAddressSpace* address = get_property_ptr<IOPCIAddressSpace>(service, CFSTR("reg"));
-	device.bus = address->s.busNum;
-	device.device = address->s.deviceNum;
-	device.function = address->s.functionNum;
+	    const IOPCIAddressSpace* address = get_property_ptr<IOPCIAddressSpace>(service, CFSTR("reg"));
+	    device.bus = address->s.busNum;
+	    device.device = address->s.deviceNum;
+	    device.function = address->s.functionNum;
 #endif
 
-        pci_devices.push_back(device);
+        output.push_back(device);
     }
     
     IOObjectRelease(iter);
-    return pci_devices;
+    return CXXPciEnumerationError::Success;
 }
 
 CXXPciDeviceHardware _get_field_availability() {

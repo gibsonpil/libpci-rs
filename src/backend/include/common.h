@@ -38,5 +38,5 @@ enum class PciInformationError {
     Unknown = 3,
 };
 
-rust::Vec<CXXPciDeviceHardware> _get_pci_list();
+CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output);
 CXXPciDeviceHardware _get_field_availability();

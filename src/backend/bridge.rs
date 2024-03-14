@@ -26,7 +26,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 use crate::backend;
-use crate::backend::PciEnumerationError;
+use crate::backend::{PciDeviceAddress, PciEnumerationError};
 use crate::pci::PciDeviceHardware;
 
 #[cxx::bridge]
@@ -46,24 +46,45 @@ mod ffi {
         revision_id: u8,
     }
 
+    #[repr(u8)]
+    enum CXXPciEnumerationError {
+        Success,
+        OsError,
+        ReadDirectory,
+        NotFound,
+        PermissionDenied,
+        GenericForeignError
+    }
+
     extern "Rust" {
         fn all_fields_available() -> CXXPciDeviceHardware;
     }
 
     unsafe extern "C++" {
         include!("libpci-rs/src/backend/include/common.h");
-        fn _get_pci_list() -> Vec<CXXPciDeviceHardware>;
+        fn _get_pci_list(output: &mut Vec<CXXPciDeviceHardware>) -> CXXPciEnumerationError;
         fn _get_field_availability() -> CXXPciDeviceHardware;
     }
 }
 
 impl From<ffi::CXXPciDeviceHardware> for PciDeviceHardware {
     fn from(device: ffi::CXXPciDeviceHardware) -> Self {
+        let mut address: Option<PciDeviceAddress> = None;
+
+        if device.domain != 0 ||
+            device.bus != 0 ||
+            device.device != 0 ||
+            device.function != 0 {
+            address = Some(PciDeviceAddress{
+                domain: device.domain,
+                bus: device.bus,
+                device: device.device,
+                function: device.function
+            })
+        }
+
         PciDeviceHardware {
-            domain: device.domain,
-            bus: device.bus,
-            device: device.device,
-            function: device.function,
+            address,
             vendor_id: device.vendor_id,
             device_id: device.device_id,
             subsys_device_id: device.subsys_device_id,
@@ -78,11 +99,25 @@ impl From<ffi::CXXPciDeviceHardware> for PciDeviceHardware {
 
 impl From<PciDeviceHardware> for ffi::CXXPciDeviceHardware {
     fn from(device: PciDeviceHardware) -> Self {
+        let mut domain: u32 = 0;
+        let mut bus: u8 = 0;
+        let mut device_id: u8 = 0;
+        let mut function: u8 = 0;
+
+        // Move the device address over if it exists.
+        if device.address.is_some() {
+            let address = device.address.unwrap();
+            domain = address.domain;
+            bus = address.bus;
+            device_id = address.device;
+            function = address.function;
+        }
+
         ffi::CXXPciDeviceHardware {
-            domain: device.domain,
-            bus: device.bus,
-            device: device.device,
-            function: device.function,
+            domain,
+            bus,
+            device: device_id,
+            function,
             vendor_id: device.vendor_id,
             device_id: device.device_id,
             subsys_device_id: device.subsys_device_id,
@@ -97,9 +132,10 @@ impl From<PciDeviceHardware> for ffi::CXXPciDeviceHardware {
 
 pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
     let mut result: Vec<PciDeviceHardware> = vec![];
-    let list = ffi::_get_pci_list();
+    let mut output: Vec<ffi::CXXPciDeviceHardware> = vec![];
+    let code = ffi::_get_pci_list(&mut output);
 
-    for device in list {
+    for device in output {
         result.push(PciDeviceHardware::from(device));
     }
 

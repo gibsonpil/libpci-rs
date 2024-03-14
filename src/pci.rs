@@ -226,6 +226,8 @@ pub enum PciEnumerationError {
     PermissionDenied,
     /// Attribute is not valid hex.
     ParseInt(ParseIntError),
+    /// An error that couldn't be resolved originating from a foreign backend.
+    GenericForeignError
 }
 
 impl Display for PciEnumerationError {
@@ -240,6 +242,7 @@ impl Display for PciEnumerationError {
                 Self::NotFound => "NotFound",
                 Self::PermissionDenied => "PermissionDenied",
                 Self::ParseInt(_parserr) => "ParseIntError",
+                Self::GenericForeignError => "GenericForeignError"
             }
         )
     }
