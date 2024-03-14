@@ -71,7 +71,7 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
 		if(pc.status == PCI_GETCONF_LIST_CHANGED) {
 			// Close the file descriptor and start over.
 			close(fd);
-			return _get_pci_list(); 
+			return _get_pci_list(output);
 		} else if(pc.status == PCI_GETCONF_ERROR) {
 			return CXXPciEnumerationError::OsError;
 		}
