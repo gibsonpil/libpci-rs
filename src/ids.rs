@@ -44,8 +44,9 @@
 //! assert_eq!("Intel Corporation", ven_entry.name());
 //! ```
 //! This code is also used behind-the-scenes in the methods of
-//! `PciDeviceHardware`, so you can easily obtain info about a device that is
-//! physically present. You don't even need to know its IDs to get the info.
+//! [PciDeviceHardware](crate::pci::PciDeviceHardware), so you can easily 
+//! obtain info about a device that is physically present. You don't even 
+//! need to know its IDs to get the info.
 //! ```rust
 //! # use libpci_rs::pci::{PciDeviceHardware, get_pci_list};
 //! let pci_list: Vec<PciDeviceHardware> = get_pci_list().unwrap();

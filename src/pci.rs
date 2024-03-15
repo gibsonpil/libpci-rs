@@ -86,7 +86,7 @@ impl TryFrom<String> for PciDeviceAddress {
 
 /// A struct representing a PCI device, all its hardcoded information, and its
 /// location on the system's PCI device bus. It implements several methods to
-/// get ID related information, gated behind the `pciids` feature.
+/// get ID related information, gated behind the [pciids feature](crate#pciids).
 /// 
 /// # Field Availability
 /// Some fields are not available on some platforms. Reference the below chart
@@ -95,26 +95,28 @@ impl TryFrom<String> for PciDeviceAddress {
 /// architectures, except for those listed under the same OS in a different
 /// column.
 /// 
-/// - ✅ Always: Available all the time without any elevated privileges.
-/// - 🔒 Elevated: Requires root / administrative permissions at runtime.
-/// - ❌ Never: Not accessible on the platform.
+/// - Always: Available all the time without any elevated privileges.
+/// - Elevated: Requires root / administrative permissions at runtime.
+/// - Never: Not accessible on the platform.
 /// 
 /// 
-/// | Field                 | Windows    | Linux     | macOS     | macOS ARM    | OpenBSD     | NetBSD    | DragonflyBSD    |
-/// |-----------------------|------------|-----------|-----------|--------------|-------------|-----------|-----------------|
-/// | Address               | ✅ Always  | ✅ Always | ✅ Always | ❌ Never     | 🔒 Elevated | ✅ Always | ✅ Always       |
-/// | Vendor ID             | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Device ID             | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Subvendor ID          | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Subdevice ID          | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Class                 | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Subclass              | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Programming Interface | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
-/// | Revision              | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Field                 | Windows | Linux  | macOS  | macOS (ARM) | OpenBSD  | NetBSD   | DragonflyBSD | FreeBSD |
+/// |-----------------------|---------|--------|--------|-------------|----------|----------|--------------|---------|
+/// | Address               | Always  | Always | Always | Never       | Elevated | Elevated | Always       | Always  |
+/// | Vendor ID             | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Device ID             | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Subvendor ID          | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Subdevice ID          | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Class                 | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Subclass              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Programming Interface | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Revision              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
  
 #[derive(Debug, Clone, Default)]
 pub struct PciDeviceHardware {
-    /// The address of a PCI device.
+    /// The address of a PCI device.  
+    /// ***NOTICE:*** The [availability](#Availability) of this field varies by platform.
+    // TODO: Make this a Result, propagate errors.
     pub address: Option<PciDeviceAddress>,
     /// The ID of the device manufacturer.
     pub vendor_id: u16,
@@ -122,12 +124,11 @@ pub struct PciDeviceHardware {
     pub device_id: u16,
     /// The ID of the sub-device.
     pub subsys_device_id: u16,
-    /// The ID of the sub-device vendor (normally the same as the device
-    /// vendor).
+    /// The ID of the sub-device vendor.
     pub subsys_vendor_id: u16,
     /// A category of functionality that the device provides.
     pub class: u8,
-    /// A more specific category of functionality, organized by class.
+    /// A more specific subcategory of the device class.
     pub subclass: u8,
     /// An even more specific subcategory of functionality, defining how the
     /// device is programmed.
@@ -205,7 +206,20 @@ impl PciDeviceHardware {
                 .to_owned(),
         )
     }
-    /// Get a pretty representation of the entire device.
+    /// Get a pretty representation of the entire device. This method does a
+    /// lot of its own error handling, so if you want to handle things in
+    /// a different way, you should just call the other  methods for the 
+    /// individual attributes. It will return [`None`] if any of the following 
+    /// items cannot be looked up:
+    /// 
+    /// - The subclass name
+    /// - The vendor name
+    /// - The device name  
+    /// 
+    /// The devices print in this style:  
+    /// `f619:00:00.0 Communication controller: Red Hat, Inc. Virtio file system  (rev 01)`  
+    /// Unless the address is not [available](crate::pci::PciDeviceHardware#availability):  
+    /// `[address inaccessible] Bridge: Red Hat, Inc. Virtio 1.0 socket  (rev 01)`  
     pub fn pretty_print(&self) -> Option<String> {
         Some(format!(
             "{} {}: {} {} {}",
@@ -230,8 +244,8 @@ impl PciDeviceHardware {
 
 /// Get all the installed PCI devices in the system.
 ///
-/// Returns a `PciEnumerationError` or a `Vec<PciDeviceHardware`, containing
-/// representations of every PCI device installed in the system.
+/// Returns a [`PciEnumerationError`] or a [`Vec`]<[`PciDeviceHardware`]>, 
+/// containing representations of every PCI device installed in the system.
 pub use crate::backend::get_pci_list;
 use crate::pci::PciInformationError::{PermissionDenied, Unavailable, Unknown};
 

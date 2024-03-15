@@ -35,6 +35,7 @@ use std::fs::*;
 /// directory. The integer type must implement from_str_radix().
 /// The path must be specified as a valid Path, and the attribute should
 /// be a string representing a filename.
+/// TODO: Please make this a generic.
 macro_rules! get_pci_device_attribute {
     ($t:ty, $dir:expr, $attribute:expr) => {{
         let dir_usable = match $dir {
