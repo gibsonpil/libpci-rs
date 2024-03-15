@@ -87,10 +87,34 @@ impl TryFrom<String> for PciDeviceAddress {
 /// A struct representing a PCI device, all its hardcoded information, and its
 /// location on the system's PCI device bus. It implements several methods to
 /// get ID related information, gated behind the `pciids` feature.
+/// 
+/// # Field Availability
+/// Some fields are not available on some platforms. Reference the below chart
+/// to see which fields are available, unavailable without administrative
+/// permission, or unavailable entirely. Each column represents all 
+/// architectures, except for those listed under the same OS in a different
+/// column.
+/// 
+/// - ✅ Always: Available all the time without any elevated privileges.
+/// - 🔒 Elevated: Requires root / administrative permissions at runtime.
+/// - ❌ Never: Not accessible on the platform.
+/// 
+/// 
+/// | Field                 | Windows    | Linux     | macOS     | macOS ARM    | OpenBSD     | NetBSD    | DragonflyBSD    |
+/// |-----------------------|------------|-----------|-----------|--------------|-------------|-----------|-----------------|
+/// | Address               | ✅ Always  | ✅ Always | ✅ Always | ❌ Never     | 🔒 Elevated | ✅ Always | ✅ Always       |
+/// | Vendor ID             | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Device ID             | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Subvendor ID          | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Subdevice ID          | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Class                 | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Subclass              | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Programming Interface | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+/// | Revision              | ✅ Always  | ✅ Always | ✅ Always | ✅ Always    | ✅ Always   | ✅ Always | ✅ Always       |
+ 
 #[derive(Debug, Clone, Default)]
 pub struct PciDeviceHardware {
-    /// The address of a PCI device. May or may not be accessible, depending
-    /// on the platform.
+    /// The address of a PCI device.
     pub address: Option<PciDeviceAddress>,
     /// The ID of the device manufacturer.
     pub vendor_id: u16,
