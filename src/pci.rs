@@ -157,7 +157,8 @@ impl Display for PciDeviceHardware {
     }
 }
 
-/// All of the following methods in this block require `pciids`.
+/// All of the following methods in this block require the 
+/// [pciids feature](crate#pciids).
 #[cfg(feature = "pciids")]
 impl PciDeviceHardware {
     /// Get the pretty name of the device.
