@@ -55,6 +55,8 @@
 
 #include "libpci-rs/src/backend/include/common.h"
 
+// TODO: handle multiple domains
+
 #ifdef __OpenBSD__
 #define PCI_SUBSYS_VENDOR(x) PCI_VENDOR(x)
 #define PCI_SUBSYS_ID(x) PCI_PRODUCT(x)
