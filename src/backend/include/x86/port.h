@@ -27,46 +27,34 @@
 
 #pragma once
 
-// Some operating systems don't have direct facilities for reading PCI
-// information (i.e. Haiku/BeOS). In such cases we have to utilize CPU
-// level calls to directly read from I/O ports. These calls are taken from the
-// MUSL source code because I'm too lazy to deal with AT&T ASM syntax and annoying
-// inline ASM directives. Also, NASM > GAS.
+#include <vector>
+#include <stdint.h>
 
-namespace cpu {
-    __attribute__((always_inline))
-    void outb(unsigned char __val, unsigned short __port) {
-        __asm__ volatile ("outb %0,%1" : : "a" (__val), "dN" (__port));
-    }
+#include "libpci-rs/src/backend/include/common.h"
+#include "libpci-rs/src/backend/bridge.rs.h"
 
-    __attribute__((always_inline))
-    void outw(unsigned short __val, unsigned short __port) {
-        __asm__ volatile ("outw %0,%1" : : "a" (__val), "dN" (__port));
-    }
+// OS-specific stuff.
+namespace os {
+    void io_lock();
+    void io_unlock();
+}
 
-    __attribute__((always_inline))
-    void outl(unsigned int __val, unsigned short __port) {
-        __asm__ volatile ("outl %0,%1" : : "a" (__val), "dN" (__port));
-    }
+namespace port {
+    // x86 IN/OUT assembly instructions.
+    void outb(unsigned char __val, unsigned short __port);
+    void outw(unsigned short __val, unsigned short __port);
+    void outl(unsigned int __val, unsigned short __port);
+    unsigned char inb(unsigned short __port);
+    unsigned short inw(unsigned short __port);
+    unsigned int inl(unsigned short __port);
 
-    __attribute__((always_inline))
-    unsigned char inb(unsigned short __port) {
-        unsigned char __val;
-        __asm__ volatile ("inb %1,%0" : "=a" (__val) : "dN" (__port));
-        return __val;
-    }
+    bool pci_read_config(unsigned int domain, unsigned int bus, unsigned int fn,
+                         int reg, int len, uint32_t *output);
 
-    __attribute__((always_inline))
-    unsigned short inw(unsigned short __port) {
-        unsigned short __val;
-        __asm__ volatile ("inw %1,%0" : "=a" (__val) : "dN" (__port));
-        return __val;
-    }
+    bool pci_write_config(unsigned int domain, unsigned int bus, unsigned int fn,
+                          int reg, int len, uint32_t value);
 
-    __attribute__((always_inline))
-    unsigned int inl(unsigned short __port) {
-        unsigned int __val;
-        __asm__ volatile ("inl %1,%0" : "=a" (__val) : "dN" (__port));
-        return __val;
-    }
+    bool pci_access_check();
+
+    CXXPciEnumerationError get_pci_list(rust::Vec<CXXPciDeviceHardware> &result);
 }

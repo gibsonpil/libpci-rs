@@ -168,7 +168,7 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
         device.subclass = (darwin_class_code >> 8) & 0xFF;
         device.programming_interface = darwin_class_code & 0xFF;
 
-	// Fetching BDF values only works on x86_64.
+	    // Fetching BDF values only works on x86_64.
 #ifndef __arm__	
 	    const IOPCIAddressSpace* address = get_property_ptr<IOPCIAddressSpace>(service, CFSTR("reg"));
 	    device.bus = address->s.busNum;
