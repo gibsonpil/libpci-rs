@@ -25,24 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// This backend should work on versions of the Haiku operating system compiled
-// after June of 2021 thanks to a change being made that automatically raises
-// the process's IOPL when the poke driver is opened. In the interest of
-// not adding in unnecessary code, the old way of calling the driver using ioctl()
-// is being omitted, and conventional x86 IN/OUT instructions are being used
-// instead. https://review.haiku-os.org/c/haiku/+/1077
-
 #include <fcntl.h>
 
 #include "libpci-rs/src/backend/include/common.h"
-#include "libpci-rs/src/backend/include/x86/port.h"
+#include "libpci-rs/src/backend/include/haiku/poke.h"
 
 CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
     CXXPciEnumerationError result = CXXPciEnumerationError::Success;
-    rust::Vec<CXXPciDeviceHardware> &tmp;
     int fd;
 
-    // Try to elevate our IOPL by opening the poke device.
+    // Try to open the poke device.
     fd = open("/dev/misc/poke", O_RDWR);
     if(fd < 0) { // Error
         // Here we should simply return instead of going to ret since
@@ -56,20 +48,49 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
         }
     }
 
-    // See if we can access the PCI configuration space.
-    if(!port::pci_access_check()) {
-        result = CXXPciEnumerationError::OsError;
-        goto ret;
-    }
+    pci_info_args args = {};
+    args.signature = POKE_SIGNATURE;
 
-    // Try to read the PCI list.
-    if(port::get_pci_list(&tmp) != CXXPciEnumerationError::Success) {
-        result = CXXPciEnumerationError::OsError;
-        goto ret;
-    }
+    for(int i = 0 ;; i++) {
+        CXXPciDeviceHardware device;
+        pci_info info = {};
 
-    // Copy temporary vector to output buffer.
-    std::copy(tmp.begin(), tmp.end(), std::back_inserter(output));
+        args.index = i;
+        args.info = &info;
+
+        ioctl(poke_driver_fd, POKE_GET_NTH_PCI_INFO, &args, sizeof(args));
+
+        if(args.status == B_OK)
+            break; // Assume we are done.
+
+        device.bus = info.bus;
+        device.device = info.device;
+        device.function = info.function;
+
+        device.vendor_id = info.vendor_id;
+        device.device_id = info.device_id;
+        device.class_id = info.class_base;
+        device.subclass = info.class_sub;
+        device.programming_interface = info.class_api;
+        device.revision_id = info.revision;
+
+        switch(info.header) {
+            case 0:
+                device.subsys_vendor_id = info.u.h0.subsystem_vendor_id;
+                device.subsys_device_id = info.u.h0.subsystem_id;
+                break;
+            case 1:
+                device.subsys_vendor_id = info.u.h1.subsystem_vendor_id;
+                device.subsys_device_id = info.u.h1.subsystem_id;
+                break;
+            case 2:
+                device.subsys_vendor_id = info.u.h2.subsystem_vendor_id;
+                device.subsys_device_id = info.u.h2.subsystem_id;
+                break;
+        }
+
+        output.push_back(device);
+    }
 
 ret:
     // Cleanup.
