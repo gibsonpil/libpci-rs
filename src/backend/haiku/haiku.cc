@@ -25,20 +25,18 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <iostream>
 #include <fcntl.h>
 
 #include "libpci-rs/src/backend/include/common.h"
-#include "libpci-rs/src/backend/include/haiku/poke.h"
+#include "libpci-rs/src/backend/haiku/poke.h"
 
 CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
-    CXXPciEnumerationError result = CXXPciEnumerationError::Success;
     int fd;
 
     // Try to open the poke device.
-    fd = open("/dev/misc/poke", O_RDWR);
+    fd = open(POKE_DEVICE_FULLNAME, O_RDWR);
     if(fd < 0) { // Error
-        // Here we should simply return instead of going to ret since
-        // closing a non-existent file descriptor isn't a good idea.
         if(errno == EACCES) {
             return CXXPciEnumerationError::PermissionDenied;
         } else if(errno == ENOENT) {
@@ -52,16 +50,16 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
     args.signature = POKE_SIGNATURE;
 
     for(int i = 0 ;; i++) {
-        CXXPciDeviceHardware device;
+        CXXPciDeviceHardware device = {};
         pci_info info = {};
 
         args.index = i;
         args.info = &info;
 
-        ioctl(poke_driver_fd, POKE_GET_NTH_PCI_INFO, &args, sizeof(args));
+        ioctl(fd, POKE_GET_NTH_PCI_INFO, &args, sizeof(args));
 
-        if(args.status == B_OK)
-            break; // Assume we are done.
+        if(args.status != B_OK)
+            break; // Assume we hit the end.
 
         device.bus = info.bus;
         device.device = info.device;
@@ -74,7 +72,7 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
         device.programming_interface = info.class_api;
         device.revision_id = info.revision;
 
-        switch(info.header) {
+        switch(info.header_type) {
             case 0:
                 device.subsys_vendor_id = info.u.h0.subsystem_vendor_id;
                 device.subsys_device_id = info.u.h0.subsystem_id;
@@ -92,21 +90,13 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
         output.push_back(device);
     }
 
-ret:
-    // Cleanup.
     close(fd);
-    return result;
+
+    return CXXPciEnumerationError::Success;
 }
 
 CXXPciDeviceHardware _get_field_availability() {
-    CXXPciDeviceHardware res = {}
+    CXXPciDeviceHardware res = {};
     return res;
 }
 
-// TODO: pciutils doesn't seem to do any kind of locking while reading IO on Haiku.
-// Frankly, I'm curious to know how exactly that doesn't lead to a race condition,
-// and this code should NOT be shipped as "stable" until that is figured out.
-namespace os {
-    void io_lock() {}
-    void io_unlock() {}
-}

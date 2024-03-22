@@ -36,6 +36,8 @@ pub fn build_cxx_module() {
             build_cxx_freebsd();
         } else if #[cfg(any(target_os = "netbsd", target_os = "openbsd"))] {
             build_cxx_netbsd();
+        } else if #[cfg(target_os = "haiku")] {
+            build_cxx_haiku();
         } else {
             panic!("No suitable CXX modules found. Cannot build.");
         }
@@ -71,3 +73,13 @@ pub fn build_cxx_netbsd() {
 
     println!("cargo:rerun-if-changed=src/backend/netbsd/netbsd.cc");
 }
+
+pub fn build_cxx_haiku() {
+    cxx_build::bridge("src/backend/bridge.rs")
+        .file("src/backend/haiku/haiku.cc")
+        .std("c++17")
+        .compile("libpci-rs-haiku");
+
+    println!("cargo:rerun-if-changed=src/backend/haiku/haiku.cc");
+}
+
