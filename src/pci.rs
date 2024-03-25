@@ -47,7 +47,7 @@ pub struct PciDeviceAddress {
     pub bus: u8,
     /// A specific device on a PCI bus.
     pub device: u8,
-    /// An even more specific sub-function of a PCI device. Graphics cards 
+    /// An even more specific sub-function of a PCI device. Graphics cards
     /// often have 2, for graphics and sound.
     pub function: u8,
 }
@@ -87,19 +87,19 @@ impl TryFrom<String> for PciDeviceAddress {
 /// A struct representing a PCI device, all its hardcoded information, and its
 /// location on the system's PCI device bus. It implements several methods to
 /// get ID related information, gated behind the [pciids feature](crate#pciids).
-/// 
+///
 /// # Field Availability
 /// Some fields are not available on some platforms. Reference the below chart
 /// to see which fields are available, unavailable without administrative
-/// permission, or unavailable entirely. Each column represents all 
+/// permission, or unavailable entirely. Each column represents all
 /// architectures, except for those listed under the same OS in a different
 /// column.
-/// 
+///
 /// - Always: Available all the time without any elevated privileges.
 /// - Elevated: Requires root / administrative permissions at runtime.
 /// - Never: Not accessible on the platform.
-/// 
-/// 
+///
+///
 /// | Field                 | Windows | Linux  | macOS  | macOS (ARM) | OpenBSD  | NetBSD   | DragonflyBSD | FreeBSD |
 /// |-----------------------|---------|--------|--------|-------------|----------|----------|--------------|---------|
 /// | Address               | Always  | Always | Always | Never       | Elevated | Elevated | Always       | Always  |
@@ -111,7 +111,7 @@ impl TryFrom<String> for PciDeviceAddress {
 /// | Subclass              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
 /// | Programming Interface | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
 /// | Revision              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
- 
+
 #[derive(Debug, Clone, Default)]
 pub struct PciDeviceHardware {
     /// The address of a PCI device.  
@@ -157,7 +157,7 @@ impl Display for PciDeviceHardware {
     }
 }
 
-/// All of the following methods in this block require the 
+/// All of the following methods in this block require the
 /// [pciids feature](crate#pciids).
 #[cfg(feature = "pciids")]
 impl PciDeviceHardware {
@@ -209,14 +209,14 @@ impl PciDeviceHardware {
     }
     /// Get a pretty representation of the entire device. This method does a
     /// lot of its own error handling, so if you want to handle things in
-    /// a different way, you should just call the other  methods for the 
-    /// individual attributes. It will return [`None`] if any of the following 
+    /// a different way, you should just call the other  methods for the
+    /// individual attributes. It will return [`None`] if any of the following
     /// items cannot be looked up:
-    /// 
+    ///
     /// - The subclass name
     /// - The vendor name
     /// - The device name  
-    /// 
+    ///
     /// The devices print in this style:  
     /// `f619:00:00.0 Communication controller: Red Hat, Inc. Virtio file system  (rev 01)`  
     /// Unless the address is not [available](crate::pci::PciDeviceHardware#availability):  
@@ -245,7 +245,7 @@ impl PciDeviceHardware {
 
 /// Get all the installed PCI devices in the system.
 ///
-/// Returns a [`PciEnumerationError`] or a [`Vec`]<[`PciDeviceHardware`]>, 
+/// Returns a [`PciEnumerationError`] or a [`Vec`]<[`PciDeviceHardware`]>,
 /// containing representations of every PCI device installed in the system.
 pub use crate::backend::get_pci_list;
 use crate::pci::PciInformationError::{PermissionDenied, Unavailable, Unknown};
@@ -266,7 +266,7 @@ pub enum PciEnumerationError {
     /// Attribute is not valid hex.
     ParseInt(ParseIntError),
     /// An error that couldn't be resolved originating from a foreign backend.
-    GenericForeignError
+    GenericForeignError,
 }
 
 impl Display for PciEnumerationError {
@@ -281,7 +281,7 @@ impl Display for PciEnumerationError {
                 Self::NotFound => "NotFound",
                 Self::PermissionDenied => "PermissionDenied",
                 Self::ParseInt(_parserr) => "ParseIntError",
-                Self::GenericForeignError => "GenericForeignError"
+                Self::GenericForeignError => "GenericForeignError",
             }
         )
     }

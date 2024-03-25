@@ -82,4 +82,3 @@ pub fn build_cxx_haiku() {
 
     println!("cargo:rerun-if-changed=src/backend/haiku/haiku.cc");
 }
-

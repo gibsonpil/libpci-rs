@@ -45,8 +45,10 @@ macro_rules! impl_trait_for_types {
     };
 }
 
-trait FromStrRadix { 
-    fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError> where Self: Sized;
+trait FromStrRadix {
+    fn from_str_radix(src: &str, radix: u32) -> Result<Self, ParseIntError>
+    where
+        Self: Sized;
 }
 
 // WHY IS THIS NOT IN THE STANDARD LIBRARY
@@ -55,22 +57,20 @@ impl_trait_for_types!(FromStrRadix for u8, u16, u32);
 
 /// Internal function to get a PCI device attribute of a certain integer size,
 /// from a file with a certain name, given the directory the file is in.
-/// T must be in the list above where I had to MANUALLY IMPL MY OWN TRAIT so I 
+/// T must be in the list above where I had to MANUALLY IMPL MY OWN TRAIT so I
 /// could genericize this function.
-fn get_pci_device_attribute<T>(dir: &DirEntry, attribute: &str) -> Result<T, PciEnumerationError> where T: FromStrRadix {
-
-        let file_contents = read_to_string(format!(
-            "{}/{}",
-            dir.path().to_string_lossy(),
-            attribute
-        ))?;
-        let input_string = if let Some(stripped) = file_contents.strip_prefix("0x") {
-            stripped
-        } else {
-            &file_contents
-        }
-        .trim();
-        Ok(T::from_str_radix(input_string, 16)?)
+fn get_pci_device_attribute<T>(dir: &DirEntry, attribute: &str) -> Result<T, PciEnumerationError>
+where
+    T: FromStrRadix,
+{
+    let file_contents = read_to_string(format!("{}/{}", dir.path().to_string_lossy(), attribute))?;
+    let input_string = if let Some(stripped) = file_contents.strip_prefix("0x") {
+        stripped
+    } else {
+        &file_contents
+    }
+    .trim();
+    Ok(T::from_str_radix(input_string, 16)?)
 }
 
 /// Primary Linux backend functionality. Iterates through /sys/bus/pci/devices
@@ -91,10 +91,7 @@ pub fn _get_pci_list() -> Result<Vec<PciDeviceHardware>, PciEnumerationError> {
         device_list.push(PciDeviceHardware {
             address: PciDeviceAddress::try_from(
                 // try_from parses an address in the 0000:00:00.0 format
-                dir_unwrapped
-                    .file_name()
-                    .into_string()
-                    .unwrap() // How can we get rid of this
+                dir_unwrapped.file_name().into_string().unwrap(), // How can we get rid of this
             )
             .ok(), // TODO: delete this when we change from an
             // Option<PciDeviceAddress> to a Result<PciDeviceAddress,

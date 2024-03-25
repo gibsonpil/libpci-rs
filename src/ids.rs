@@ -44,8 +44,8 @@
 //! assert_eq!("Intel Corporation", ven_entry.name());
 //! ```
 //! This code is also used behind-the-scenes in the methods of
-//! [PciDeviceHardware](crate::pci::PciDeviceHardware), so you can easily 
-//! obtain info about a device that is physically present. You don't even 
+//! [PciDeviceHardware](crate::pci::PciDeviceHardware), so you can easily
+//! obtain info about a device that is physically present. You don't even
 //! need to know its IDs to get the info.
 //! ```rust
 //! # use libpci_rs::pci::{PciDeviceHardware, get_pci_list};
@@ -144,7 +144,7 @@ impl PciDeviceEntry {
         }
     }
 
-    /// Gets a specific subsystem by ID. Many devices do not have subsystems, 
+    /// Gets a specific subsystem by ID. Many devices do not have subsystems,
     /// so it is common for this function to return None.
     pub fn subsystem(&self, did: u16, vid: u16) -> Option<&PciSubsystemEntry> {
         self.subsystems

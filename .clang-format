@@ -1,0 +1,19 @@
+# This mostly just follows LLVM style guidelines
+# aside from a few nitpicks of mine.
+---
+AccessModifierOffset: -4
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: BlockIndent
+AlignConsecutiveBitFields:
+  Enabled: true
+AlignConsecutiveMacros:
+  Enabled: true
+AlignEscapedNewlines: Left
+BreakAfterAttributes: Leave
+BreakArrays: false
+ColumnLimit: 100
+IndentCaseLabels: true
+IndentWidth: 4
+SpaceBeforeParens: Never
+SpacesInContainerLiterals: false
+Standard: c++17

@@ -52,7 +52,7 @@ mod ffi {
         ReadDirectory,
         NotFound,
         PermissionDenied,
-        GenericForeignError
+        GenericForeignError,
     }
 
     extern "Rust" {
@@ -70,15 +70,12 @@ impl From<ffi::CXXPciDeviceHardware> for PciDeviceHardware {
     fn from(device: ffi::CXXPciDeviceHardware) -> Self {
         let mut address: Option<PciDeviceAddress> = None;
 
-        if device.domain != 0 ||
-            device.bus != 0 ||
-            device.device != 0 ||
-            device.function != 0 {
-            address = Some(PciDeviceAddress{
+        if device.domain != 0 || device.bus != 0 || device.device != 0 || device.function != 0 {
+            address = Some(PciDeviceAddress {
                 domain: device.domain,
                 bus: device.bus,
                 device: device.device,
-                function: device.function
+                function: device.function,
             })
         }
 
@@ -103,7 +100,9 @@ impl From<ffi::CXXPciEnumerationError> for PciEnumerationError {
             ffi::CXXPciEnumerationError::ReadDirectory => PciEnumerationError::ReadDirectory,
             ffi::CXXPciEnumerationError::NotFound => PciEnumerationError::NotFound,
             ffi::CXXPciEnumerationError::PermissionDenied => PciEnumerationError::PermissionDenied,
-            ffi::CXXPciEnumerationError::GenericForeignError => PciEnumerationError::GenericForeignError,
+            ffi::CXXPciEnumerationError::GenericForeignError => {
+                PciEnumerationError::GenericForeignError
+            }
             _ => PciEnumerationError::GenericForeignError, // This shouldn't be reachable.
         }
     }
