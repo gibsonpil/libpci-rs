@@ -46,9 +46,12 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 
+// OpenBSD freaks out if pcireg.h isn't included first.
+// clang-format off
+#include <dev/pci/pcireg.h>
 #include <dev/pci/pcidevs.h>
 #include <dev/pci/pcidevs_data.h>
-#include <dev/pci/pcireg.h>
+// clang-format on
 
 #include <errno.h>
 #include <fcntl.h>
