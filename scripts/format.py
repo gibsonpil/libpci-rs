@@ -4,6 +4,10 @@
 from glob import glob
 import os
 
+# Format Rust code.
+os.system("cargo fmt")
+
+# Format C++ code.
 sources = (glob("src/backend/**/*.cc", recursive=True) +
            glob("src/backend/**/*.h", recursive=True))
 
