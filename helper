@@ -11,4 +11,4 @@ else
     exit 1 # error
 fi
 
-$PYTHON 'helper.py $@'
+$PYTHON 'helper.py' $@
