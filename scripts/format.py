@@ -7,8 +7,8 @@ def format_code():
     try_command(["cargo", "format"])
 
     print("[!] Running clang-format...")
-    sources = (glob("src/backend/**/*.cc", recursive=True) +
-               glob("src/backend/**/*.h", recursive=True))
+    sources = (glob("src/lib/backend/**/*.cc", recursive=True) +
+               glob("src/lib/backend/**/*.h", recursive=True))
 
     for source in sources:
         try_command(["clang-format", "-i", "--style=file", source])

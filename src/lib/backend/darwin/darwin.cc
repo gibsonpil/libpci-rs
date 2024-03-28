@@ -40,7 +40,7 @@
 #include <string>
 #include <vector>
 
-#include "libpci-rs/src/backend/include/common.h"
+#include "libpci-rs/src/lib/backend/include/common.h"
 
 #define ToCFDataRef(x) static_cast<CFDataRef>(x)
 

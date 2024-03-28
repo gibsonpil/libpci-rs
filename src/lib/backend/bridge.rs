@@ -60,7 +60,7 @@ mod ffi {
     }
 
     unsafe extern "C++" {
-        include!("libpci-rs/src/backend/include/common.h");
+        include!("libpci-rs/src/lib/backend/include/common.h");
         fn _get_pci_list(output: &mut Vec<CXXPciDeviceHardware>) -> CXXPciEnumerationError;
         fn _get_field_availability() -> CXXPciDeviceHardware;
     }

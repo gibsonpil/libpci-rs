@@ -36,7 +36,7 @@
 #include <sys/fcntl.h>
 #include <sys/pciio.h>
 
-#include "libpci-rs/src/backend/include/common.h"
+#include "libpci-rs/src/lib/backend/include/common.h"
 
 #define CONF_SIZE 512
 

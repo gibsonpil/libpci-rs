@@ -29,8 +29,8 @@
 #include <fcntl.h>
 #include <iostream>
 
-#include "libpci-rs/src/backend/haiku/poke.h"
-#include "libpci-rs/src/backend/include/common.h"
+#include "libpci-rs/src/lib/backend/haiku/poke.h"
+#include "libpci-rs/src/lib/backend/include/common.h"
 
 CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
     int fd;

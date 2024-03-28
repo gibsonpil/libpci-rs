@@ -4,5 +4,5 @@
 /target
 /Cargo.lock
 /.idea
-/src/backend/c/cmake-build*
+/src/lib/backend/c/cmake-build*
 /.vscode

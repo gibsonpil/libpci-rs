@@ -42,43 +42,43 @@ pub fn build_cxx_module() {
             panic!("No suitable CXX modules found. Cannot build.");
         }
     }
-    println!("cargo:rerun-if-changed=src/backend/include/common.h");
+    println!("cargo:rerun-if-changed=src/lib/backend/include/common.h");
 }
 
 pub fn build_cxx_darwin() {
-    cxx_build::bridge("src/backend/bridge.rs")
-        .file("src/backend/darwin/darwin.cc")
+    cxx_build::bridge("src/lib/backend/bridge.rs")
+        .file("src/lib/backend/darwin/darwin.cc")
         .std("c++17")
         .compile("libpci-rs-darwin");
 
-    println!("cargo:rerun-if-changed=src/backend/darwin/darwin.cc");
+    println!("cargo:rerun-if-changed=src/lib/backend/darwin/darwin.cc");
     println!("cargo:rustc-flags=-l framework=CoreFoundation");
     println!("cargo:rustc-flags=-l framework=IOKit");
 }
 
 pub fn build_cxx_freebsd() {
-    cxx_build::bridge("src/backend/bridge.rs")
-        .file("src/backend/freebsd/freebsd.cc")
+    cxx_build::bridge("src/lib/backend/bridge.rs")
+        .file("src/lib/backend/freebsd/freebsd.cc")
         .std("c++17")
         .compile("libpci-rs-freebsd");
 
-    println!("cargo:rerun-if-changed=src/backend/freebsd/freebsd.cc");
+    println!("cargo:rerun-if-changed=src/lib/backend/freebsd/freebsd.cc");
 }
 
 pub fn build_cxx_netbsd() {
-    cxx_build::bridge("src/backend/bridge.rs")
-        .file("src/backend/netbsd/netbsd.cc")
+    cxx_build::bridge("src/lib/backend/bridge.rs")
+        .file("src/lib/backend/netbsd/netbsd.cc")
         .std("c++17")
         .compile("libpci-rs-netbsd");
 
-    println!("cargo:rerun-if-changed=src/backend/netbsd/netbsd.cc");
+    println!("cargo:rerun-if-changed=src/lib/backend/netbsd/netbsd.cc");
 }
 
 pub fn build_cxx_haiku() {
-    cxx_build::bridge("src/backend/bridge.rs")
-        .file("src/backend/haiku/haiku.cc")
+    cxx_build::bridge("src/lib/backend/bridge.rs")
+        .file("src/lib/backend/haiku/haiku.cc")
         .std("c++17")
         .compile("libpci-rs-haiku");
 
-    println!("cargo:rerun-if-changed=src/backend/haiku/haiku.cc");
+    println!("cargo:rerun-if-changed=src/lib/backend/haiku/haiku.cc");
 }

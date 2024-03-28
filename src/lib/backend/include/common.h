@@ -27,7 +27,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
-#include "libpci-rs/src/backend/bridge.rs.h"
+#include "libpci-rs/src/lib/backend/bridge.rs.h"
 #include <stdint.h>
 
 // Handy PCI information error macro.

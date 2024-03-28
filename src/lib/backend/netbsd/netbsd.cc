@@ -57,7 +57,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "libpci-rs/src/backend/include/common.h"
+#include "libpci-rs/src/lib/backend/include/common.h"
 
 // TODO: handle multiple domains
 
