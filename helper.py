@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Gibson Pilconis, shibedrill, and contributors
+# SPDX-License-Identifier: BSD-3-Clause
+
 #!/usr/bin/env python3
 
 # This is a useful automation script to be used in conjunction

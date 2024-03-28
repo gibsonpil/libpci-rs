@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Gibson Pilconis, shibedrill, and contributors
+// SPDX-License-Identifier: BSD-3-Clause
+
 use std::collections::BTreeMap;
 
 use clap::{command, Parser};
@@ -29,18 +32,20 @@ fn tree_from_vec(devices: Vec<PciDeviceHardware>) -> PciDeviceTree {
     let mut tree: PciDeviceTree = BTreeMap::new();
     for device in devices {
         if let Some(address) = device.address {
-            tree
-                .entry(address.domain).or_default()
-                .entry(address.bus).or_default()
-                .entry(address.device).or_default()
-                .entry(address.function).or_insert(device);
+            tree.entry(address.domain)
+                .or_default()
+                .entry(address.bus)
+                .or_default()
+                .entry(address.device)
+                .or_default()
+                .entry(address.function)
+                .or_insert(device);
         }
     }
     tree
 }
 
 fn print_tree(tree: PciDeviceTree) {
-
     // TODO: Add logic to draw box characters.
     // This whole thing sucks so I don't think I want to even begin
     // doing this. If I were using any data structure worth its weight
@@ -67,11 +72,15 @@ fn print_tree(tree: PciDeviceTree) {
             level = 1;
             print!("{}", "  ".repeat(level));
             println!("{:02x}", bus_value);
-            for (device_index, (device_value, device_entry)) in bus_entry.clone().into_iter().enumerate() {
+            for (device_index, (device_value, device_entry)) in
+                bus_entry.clone().into_iter().enumerate()
+            {
                 level = 2;
                 print!("{}", "  ".repeat(level));
                 println!("{:02x}", device_value);
-                for (function_index, (function_value, function_entry)) in device_entry.clone().into_iter().enumerate() {
+                for (function_index, (function_value, function_entry)) in
+                    device_entry.clone().into_iter().enumerate()
+                {
                     level = 3;
                     print!("{}", "  ".repeat(level));
                     println!("{:01x} {}", function_value, numeracy_1(function_entry));
@@ -79,7 +88,6 @@ fn print_tree(tree: PciDeviceTree) {
             }
         }
     }
-
 }
 
 // Numeric level zero.
@@ -115,7 +123,9 @@ fn numeracy_0(device: PciDeviceHardware) -> String {
         } else {
             "".to_string()
         }
-    ).trim().to_string()
+    )
+    .trim()
+    .to_string()
 }
 
 // Numeric level one.
@@ -140,7 +150,9 @@ fn numeracy_1(device: PciDeviceHardware) -> String {
         } else {
             "".to_string()
         }
-    ).trim().to_string()
+    )
+    .trim()
+    .to_string()
 }
 // Numeric level two.
 // 0000:00:00.0 Subclassname [classsubclass]: Vendor Devicename (rev 01)
@@ -179,7 +191,9 @@ fn numeracy_2(device: PciDeviceHardware) -> String {
         } else {
             "".to_string()
         }
-    ).trim().to_string()
+    )
+    .trim()
+    .to_string()
 }
 
 // Verbosity 0 does not exist, since it won't print anything in the second
