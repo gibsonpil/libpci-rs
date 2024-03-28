@@ -3,7 +3,7 @@ name = "libpci-rs"
 description = "A cross-platform library to detect and list PCI devices and their information."
 authors = [ "Gibson Pilconis", "shibedrill" ]
 license = "BSD-3-Clause"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2021"
 homepage = "https://github.com/gibsonpil/libpci-rs"
 documentation = "https://docs.rs/libpci-rs"
@@ -17,9 +17,17 @@ categories = [ "api-bindings", "hardware-support", "os" ]
 default = ["pciids"]
 pciids = []
 
+[lib]
+path = "src/lib/lib.rs"
+
+[[bin]]
+name = "lspci"
+path = "src/bin/lspci.rs"
+
 [dependencies]
 bindgen = "0.69.4"
 cfg-if = "1.0.0"
+clap = { version = "4.5.4", features = ["derive"] }
 cxx = { version = "1.0.119", features = ["c++17"] }
 lazy_static = "1.4.0"
 once_cell = "1.19.0"

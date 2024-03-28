@@ -38,7 +38,7 @@ use std::fmt::{Display, Formatter, Result};
 use std::io::ErrorKind;
 use std::num::ParseIntError;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 /// A structure representing the physical address of a PCI device.
 pub struct PciDeviceAddress {
     /// One of a set of "segments" containing multiple PCI buses.
@@ -112,7 +112,7 @@ impl TryFrom<String> for PciDeviceAddress {
 /// | Programming Interface | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
 /// | Revision              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PciDeviceHardware {
     /// The address of a PCI device.  
     /// ***NOTICE:*** The [availability](#Availability) of this field varies by platform.
