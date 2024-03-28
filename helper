@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+if command -V python3 &> /dev/null; then
+    PYTHON=python3
+elif command -V python &> /dev/null; then
+    PYTHON=python
+else
+    echo Could not find a Python interpreter.
+    exit 1 # error
+fi
+
+$PYTHON 'helper.py' $@

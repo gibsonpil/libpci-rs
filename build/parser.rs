@@ -40,7 +40,7 @@ cfg_if::cfg_if! {
     }
 }
 
-// A lot of inspiration for the overall architecture of this script
+// A lot of inspiration for the overall architecture of this helper
 // (i.e. using PHF with quote) was taken from here:
 // https://github.com/lienching/pci-ids.rs/blob/main/build.rs
 

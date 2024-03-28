@@ -1,15 +1,14 @@
-# This is just a quick and dirty Python script to run clang-format
-# on all the backend source files.
-
+from scripts.common import try_command
 from glob import glob
-import os
 
-# Format Rust code.
-os.system("cargo fmt")
 
-# Format C++ code.
-sources = (glob("src/backend/**/*.cc", recursive=True) +
-           glob("src/backend/**/*.h", recursive=True))
+def format_code():
+    print("[!] Running rust-fmt...")
+    try_command(["cargo", "format"])
 
-for source in sources:
-    os.system(f"clang-format -i --style=file {source}")
+    print("[!] Running clang-format...")
+    sources = (glob("src/backend/**/*.cc", recursive=True) +
+               glob("src/backend/**/*.h", recursive=True))
+
+    for source in sources:
+        try_command(["clang-format", "-i", "--style=file", source])

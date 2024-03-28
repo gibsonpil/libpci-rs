@@ -13,12 +13,27 @@ C++17 backend.
 
 This project uses [Semantic Versioning](https://semver.org/).
 
+### Building
+Building libpci-rs easy. Below is an example of how you might go about it.
+- `git clone --recurse-submodules https://github.com/gibsonpil/libpci-rs.git`
+- `cargo build`
+
+### Build Dependencies
+Aside from the dependencies pulled in by Cargo, libpci-rs requires a few packages be installed on your system,
+some are required and some are only needed if you are trying to do certain things. Notes will be added in for those that aren't always needed.
+- `rustc`
+- `cargo`
+- `clang` (needed for platforms that have a C++ backend)
+- `python3` (needed for helper.py helper script, mostly only needed by devs)
+
 ### Platform Support
-- Windows
-- Linux
-- macOS/Darwin
-- FreeBSD
-- DragonflyBSD
-- OpenBSD
-- NetBSD
-- Haiku
+| Platform     | OS API         | Backend Language |
+|--------------|----------------|------------------|
+| Windows      | setupapi       | Rust backend     |
+| Linux        | procfs         | Rust backend     |
+| macOS/Darwin | IOKit          | C++ backend      |
+| FreeBSD      | /dev/pci       | C++ backend      |
+| DragonflyBSD | /dev/pci       | C++ backend      |
+| OpenBSD      | /dev/pci       | C++ backend      |
+| NetBSD       | /dev/pci       | C++ backend      |
+| Haiku        | /dev/misc/poke | C++ backend      |
