@@ -30,7 +30,7 @@ some are required and some are only needed if you are trying to do certain thing
 | Platform     | OS API         | Backend Language |
 |--------------|----------------|------------------|
 | Windows      | setupapi       | Rust backend     |
-| Linux        | procfs         | Rust backend     |
+| Linux        | sysfs          | Rust backend     |
 | macOS/Darwin | IOKit          | C++ backend      |
 | FreeBSD      | /dev/pci       | C++ backend      |
 | DragonflyBSD | /dev/pci       | C++ backend      |
