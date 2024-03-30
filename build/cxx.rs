@@ -3,6 +3,20 @@
 
 #![allow(dead_code)]
 
+macro_rules! build_platform {
+    ($name:literal) => {
+        cxx_build::bridge("src/lib/backend/bridge.rs")
+            .file(concat!("src/lib/backend/", $name, "/", $name, ".cc"))
+            .std("c++17")
+            .warnings(true)
+            .extra_warnings(true)
+            .cargo_warnings(true)
+            .compile(concat!("libpci-rs-", $name));
+
+        println!(concat!("cargo:rerun-if-changed=", $name));
+    };
+}
+
 #[allow(unreachable_code)]
 pub fn build_cxx_module() {
     cfg_if::cfg_if! {
@@ -22,39 +36,20 @@ pub fn build_cxx_module() {
 }
 
 pub fn build_cxx_darwin() {
-    cxx_build::bridge("src/lib/backend/bridge.rs")
-        .file("src/lib/backend/darwin/darwin.cc")
-        .std("c++17")
-        .compile("libpci-rs-darwin");
+    build_platform!("darwin");
 
-    println!("cargo:rerun-if-changed=src/lib/backend/darwin/darwin.cc");
     println!("cargo:rustc-flags=-l framework=CoreFoundation");
     println!("cargo:rustc-flags=-l framework=IOKit");
 }
 
 pub fn build_cxx_freebsd() {
-    cxx_build::bridge("src/lib/backend/bridge.rs")
-        .file("src/lib/backend/freebsd/freebsd.cc")
-        .std("c++17")
-        .compile("libpci-rs-freebsd");
-
-    println!("cargo:rerun-if-changed=src/lib/backend/freebsd/freebsd.cc");
+    build_platform!("freebsd");
 }
 
 pub fn build_cxx_netbsd() {
-    cxx_build::bridge("src/lib/backend/bridge.rs")
-        .file("src/lib/backend/netbsd/netbsd.cc")
-        .std("c++17")
-        .compile("libpci-rs-netbsd");
-
-    println!("cargo:rerun-if-changed=src/lib/backend/netbsd/netbsd.cc");
+    build_platform!("netbsd");
 }
 
 pub fn build_cxx_haiku() {
-    cxx_build::bridge("src/lib/backend/bridge.rs")
-        .file("src/lib/backend/haiku/haiku.cc")
-        .std("c++17")
-        .compile("libpci-rs-haiku");
-
-    println!("cargo:rerun-if-changed=src/lib/backend/haiku/haiku.cc");
+    build_platform!("haiku");
 }
