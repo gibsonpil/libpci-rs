@@ -1,6 +1,8 @@
 // Copyright (c) 2024 Gibson Pilconis, shibedrill, and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
+#ifdef __HAIKU__
+
 #include <fcntl.h>
 #include <iostream>
 
@@ -75,3 +77,5 @@ CXXPciDeviceHardware _get_field_availability() {
     CXXPciDeviceHardware res = {};
     return res;
 }
+
+#endif // __HAIKU__

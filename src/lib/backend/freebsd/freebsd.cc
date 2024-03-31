@@ -4,6 +4,9 @@
 // This module is for BSD operating systems that share FreeBSD's PCIIO calls,
 // such as DragonFlyBSD.
 
+#if defined(__FreeBSD__) || defined(__DragonFly__)
+#define MODULE_FOUND
+
 #include <errno.h>
 #include <iostream>
 #include <unistd.h>
@@ -81,3 +84,5 @@ CXXPciDeviceHardware _get_field_availability() {
     CXXPciDeviceHardware hardware = {};
     return hardware;
 }
+
+#endif // __FreeBSD__ || __DragonFly__

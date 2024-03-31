@@ -25,6 +25,8 @@ some are required and some are only needed if you are trying to do certain thing
 - `cargo`
 - `clang` (needed for platforms that have a C++ backend)
 - `python3` (needed for helper.py helper script, mostly only needed by devs)
+- `clang-format` (needed for formatting C++ code, applies styling requirement)
+- `cppcheck` (needed for C++ code linting)
 
 ### Platform Support
 | Platform     | OS API         | Backend Language |

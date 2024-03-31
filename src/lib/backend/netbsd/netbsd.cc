@@ -8,6 +8,8 @@
 // the functions within libpci would use, and since OpenBSD doesn't have
 // libpci, it makes more sense to not use it and keep this all in one module.
 
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -150,3 +152,5 @@ CXXPciDeviceHardware _get_field_availability() {
     CXXPciDeviceHardware hardware = {};
     return hardware;
 }
+
+#endif // defined(__NetBSD__) || defined(__OpenBSD__)

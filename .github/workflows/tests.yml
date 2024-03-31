@@ -13,13 +13,15 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-      with: 
-        submodules: recursive
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test -- --color always --nocapture
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test -- --color always --nocapture
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
   windows:
     runs-on: windows-latest
     steps:
@@ -30,6 +32,8 @@ jobs:
         run: cargo build --verbose
       - name: Run tests
         run: cargo test -- --color always --nocapture
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
   macos:
     runs-on: macos-12
     steps:
@@ -40,6 +44,8 @@ jobs:
         run: cargo build --verbose
       - name: Run tests
         run: cargo test -- --color always --nocapture
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
   macos-arm:
     runs-on: macos-14 # macos-14 is an ARM runner
     steps:
@@ -50,8 +56,10 @@ jobs:
         run: cargo build --verbose
       - name: Run tests
         run: cargo test -- --color always --nocapture
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
   freebsd:
-    runs-on: ubuntu-latest # Ubuntu w/ FreeBSD-vm from vmactions 
+    runs-on: ubuntu-latest # Ubuntu w/ FreeBSD-vm from vmactions
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,13 +68,14 @@ jobs:
         id: freebsd
         uses: vmactions/freebsd-vm@v1
         with:
-           prepare : |
-             pkg install -y rust llvm
-           run : |
-             cargo build --verbose
-             cargo test -- --color always --nocapture
+          prepare : |
+            pkg install -y rust llvm
+          run : |
+            cargo build --verbose
+            cargo test -- --color always --nocapture
+            cargo clippy --all-targets --all-features -- -D warnings
   dragonflybsd:
-    runs-on: ubuntu-latest # Ubuntu w/ DragonFlyBSD-vm from vmactions 
+    runs-on: ubuntu-latest # Ubuntu w/ DragonFlyBSD-vm from vmactions
     steps:
       - uses: actions/checkout@v3
         with:
@@ -75,14 +84,15 @@ jobs:
         id: dragonflybsd
         uses: vmactions/dragonflybsd-vm@v1
         with:
-           prepare : |
-             pkg install -y rust llvm
-             pkg upgrade -y # DragonFlyBSD is sensitive to out of date packages for some reaosn.
-           run : |
-             cargo build --verbose
-             cargo test -- --color always --nocapture
+          prepare : |
+            pkg install -y rust llvm
+            pkg upgrade -y # DragonFlyBSD is sensitive to out of date packages for some reaosn.
+          run : |
+            cargo build --verbose
+            cargo test -- --color always --nocapture
+            cargo clippy --all-targets --all-features -- -D warnings
   netbsd:
-    runs-on: ubuntu-latest # Ubuntu w/ NetBSD-vm from vmactions 
+    runs-on: ubuntu-latest # Ubuntu w/ NetBSD-vm from vmactions
     steps:
       - uses: actions/checkout@v3
         with:
@@ -91,13 +101,14 @@ jobs:
         id: netbsd
         uses: vmactions/netbsd-vm@v1
         with:
-           prepare : |
-             /usr/sbin/pkg_add -I rust llvm
-           run : |
-             cargo build --verbose
-             cargo test -- --color always --nocapture
+          prepare : |
+            /usr/sbin/pkg_add -I rust llvm
+          run : |
+            cargo build --verbose
+            cargo test -- --color always --nocapture
+            cargo clippy --all-targets --all-features -- -D warnings
   openbsd:
-    runs-on: ubuntu-latest # Ubuntu w/ OpenBSD-vm from vmactions 
+    runs-on: ubuntu-latest # Ubuntu w/ OpenBSD-vm from vmactions
     steps:
       - uses: actions/checkout@v3
         with:
@@ -106,8 +117,9 @@ jobs:
         id: openbsd
         uses: vmactions/openbsd-vm@v1
         with:
-           prepare : 
-             pkg_add -I rust llvm
-           run : |
-             cargo build --verbose
-             cargo test -- --color always --nocapture
+          prepare :
+            pkg_add -I rust llvm
+          run : |
+            cargo build --verbose
+            cargo test -- --color always --nocapture
+            cargo clippy --all-targets --all-features -- -D warnings

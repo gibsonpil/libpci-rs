@@ -2,6 +2,9 @@
  * Copyright 2005, Oscar Lesta. All rights reserved.
  * Distributed under the terms of the MIT License.
  */
+
+#ifdef __HAIKU__
+
 #ifndef _POKE_DRIVER_H_
 #define _POKE_DRIVER_H_
 
@@ -62,3 +65,4 @@ typedef struct {
 } mem_map_args;
 
 #endif // _POKE_DRIVER_H_
+#endif // __HAIKU__

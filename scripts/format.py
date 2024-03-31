@@ -5,13 +5,24 @@ from scripts.common import try_command
 from glob import glob
 
 
-def format_code():
+def format_code(args) -> None:
+    # All the code here is platform agnostic
+    if not args.agnostic:
+        return
+
     print("[!] Running rust-fmt...")
-    try_command(["cargo", "fmt"])
+    if args.dry_run:
+        try_command(["cargo", "fmt"])
+    else:
+        try_command(["cargo", "fmt", "--", "--check"])
 
     print("[!] Running clang-format...")
     sources = (glob("src/lib/backend/**/*.cc", recursive=True) +
                glob("src/lib/backend/**/*.h", recursive=True))
 
     for source in sources:
-        try_command(["clang-format", "-i", "--style=file", source])
+        if args.dry_run:
+            try_command(["clang-format", "--dry-run", "-Werror", "-i", "--style=file", source])
+        else:
+            try_command(["clang-format", "-i", "--style=file", source])
+

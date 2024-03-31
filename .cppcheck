@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <builddir>project-cppcheck-build-dir</builddir>
+    <analyze-all-vs-configs>false</analyze-all-vs-configs>
+    <check-headers>false</check-headers>
+    <check-unused-templates>true</check-unused-templates>
+    <max-ctu-depth>2</max-ctu-depth>
+    <max-template-recursion>100</max-template-recursion>
+    <includedir>
+        <dir name="../"/>
+    </includedir>
+    <paths>
+        <dir name="src/lib/backend"/>
+    </paths>
+    <suppressions>
+        <suppression>missingInclude</suppression>
+        <suppression>unusedStructMember</suppression>
+    </suppressions>
+    <project-name>project</project-name>
+</project>

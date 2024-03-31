@@ -6,6 +6,8 @@
 // posts. If you have experience with IOKit and have found anything incorrect in
 // this file, please make a pull request!
 
+#ifdef __APPLE__
+
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 
@@ -171,3 +173,5 @@ CXXPciDeviceHardware _get_field_availability() {
 #endif
     return hardware;
 }
+
+#endif // __APPLE__

@@ -1,0 +1,24 @@
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+name: Platform agnostic code checks
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+      - name: Check formatting
+        run: ./helper --dry-run --agnostic format
+      - name: Lint code
+        run: ./helper --dry-run --agnostic lint
