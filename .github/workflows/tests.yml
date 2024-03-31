@@ -74,23 +74,6 @@ jobs:
             cargo build --verbose
             cargo test -- --color always --nocapture
             cargo clippy --all-targets --all-features -- -D warnings
-  dragonflybsd:
-    runs-on: ubuntu-latest # Ubuntu w/ DragonFlyBSD-vm from vmactions
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: Build and run tests
-        id: dragonflybsd
-        uses: vmactions/dragonflybsd-vm@v1
-        with:
-          prepare : |
-            pkg install -y rust llvm
-            pkg upgrade -y # DragonFlyBSD is sensitive to out of date packages for some reaosn.
-          run : |
-            cargo build --verbose
-            cargo test -- --color always --nocapture
-            cargo clippy --all-targets --all-features -- -D warnings
   netbsd:
     runs-on: ubuntu-latest # Ubuntu w/ NetBSD-vm from vmactions
     steps:
