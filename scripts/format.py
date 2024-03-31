@@ -6,10 +6,6 @@ from glob import glob
 
 
 def format_code(args) -> None:
-    # All the code here is platform agnostic
-    if not args.agnostic:
-        return
-
     print("[!] Running rust-fmt...")
     if args.dry_run:
         try_command(["cargo", "fmt"])
