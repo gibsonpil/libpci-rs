@@ -1,0 +1,15 @@
+---
+Checks:          '-*,
+                  clang-diagnostic-*,
+                  clang-analyzer-*,
+                  cppcoreguidelines-*,
+                  clang-analyzer-*,
+                  bugprone-*,
+                  readability-*,
+                  performance-*,
+                  -readability-else-after-return,
+'
+WarningsAsErrors: 'cppcoreguidelines-*,clang-analyzer-*,bugprone-*'
+SystemHeaders:   false
+...
+

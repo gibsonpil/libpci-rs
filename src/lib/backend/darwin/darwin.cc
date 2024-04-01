@@ -19,8 +19,15 @@
 
 #include "libpci-rs/src/lib/backend/include/common.h"
 
-#define ToCFDataRef(x) static_cast<CFDataRef>(x)
+template <typename T> constexpr CFDataRef TO_CFDATAREF(T ref) {
+    return static_cast<CFDataRef>(ref);
+}
 
+static constexpr int DARWIN_CLASS = 16;
+static constexpr int DARWIN_SUBCLASS = 8;
+static constexpr int EIGHT_BIT_MASK = 0xFF;
+
+// Thanks for the pointless deprecation Apple.
 #if(MAC_OS_X_VERSION_MAX_ALLOWED < 120000)
 #define kIOMainPortDefault kIOMasterPortDefault
 #endif
@@ -28,8 +35,8 @@
 // __arm__ should be fairly standard on ARM, but
 // it wasn't defined on my Macbook Air while __arm64__
 // was, so I'm adding in this code just to be safe.
-#ifdef __arm64__
-#define __arm__
+#if defined(__arm64__) && !defined(__arm__)
+#define __arm__ // NOLINT: Defines __arm__ only on platforms where it should be defined
 #endif
 
 union IOPCIAddressSpace {
@@ -83,12 +90,16 @@ CFTypeRef get_property_type_ref(io_service_t service, const CFStringRef key) {
 template <typename T> const T *get_property_ptr(io_service_t service, const CFStringRef key) {
     CFTypeRef type_ref = get_property_type_ref(service, key);
 
-    // type_ref == NULL evaluates first, making this statement safe.
-    if(type_ref == NULL || CFGetTypeID(type_ref) != CFDataGetTypeID())
-        return NULL; // None of these properties are normally 0, so returning 0
-                     // is fine.
+    if(type_ref == NULL) {
+        return 0;
+    }
+    if(CFGetTypeID(type_ref) != CFDataGetTypeID()) {
+        CFRelease(type_ref);
+        return 0;
+    }
 
-    const T *data = reinterpret_cast<const T *>((CFDataGetBytePtr(ToCFDataRef(type_ref))));
+    // NOLINTNEXTLINE: reinterpret_cast is needed to handle opaque data.
+    const T *data = reinterpret_cast<const T *>((CFDataGetBytePtr(TO_CFDATAREF(type_ref))));
     CFRelease(type_ref);
     return data;
 }
@@ -96,22 +107,25 @@ template <typename T> const T *get_property_ptr(io_service_t service, const CFSt
 template <typename T> const T get_property(io_service_t service, const CFStringRef key) {
     CFTypeRef type_ref = get_property_type_ref(service, key);
 
-    // type_ref == NULL evaluates first, making this statement safe.
-    if(type_ref == NULL || CFGetTypeID(type_ref) != CFDataGetTypeID())
-        return 0; // None of these properties are normally 0, so returning 0 is
-                  // fine.
+    if(type_ref == NULL) {
+        return 0;
+    } else if(CFGetTypeID(type_ref) != CFDataGetTypeID()) {
+        CFRelease(type_ref);
+        return 0;
+    }
 
-    T data = *reinterpret_cast<const T *>((CFDataGetBytePtr(ToCFDataRef(type_ref))));
+    // NOLINTNEXTLINE: reinterpret_cast is needed to handle opaque data.
+    T data = *reinterpret_cast<const T *>((CFDataGetBytePtr(TO_CFDATAREF(type_ref))));
     CFRelease(type_ref);
     return data;
 }
 
 CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
     rust::Vec<CXXPciDeviceHardware> pci_devices;
-    CFMutableDictionaryRef matching_dictionary;
-    io_service_t service;
-    io_iterator_t iter;
-    kern_return_t ret;
+    CFMutableDictionaryRef matching_dictionary = nullptr;
+    io_service_t service = 0;
+    io_iterator_t iter = 0;
+    kern_return_t ret = 0;
 
     matching_dictionary = IOServiceMatching("IOPCIDevice");
     if(matching_dictionary == NULL) {
@@ -123,7 +137,7 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
         return CXXPciEnumerationError::OsError;
     }
 
-    while((service = IOIteratorNext(iter))) {
+    while((service = IOIteratorNext(iter)) != 0U) {
         CXXPciDeviceHardware device = {};
 
         device.vendor_id = get_property<uint16_t>(service, CFSTR("vendor-id"));
@@ -143,9 +157,9 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
         // |  |-> Class
         // |-> Unknown
         uint32_t darwin_class_code = get_property<uint32_t>(service, CFSTR("class-code"));
-        device.class_id = (darwin_class_code >> 16) & 0xFF;
-        device.subclass = (darwin_class_code >> 8) & 0xFF;
-        device.programming_interface = darwin_class_code & 0xFF;
+        device.class_id = (darwin_class_code >> DARWIN_CLASS) & EIGHT_BIT_MASK;
+        device.subclass = (darwin_class_code >> DARWIN_SUBCLASS) & EIGHT_BIT_MASK;
+        device.programming_interface = darwin_class_code & EIGHT_BIT_MASK;
 
         // Fetching BDF values only works on x86_64.
 #ifndef __arm__
