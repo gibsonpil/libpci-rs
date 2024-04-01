@@ -9,11 +9,11 @@ use libpci_rs::pci::*;
 #[derive(Parser)]
 #[command(version, about = "A reimplementation of lspci using libpci-rs.", long_about = None)]
 struct Args {
-    #[arg(short, long, action = clap::ArgAction::Count)]
+    #[arg(short, long, help = "Verbosity (use more than once for more details)", action = clap::ArgAction::Count)]
     verbose: u8,
-    #[arg(short, long, action = clap::ArgAction::Count)]
+    #[arg(short, long, help = "Numeracy (use more than once for different options)", action = clap::ArgAction::Count)]
     numeric: u8,
-    #[arg(short, long)]
+    #[arg(short, long, help = "Display a tree view")]
     tree: bool,
 }
 
@@ -46,44 +46,110 @@ fn tree_from_vec(devices: Vec<PciDeviceHardware>) -> PciDeviceTree {
 }
 
 fn print_tree(tree: PciDeviceTree) {
-    // TODO: Add logic to draw box characters.
-    // This whole thing sucks so I don't think I want to even begin
-    // doing this. If I were using any data structure worth its weight
-    // this would be easy, but I can't use a normal tree because my life
-    // sucks.
 
-    //const OTHER_CHILD: &str = "│   ";   // prefix: pipe
-    //const OTHER_ENTRY: &str = "├── ";   // connector: tee
-    //const FINAL_CHILD: &str = "    ";   // prefix: no more siblings
-    //const FINAL_ENTRY: &str = "└── ";   // connector: elbow
+    // WARNING: This code SUCKS
+    // don't complain unless you're willing to fix it.
+    // (please fix it.)
+    // - shibedrill
 
-    println!("PCI root");
+    const OTHER_CHILD: &str = "│   "; // prefix: pipe
+    const OTHER_ENTRY: &str = "├── "; // connector: tee
+    const FINAL_CHILD: &str = "    "; // prefix: no more siblings
+    const FINAL_ENTRY: &str = "└── "; // connector: elbow
 
-    #[allow(unused_assignments)]
-    let mut level: usize = 0;
+    println!("PCI root:");
 
-    // Remove this once we add the thingy.
-    #[allow(unused_variables)]
     for (domain_index, (domain_value, domain_entry)) in tree.clone().into_iter().enumerate() {
-        level = 0;
-        print!("{}", "  ".repeat(level));
-        println!("{:04x}", domain_value);
+        let last_domain = domain_index == tree.len() - 1;
+        print!("{}", {
+            if last_domain {
+                FINAL_ENTRY
+            } else {
+                OTHER_ENTRY
+            }
+        });
+        println!("0x{:04x}:", domain_value);
         for (bus_index, (bus_value, bus_entry)) in domain_entry.clone().into_iter().enumerate() {
-            level = 1;
-            print!("{}", "  ".repeat(level));
-            println!("{:02x}", bus_value);
+            let last_bus = bus_index == domain_entry.len() - 1;
+            print!("{}", {
+                if last_domain {
+                    FINAL_CHILD
+                } else {
+                    OTHER_CHILD
+                }
+            });
+            print!("{}", {
+                if last_bus {
+                    FINAL_ENTRY
+                } else {
+                    OTHER_ENTRY
+                }
+            });
+            println!("0x{:02x}:", bus_value);
             for (device_index, (device_value, device_entry)) in
                 bus_entry.clone().into_iter().enumerate()
             {
-                level = 2;
-                print!("{}", "  ".repeat(level));
-                println!("{:02x}", device_value);
+                let last_device = device_index == bus_entry.len() - 1;
+                print!("{}", {
+                    if last_domain {
+                        FINAL_CHILD
+                    } else {
+                        OTHER_CHILD
+                    }
+                });
+                print!("{}", {
+                    if last_bus {
+                        FINAL_CHILD
+                    } else {
+                        OTHER_CHILD
+                    }
+                });
+                print!("{}", {
+                    if last_device {
+                        FINAL_ENTRY
+                    } else {
+                        OTHER_ENTRY
+                    }
+                });
+                println!("0x{:02x}:", device_value);
                 for (function_index, (function_value, function_entry)) in
                     device_entry.clone().into_iter().enumerate()
                 {
-                    level = 3;
-                    print!("{}", "  ".repeat(level));
-                    println!("{:01x} {}", function_value, numeracy_1(function_entry));
+                    let last_function = function_index == device_entry.len() - 1;
+                    print!("{}", {
+                        if last_domain {
+                            FINAL_CHILD
+                        } else {
+                            OTHER_CHILD
+                        }
+                    });
+                    print!("{}", {
+                        if last_bus {
+                            FINAL_CHILD
+                        } else {
+                            OTHER_CHILD
+                        }
+                    });
+                    print!("{}", {
+                        if last_device {
+                            FINAL_CHILD
+                        } else {
+                            OTHER_CHILD
+                        }
+                    });
+                    print!("{}", {
+                        if last_function {
+                            FINAL_ENTRY
+                        } else {
+                            OTHER_ENTRY
+                        }
+                    });
+                    println!(
+                        "0x{:01x}: [{:04x}:{:04x}]",
+                        function_value,
+                        function_entry.vendor_id,
+                        function_entry.device_id,
+                    );
                 }
             }
         }
@@ -218,9 +284,16 @@ fn main() {
             2.. => numeracy_2,
         };
 
+        //let line2_formatter: fn(PciDeviceHardware) -> String = match args.verbose {
+        //    0 => verbosity_0,
+        //    1 => verbosity_1,
+        //    2.. => verbosity_3,
+        //}
+
         match args.tree {
             true => {
                 devices.retain(|dev| dev.address.is_some());
+                assert!(!devices.is_empty(), "Error: No devices with accessible addresses.");
                 let device_tree: PciDeviceTree = tree_from_vec(devices);
                 print_tree(device_tree);
             }
