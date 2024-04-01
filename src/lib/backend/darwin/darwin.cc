@@ -92,8 +92,7 @@ template <typename T> const T *get_property_ptr(io_service_t service, const CFSt
 
     if(type_ref == NULL) {
         return 0;
-    }
-    if(CFGetTypeID(type_ref) != CFDataGetTypeID()) {
+    } else if(CFGetTypeID(type_ref) != CFDataGetTypeID()) {
         CFRelease(type_ref);
         return 0;
     }
