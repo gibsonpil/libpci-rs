@@ -1,6 +1,12 @@
 // Copyright (c) 2024 Gibson Pilconis, shibedrill, and contributors
 // SPDX-License-Identifier: BSD-3-Clause
 
+//! # lspci
+//! This `lspci` is a Rust reimplementation of the `lspci` from `libpci`,
+//! using the `libpci-rs` backend. It offers a limited subset of the
+//! functionality from the original `lspci`. See the [args](crate::Args) 
+//! section for usage information.
+
 use std::collections::BTreeMap;
 
 use clap::{command, Parser};
@@ -9,23 +15,34 @@ use libpci_rs::pci::*;
 #[derive(Parser)]
 #[command(version, about = "A reimplementation of lspci using libpci-rs.", long_about = None)]
 struct Args {
+    /// Verbosity (`-v`, `--verbose`): Increases the amount of supplementary 
+    /// info printed. Use multiple flags for more info.
     #[arg(short, long, help = "Verbosity (use more than once for more details)", action = clap::ArgAction::Count)]
     verbose: u8,
+    /// Numeracy (`-n`, `--numeric`): Change the format of the output to use
+    /// just numbers, or numbers and text. Use more flags for different 
+    /// formats.
     #[arg(short, long, help = "Numeracy (use more than once for different options)", action = clap::ArgAction::Count)]
     numeric: u8,
+    /// Tree (`-t`, `--tree`): Display a tree view. Requires at least one
+    /// device with an obtainable address.
     #[arg(short, long, help = "Display a tree view")]
     tree: bool,
 }
 
-/// Tree
-/// \- Branch<Domain, Children>
-///    \- Branch<Bus, Children>
-///       \- Branch<Device, Children>
-///          \- Leaf<Function, PciDeviceHardware>
+// Tree
+// \- Branch<Domain, Children>
+//    \- Branch<Bus, Children>
+//       \- Branch<Device, Children>
+//          \- Leaf<Function, PciDeviceHardware>
 
+// Key: Domain number, Value: Domain (contains all child buses)
 type PciDeviceTree = BTreeMap<u32, TreeDomain>;
+// Key: Bus number, Value: Bus (contains all child devices)
 type TreeDomain = BTreeMap<u8, TreeBus>;
+// Key: Device number, Value: Device (contains all child functions)
 type TreeBus = BTreeMap<u8, TreeDevice>;
+// Key: Function number, Value: PciDeviceHardware (struct representing the device)
 type TreeDevice = BTreeMap<u8, PciDeviceHardware>;
 
 fn tree_from_vec(devices: Vec<PciDeviceHardware>) -> PciDeviceTree {
@@ -46,7 +63,6 @@ fn tree_from_vec(devices: Vec<PciDeviceHardware>) -> PciDeviceTree {
 }
 
 fn print_tree(tree: PciDeviceTree) {
-
     // WARNING: This code SUCKS
     // don't complain unless you're willing to fix it.
     // (please fix it.)
@@ -146,9 +162,7 @@ fn print_tree(tree: PciDeviceTree) {
                     });
                     println!(
                         "0x{:01x}: [{:04x}:{:04x}]",
-                        function_value,
-                        function_entry.vendor_id,
-                        function_entry.device_id,
+                        function_value, function_entry.vendor_id, function_entry.device_id,
                     );
                 }
             }
@@ -293,7 +307,10 @@ fn main() {
         match args.tree {
             true => {
                 devices.retain(|dev| dev.address.is_some());
-                assert!(!devices.is_empty(), "Error: No devices with accessible addresses.");
+                assert!(
+                    !devices.is_empty(),
+                    "Error: No devices with accessible addresses."
+                );
                 let device_tree: PciDeviceTree = tree_from_vec(devices);
                 print_tree(device_tree);
             }
