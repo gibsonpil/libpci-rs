@@ -1,0 +1,22 @@
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+name: Verify MSRV compatibility
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install cargo-msrv.
+        run: cargo install cargo-msrv
+      - name: Run cargo-msrv.
+        run: cargo msrv verify

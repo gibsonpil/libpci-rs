@@ -12,7 +12,7 @@ cfg_if! {
         use linux::{_get_field_availability, _get_pci_list};
     } else if #[cfg(target_os = "windows")] {
         mod windows;
-        use windows::{_get_field_availability, _get_pci_list};
+        use crate::backend::windows::{_get_field_availability, _get_pci_list};
     } else {
         // It is safe to assume we are probably running under a C++ backend.
         mod bridge;
