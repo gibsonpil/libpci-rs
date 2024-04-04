@@ -87,13 +87,13 @@ CFTypeRef get_property_type_ref(io_service_t service, const CFStringRef key) {
     return IORegistryEntrySearchCFProperty(service, kIOServicePlane, key, NULL, 0);
 }
 
+// NOLINTNEXTLINE: won't compile on x64 without const qualifier on return value.
 template <typename T> const T *get_property_ptr(io_service_t service, const CFStringRef key) {
     CFTypeRef type_ref = get_property_type_ref(service, key);
 
     if(type_ref == NULL) {
         return 0;
-    }
-    if(CFGetTypeID(type_ref) != CFDataGetTypeID()) {
+    } else if(CFGetTypeID(type_ref) != CFDataGetTypeID()) {
         CFRelease(type_ref);
         return 0;
     }
@@ -104,6 +104,7 @@ template <typename T> const T *get_property_ptr(io_service_t service, const CFSt
     return data;
 }
 
+// NOLINTNEXTLINE: won't compile on x64 without const qualifier on return value.
 template <typename T> const T get_property(io_service_t service, const CFStringRef key) {
     CFTypeRef type_ref = get_property_type_ref(service, key);
 

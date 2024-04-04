@@ -4,6 +4,6 @@
 /target
 /Cargo.lock
 /.idea
-/src/lib/backend/c/cmake-build*
+/src/lib/backend/bridge.rs.h
 /.vscode
 /src/lib/backend/bridge.rs.h
