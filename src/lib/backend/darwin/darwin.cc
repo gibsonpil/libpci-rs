@@ -53,15 +53,15 @@ union IOPCIAddressSpace {
         unsigned int functionNum : 3;
         unsigned int registerNum : 8;
 #elif __LITTLE_ENDIAN__
-        unsigned int registerNum : 8;
-        unsigned int functionNum : 3;
-        unsigned int deviceNum   : 5;
-        unsigned int busNum      : 8;
-        unsigned int space       : 2;
-        unsigned int resv        : 3;
-        unsigned int t           : 1;
-        unsigned int prefetch    : 1;
-        unsigned int reloc       : 1;
+        unsigned int registerNum         : 8;
+        unsigned int functionNum         : 3;
+        unsigned int deviceNum           : 5;
+        unsigned int busNum              : 8;
+        unsigned int space               : 2;
+        unsigned int resv                : 3;
+        unsigned int t                   : 1;
+        unsigned int prefetch            : 1;
+        unsigned int reloc               : 1;
 #endif
     } s;
     struct {

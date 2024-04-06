@@ -39,24 +39,27 @@
 // TODO: handle multiple domains
 
 #ifdef __OpenBSD__
-#define PCI_SUBSYS_VENDOR(x) PCI_VENDOR(x)
-#define PCI_SUBSYS_ID(x)     PCI_PRODUCT(x)
-#define PCI_IOC_BDF_CFGREAD  PCIOCREAD
-#define PCI_DEV              "/dev/pci"
+constexpr uint32_t PCI_SUBSYS_VENDOR(uint32_t id) { return PCI_VENDOR(id); }
+constexpr uint32_t PCI_SUBSYS_ID(uint32_t id) { return PCI_PRODUCT(id); }
+constexpr auto PCI_IOC_BDF_CFGREAD = PCIOCREAD;
+constexpr auto PCI_DEV = "/dev/pci";
 #else
-#define PCI_DEV "/dev/pci0"
+constexpr auto PCI_DEV = "/dev/pci0";
 #endif
 
-int pci_fd;
+constexpr auto PCI_BUS_LENGTH = 256;
+constexpr auto PCI_DEVICE_LENGTH = 32;
+
+static int pci_fd; // NOLINT
 
 int pci_read(int bus, int dev, int func, uint32_t reg, uint32_t *out) {
-    int status;
+    int status = 0;
 #ifdef __OpenBSD__
     struct pci_io io = {};
     io.pi_sel.pc_bus = bus;
     io.pi_sel.pc_dev = dev;
     io.pi_sel.pc_func = func;
-    io.pi_reg = reg;
+    io.pi_reg = static_cast<int>(reg);
     io.pi_width = 4;
 #else
     struct pciio_bdf_cfgreg io = {};
@@ -79,7 +82,9 @@ int pci_read(int bus, int dev, int func, uint32_t reg, uint32_t *out) {
 
 std::optional<CXXPciDeviceHardware> pci_read_info(int bus, int dev, int func) {
     CXXPciDeviceHardware device = {};
-    uint32_t id_reg, class_reg, subsys_reg;
+    uint32_t id_reg = 0;
+    uint32_t class_reg = 0;
+    uint32_t subsys_reg = 0;
 
     if(pci_read(bus, dev, func, PCI_ID_REG, &id_reg) != 0)
         return {}; // TODO: treat as error.
@@ -124,16 +129,18 @@ CXXPciEnumerationError _get_pci_list(rust::Vec<CXXPciDeviceHardware> &output) {
 
     // Though this method of discovering PCI devices may seem kind of dumb,
     // it is what the NetBSD developers used in pcictl, so it is kosher.
-    for(int bus = 0; bus < 256; bus++) {
-        for(int dev = 0; dev < 32; dev++) {
-            int nfuncs;
-            uint32_t hdr;
+    for(int bus = 0; bus < PCI_BUS_LENGTH; bus++) {
+        for(int dev = 0; dev < PCI_DEVICE_LENGTH; dev++) {
+            int nfuncs = 0;
+            uint32_t hdr = 0;
 
             // Find out how many functions the device has.
             if(pci_read(bus, dev, 0, PCI_BHLC_REG, &hdr) != 0)
                 continue; // TODO: maybe handle better?
 
-            nfuncs = PCI_HDRTYPE_MULTIFN(hdr) ? 8 : 1;
+            // TODO: figure out the purpose of the magic number 8 and
+            // create a named constant for it.
+            nfuncs = PCI_HDRTYPE_MULTIFN(hdr) ? 8 : 1; // NOLINT
 
             for(int func = 0; func < nfuncs; func++) {
                 auto info = pci_read_info(bus, dev, func);
