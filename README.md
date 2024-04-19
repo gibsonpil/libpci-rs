@@ -28,6 +28,14 @@ some are required and some are only needed if you are trying to do certain thing
 - `clang-format` (needed for formatting C++ code, applies styling requirement)
 - `cppcheck` (needed for C++ code linting)
 
+### Documentation
+Documentation is included in the code itself, in the form of Rustdoc comments. It includes the following useful pieces of information:
+- Total coverage of the public API
+- Code examples for some common use cases
+- Detailed information on per-platform field availability
+
+To view the docs, clone the repo and enter the directory, before running `cargo doc --open`.
+
 ### Platform Support
 | Platform     | OS API         | Backend Language |
 |--------------|----------------|------------------|
