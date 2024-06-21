@@ -160,16 +160,25 @@ pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
 
     for entry in data {
         if let Some(value) = try_level(entry, 0, class) {
+            // New class found. Add last parsed subclass to current class,
+            // add current class to results, reset subclass, and begin parsing new class
+            if let Some(subclass) = current_subclass.take() {
+                current_class.as_mut().unwrap().subclasses.push(subclass);
+            }
             if let Some(class) = current_class.take() {
                 result.entry(class.id, &quote!(#class).to_string());
             }
+
             current_class = Some(value);
+            current_subclass = None;
         } else if let Some(value) = try_level(entry, 1, subclass) {
+            // New subclass, add previous subclass to current class, and begin parsing new subclass
             if let Some(subclass) = current_subclass.take() {
                 current_class.as_mut().unwrap().subclasses.push(subclass);
             }
             current_subclass = Some(value);
         } else if let Some(value) = try_level(entry, 2, prog) {
+            // No children of prog, so can add to subclass as we go
             current_subclass.as_mut().unwrap().progs.push(value);
         }
     }
