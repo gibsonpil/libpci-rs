@@ -131,16 +131,23 @@ pub fn ingest_pci_database(data: Vec<&str>) -> Map<u16> {
 
     for entry in data {
         if let Some(value) = try_level(entry, 0, vendor) {
+            // New vendor found. Add last parsed device to current vendor,
+            // add current vendor to results, reset device, and begin parsing new vendor
+            if let Some(device) = current_device.take() {
+                current_vendor.as_mut().unwrap().devices.push(device);
+            }
             if let Some(vendor) = current_vendor.take() {
                 result.entry(vendor.id, &quote!(#vendor).to_string());
             }
             current_vendor = Some(value);
         } else if let Some(value) = try_level(entry, 1, device) {
+            // New device, add previous device to current vendor, and begin parsing new device
             if let Some(device) = current_device.take() {
                 current_vendor.as_mut().unwrap().devices.push(device);
             }
             current_device = Some(value);
         } else if let Some(value) = try_level(entry, 2, subsystem) {
+            // No children of subsystem, so can add to device as we go
             current_device.as_mut().unwrap().subsystems.push(value);
         }
     }
