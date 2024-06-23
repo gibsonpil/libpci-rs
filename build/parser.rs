@@ -198,7 +198,8 @@ pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
 }
 
 pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
-    let pciids_raw = fs::read_to_string(path).unwrap();
+    let pciids_raw = fs::read_to_string(path)
+        .expect("Failed to read PCI IDs. Are the repository submodules initialized?");
     let pciids_filtered: Vec<&str> = pciids_raw
         .split(LINE_BREAK)
         .filter(|str| !clean(str).starts_with('#')) // Filter comments.
