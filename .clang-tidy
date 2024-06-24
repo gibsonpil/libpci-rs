@@ -8,8 +8,10 @@ Checks:          '-*,
                   readability-*,
                   performance-*,
                   -readability-else-after-return,
+                  -readability-braces-around-statements,
+                  -cppcoreguidelines-pro-type-vararg,
+                  -bugprone-easily-swappable-parameters,
 '
 WarningsAsErrors: 'cppcoreguidelines-*,clang-analyzer-*,bugprone-*'
-SystemHeaders:   false
 ...
 

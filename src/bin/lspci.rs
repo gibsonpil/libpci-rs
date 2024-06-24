@@ -4,7 +4,7 @@
 //! # lspci
 //! This `lspci` is a Rust reimplementation of the `lspci` from `libpci`,
 //! using the `libpci-rs` backend. It offers a limited subset of the
-//! functionality from the original `lspci`. See the [args](crate::Args) 
+//! functionality from the original `lspci`. See the [args](crate::Args)
 //! section for usage information.
 
 use std::collections::BTreeMap;
@@ -15,12 +15,12 @@ use libpci_rs::pci::*;
 #[derive(Parser)]
 #[command(version, about = "A reimplementation of lspci using libpci-rs.", long_about = None)]
 struct Args {
-    /// Verbosity (`-v`, `--verbose`): Increases the amount of supplementary 
+    /// Verbosity (`-v`, `--verbose`): Increases the amount of supplementary
     /// info printed. Use multiple flags for more info.
     #[arg(short, long, help = "Verbosity (use more than once for more details)", action = clap::ArgAction::Count)]
     verbose: u8,
     /// Numeracy (`-n`, `--numeric`): Change the format of the output to use
-    /// just numbers, or numbers and text. Use more flags for different 
+    /// just numbers, or numbers and text. Use more flags for different
     /// formats.
     #[arg(short, long, help = "Numeracy (use more than once for different options)", action = clap::ArgAction::Count)]
     numeric: u8,
