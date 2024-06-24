@@ -76,17 +76,17 @@ impl TryFrom<String> for PciDeviceAddress {
 /// - Never: Not accessible on the platform.
 ///
 ///
-/// | Field                 | Windows | Linux  | macOS  | macOS (ARM) | OpenBSD  | NetBSD   | DragonflyBSD | FreeBSD |
-/// |-----------------------|---------|--------|--------|-------------|----------|----------|--------------|---------|
-/// | Address               | Always  | Always | Always | Never       | Elevated | Elevated | Always       | Always  |
-/// | Vendor ID             | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Device ID             | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Subvendor ID          | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Subdevice ID          | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Class                 | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Subclass              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Programming Interface | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
-/// | Revision              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  |
+/// | Field                 | Windows | Linux  | macOS  | macOS (ARM) | OpenBSD  | NetBSD   | DragonflyBSD | FreeBSD | Android  |
+/// |-----------------------|---------|--------|--------|-------------|----------|----------|--------------|---------|----------|
+/// | Address               | Always  | Always | Always | Never       | Elevated | Elevated | Always       | Always  | Elevated |
+/// | Vendor ID             | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Device ID             | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Subvendor ID          | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Subdevice ID          | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Class                 | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Subclass              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Programming Interface | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
+/// | Revision              | Always  | Always | Always | Always      | Always   | Always   | Always       | Always  | Elevated |
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PciDeviceHardware {

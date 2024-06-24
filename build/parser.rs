@@ -131,16 +131,23 @@ pub fn ingest_pci_database(data: Vec<&str>) -> Map<u16> {
 
     for entry in data {
         if let Some(value) = try_level(entry, 0, vendor) {
+            // New vendor found. Add last parsed device to current vendor,
+            // add current vendor to results, reset device, and begin parsing new vendor
+            if let Some(device) = current_device.take() {
+                current_vendor.as_mut().unwrap().devices.push(device);
+            }
             if let Some(vendor) = current_vendor.take() {
                 result.entry(vendor.id, &quote!(#vendor).to_string());
             }
             current_vendor = Some(value);
         } else if let Some(value) = try_level(entry, 1, device) {
+            // New device, add previous device to current vendor, and begin parsing new device
             if let Some(device) = current_device.take() {
                 current_vendor.as_mut().unwrap().devices.push(device);
             }
             current_device = Some(value);
         } else if let Some(value) = try_level(entry, 2, subsystem) {
+            // No children of subsystem, so can add to device as we go
             current_device.as_mut().unwrap().subsystems.push(value);
         }
     }
@@ -160,16 +167,25 @@ pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
 
     for entry in data {
         if let Some(value) = try_level(entry, 0, class) {
+            // New class found. Add last parsed subclass to current class,
+            // add current class to results, reset subclass, and begin parsing new class
+            if let Some(subclass) = current_subclass.take() {
+                current_class.as_mut().unwrap().subclasses.push(subclass);
+            }
             if let Some(class) = current_class.take() {
                 result.entry(class.id, &quote!(#class).to_string());
             }
+
             current_class = Some(value);
+            current_subclass = None;
         } else if let Some(value) = try_level(entry, 1, subclass) {
+            // New subclass, add previous subclass to current class, and begin parsing new subclass
             if let Some(subclass) = current_subclass.take() {
                 current_class.as_mut().unwrap().subclasses.push(subclass);
             }
             current_subclass = Some(value);
         } else if let Some(value) = try_level(entry, 2, prog) {
+            // No children of prog, so can add to subclass as we go
             current_subclass.as_mut().unwrap().progs.push(value);
         }
     }
@@ -182,7 +198,8 @@ pub fn ingest_class_database(data: Vec<&str>) -> Map<u8> {
 }
 
 pub fn ingest_pciids(path: &Path) -> PciIdsParsed {
-    let pciids_raw = fs::read_to_string(path).unwrap();
+    let pciids_raw = fs::read_to_string(path)
+        .expect("Failed to read PCI IDs. Are the repository submodules initialized?");
     let pciids_filtered: Vec<&str> = pciids_raw
         .split(LINE_BREAK)
         .filter(|str| !clean(str).starts_with('#')) // Filter comments.

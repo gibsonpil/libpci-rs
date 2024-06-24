@@ -7,7 +7,7 @@ pub use crate::pci::*;
 use cfg_if::cfg_if;
 
 cfg_if! {
-    if #[cfg(target_os = "linux")] {
+    if #[cfg(any(target_os = "linux", target_os = "android"))] {
         mod linux;
         use linux::{_get_field_availability, _get_pci_list};
     } else if #[cfg(target_os = "windows")] {
