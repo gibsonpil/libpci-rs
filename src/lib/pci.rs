@@ -43,7 +43,7 @@ impl TryFrom<String> for PciDeviceAddress {
     fn try_from(
         address_string: String,
     ) -> std::result::Result<crate::pci::PciDeviceAddress, crate::pci::PciEnumerationError> {
-        let parts: Vec<&str> = address_string.split(|c| c == ':' || c == '.').collect();
+        let parts: Vec<&str> = address_string.split([':', '.']).collect();
 
         // We know that if we somehow don't have all 4 segments of the address
         // then something has gone horribly wrong.
@@ -60,9 +60,12 @@ impl TryFrom<String> for PciDeviceAddress {
     }
 }
 
-/// A struct representing a PCI device, all its hardcoded information, and its
-/// location on the system's PCI device bus. It implements several methods to
-/// get ID related information, gated behind the [pciids feature](crate#pciids).
+/// A struct representing a PCI device.
+/// 
+/// # Fields
+/// This structure contains not only all the hardcoded information within the
+/// device, but also its location on the system PCI bus, and it has some
+/// methods to obtain pretty-print information through the [pciids feature](crate#pciids)
 ///
 /// # Field Availability
 /// Some fields are not available on some platforms. Reference the below chart
