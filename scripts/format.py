@@ -8,9 +8,9 @@ from glob import glob
 def format_code(args) -> None:
     print("[!] Running rust-fmt...")
     if args.dry_run:
-        try_command(["cargo", "fmt"])
+        try_command(["cargo fmt -- --check"])
     else:
-        try_command(["cargo", "fmt", "--", "--check"])
+        try_command(["cargo fmt"])
 
     print("[!] Running clang-format...")
     sources = (glob("src/lib/backend/**/*.cc", recursive=True) +
@@ -18,7 +18,7 @@ def format_code(args) -> None:
 
     for source in sources:
         if args.dry_run:
-            try_command(["clang-format", "--dry-run", "-Werror", "-i", "--style=file", source])
+            try_command([f"clang-format --dry-run -Werror -i --style=file {source}"])
         else:
-            try_command(["clang-format", "-i", "--style=file", source])
+            try_command([f"clang-format -i --style=file {source}"])
 
