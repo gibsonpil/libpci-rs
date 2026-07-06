@@ -9,7 +9,7 @@
 
 use std::collections::BTreeMap;
 
-use clap::{command, Parser};
+use clap::Parser;
 use libpci_rs::pci::*;
 
 #[derive(Parser)]
